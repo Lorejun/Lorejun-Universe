@@ -1,0 +1,27 @@
+<Screen xmlns="runtime-namespace:Game">
+
+  <BevelledRectangleWidget Size="614, 382" BevelSize="3" />
+  <LabelWidget CanvasWidget.Position="220, 14" Name="HelpLabel" Text="附魔合成表" Font="{Fonts/Pericles}" Color="255, 255, 255, 192"/>
+  
+     <CanvasWidget CanvasWidget.Position="14, 20" Size="200, 300">
+       <RectangleWidget FillColor="0, 0, 0, 64" OutlineColor="128, 128, 158, 128" />
+       <ListPanelWidget Name="BlocksList" Direction="Vertical" Margin="5, 3" ItemSize="45.5" SelectionColor="70, 163, 215, 128"/>          
+     </CanvasWidget>
+        
+     <BevelledButtonWidget CanvasWidget.Position="14, 320" Style="{Styles/ButtonStyle_ArrowLeft}" Name="PreviousCategory" Margin="20, 0" VerticalAlignment="Center"/>        
+     <BevelledButtonWidget CanvasWidget.Position="154, 320" Style="{Styles/ButtonStyle_ArrowRight}" Name="NextCategory" Margin="20, 0" VerticalAlignment="Center"/>
+
+  <CanvasWidget CanvasWidget.Position="240, 50" Size="340, 300" VerticalAlignment="Center">
+     <XSmeltingRecipeWidget Name="SmeltingRecipe" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="false"/>
+     <XCraftingRecipeWidget Name="CraftingRecipe" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="true"/>          
+  </CanvasWidget>        
+  
+  <CanvasWidget CanvasWidget.Position="300, 320" Size="200, 50" VerticalAlignment="Center">  
+  <StackPanelWidget Direction="Horizontal">  
+     <BevelledButtonWidget Style="{Styles/ButtonStyle_ArrowLeft}" Name="PreviousRecipe" Margin="20, 0" VerticalAlignment="Center"/>
+      <CanvasWidget Size="0, 6" />     
+     <BevelledButtonWidget Style="{Styles/ButtonStyle_ArrowRight}" Name="NextRecipe" Margin="20, 0" VerticalAlignment="Center"/>
+  </StackPanelWidget>
+  </CanvasWidget>        
+  
+</Screen>

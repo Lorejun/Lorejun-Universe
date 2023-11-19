@@ -1,0 +1,145 @@
+<Mod>
+	<ProjectTemplate Name="Project" Guid="85023bf8-1c90-4dd1-9442-e6c13691d078">
+		<!--硝石转换器-->
+		<MemberSubsystemTemplate Name="FCSubsystemFermentationBlockBehavior" Guid="10000001-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="10000001-abcd-1000-0000-000000000002" Value="Game.FCSubsystemFermentationBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<!--微观提取器-->
+		<MemberSubsystemTemplate Name="FCSubsystemMicroBehavior" Guid="50000001-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="50000001-abcd-1000-0000-000000000002" Value="Game.FCSubsystemFCMicroBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		
+		<!--发酵桶-->
+		<MemberSubsystemTemplate Name="FajiaotongBlockBehavior" Guid="20000000-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="20000000-abcd-1000-0000-000000000002" Value="Game.FCSubsystemFurnaceBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<!--高炉-->
+		<MemberSubsystemTemplate Name="GaoluBlockBehavior" Guid="30000000-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="30000000-abcd-1000-0000-000000000002" Value="Game.FCSubsystemGaoluBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<!--机床-->
+		<MemberSubsystemTemplate Name="JichuangBehavior" Guid="40000000-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="40000000-abcd-1000-0000-000000000002" Value="Game.FCSubsystemJichuangBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<!--樱花酒水子系统-->
+		<MemberSubsystemTemplate Name="YHjiushuiBehavior" Guid="50000000-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="50000000-abcd-1000-0000-000000000002" Value="Game.FCSubsystemYHWaterBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<!--酒桶子系统-->
+		<MemberSubsystemTemplate Name="FCtongBehavior" Guid="60000000-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="60000000-abcd-1000-0000-000000000002" Value="Game.FCSubsystemBucketBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<!-- <MemberSubsystemTemplate Name="FCSubsystemCollapsingBlockBehavior" Guid="70000000-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="70000000-abcd-1000-0000-000000000002" Value="Game.FCSubsystemCollapsingBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate> -->
+		
+		<!--附魔台系统-->
+		<MemberSubsystemTemplate Name="XCraftingTableBlockBehavior" Guid="80000000-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+		  <Parameter Name="Class" Guid="80000000-abcd-1000-0000-000000000002" Value="Game.SubsystemXCraftingTableBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<!--炼药锅系统-->
+		<MemberSubsystemTemplate Name="FlameFurnaceBlockBehavior" Guid="90000000-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+		  <Parameter Name="Class" Guid="90000000-abcd-1000-0000-000000000002" Value="Game.SubsystemFlameFurnaceBlockBehavior" Type="string"/>                
+		</MemberSubsystemTemplate>
+		  
+	</ProjectTemplate>
+	
+	
+	
+	<Folder Name="Entities" Guid="5fcdf35f-7001-442c-883e-e0502b15d291">
+		<EntityTemplate Name="FCFermentation" Guid="10000001-abcd-1000-0000-000000000007">
+			<MemberComponentTemplate Name="FCFermentation" Guid="10000001-abcd-1000-0000-000000000003" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9">
+				<Parameter Name="SlotsCount" Guid="10000001-abcd-1000-0000-000000000004" Value="3" Type="int"/>
+				<Parameter Name="Class" Guid="10000001-abcd-1000-0000-000000000005" Value="Game.FCComponentFermentation" Type="string"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="BlockEntity" Guid="10000001-abcd-1000-0000-000000000006" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e"/>
+		</EntityTemplate>
+		
+		<EntityTemplate Name="FajiaotongBlock" Guid="20000001-abcd-1000-0000-000000000007">
+			<MemberComponentTemplate Name="BlockEntity" Guid="200000f1-abcd-1000-0000-000000000006" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e"/>
+			<MemberComponentTemplate Name="FajiaotongBlock" Guid="20000001-abcd-1000-0000-000000000003" InheritanceParent="c91f7906-de35-4e94-ba6e-90cd55cd19d4">
+				<Parameter Name="FireTimeRemaining" Description="Fire time remaining, in seconds" Guid="20000001-abcd-1000-0000-000000000009" Value="0" Type="float" />
+			    <Parameter Name="HeatLevel" Description="Current heat level in furnace" Guid="20000001-abcd-1000-0000-000000000008" Value="0" Type="float" />
+				<Parameter Name="SlotsCount" Guid="20000001-abcd-1000-0000-000000000004" Value="5" Type="int" />
+				<Parameter Name="Class" Guid="20000001-abcd-1000-0000-000000000005" Value="Game.FCComponentFajiaotong" Type="string"/>
+			</MemberComponentTemplate>
+		</EntityTemplate>
+		<EntityTemplate Name="GaoluBlock" Guid="30000001-abcd-1000-0000-000000000007">
+			<MemberComponentTemplate Name="BlockEntity" Guid="300000f1-abcd-1000-0000-000000000006" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e"/>
+			<MemberComponentTemplate Name="GaoluBlock" Guid="30000001-abcd-1000-0000-000000000003" InheritanceParent="c91f7906-de35-4e94-ba6e-90cd55cd19d4">
+				<Parameter Name="FireTimeRemaining" Description="Fire time remaining, in seconds" Guid="30000001-abcd-1000-0000-000000000009" Value="0" Type="float" />
+			    <Parameter Name="HeatLevel" Description="Current heat level in furnace" Guid="30000001-abcd-1000-0000-000000000008" Value="0" Type="float" />
+				<Parameter Name="SlotsCount" Guid="30000001-abcd-1000-0000-000000000004" Value="5" Type="int" />
+				<Parameter Name="Class" Guid="30000001-abcd-1000-0000-000000000005" Value="Game.FCComponentGaolu" Type="string"/>
+			</MemberComponentTemplate>
+		</EntityTemplate>
+		
+		<EntityTemplate Name="JichuangBlock" Guid="40000000-abcd-1000-0000-000000000003">
+			<MemberComponentTemplate Name="BlockEntity" Guid="40000000-abcd-1000-0000-000000000004" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e" />
+			<MemberComponentTemplate Name="JichuangBlock" Guid="40000000-abcd-1000-0000-000000000005" InheritanceParent="48fdc8bb-8ca8-4d0f-af8d-25bfe9b56a19">
+				<Parameter Name="SlotsCount" Guid="40000000-abcd-1000-0000-000000000006" Value="11" Type="int" />
+				<Parameter Name="Class" Guid="40000001-abcd-1000-0000-000000000007" Value="Game.FCComponentJichuang" Type="string"/>
+			</MemberComponentTemplate>
+		</EntityTemplate>
+		
+		<EntityTemplate Name="FCMicro" Guid="50000001-abcd-1000-0000-000000000007">
+			<MemberComponentTemplate Name="FCMicro" Guid="50000001-abcd-1000-0000-000000000003" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9">
+				<Parameter Name="SlotsCount" Guid="50000001-abcd-1000-0000-000000000004" Value="3" Type="int"/>
+				<Parameter Name="Class" Guid="50000001-abcd-1000-0000-000000000005" Value="Game.FCComponentMicro" Type="string"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="BlockEntity" Guid="50000001-abcd-1000-0000-000000000006" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e"/>
+		</EntityTemplate>
+		<!--附魔台系统-->
+		<EntityTemplate Name="XCraftingTable" Guid="80000000-abcd-1000-0000-000000000003">
+		  <MemberComponentTemplate Name="BlockEntity" Guid="80000000-abcd-1000-0000-000000000004" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e"/>
+		  <MemberComponentTemplate Name="XCraftingTable" Guid="80000000-abcd-1000-0000-000000000005" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9">
+			<Parameter Name="SlotsCount" Guid="80000000-abcd-1000-0000-000000000006" Value="18" Type="int"/>
+			<Parameter Name="Class" Guid="80000000-abcd-1000-0000-000000000007" Value="Game.ComponentXCraftingTable" Type="string"/>
+		  </MemberComponentTemplate>
+		</EntityTemplate>
+		<!--炼药锅系统-->
+		<EntityTemplate Name="FlameFurnace" Guid="90000000-abcd-1000-0000-000000000003">
+		  <MemberComponentTemplate Name="BlockEntity" Guid="90000000-abcd-1000-0000-000000000004" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e"/>
+		  <MemberComponentTemplate Name="FlameFurnace" Guid="90000000-abcd-1000-0000-000000000005" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9">
+			<Parameter Name="SlotsCount" Guid="90000000-abcd-1000-0000-000000000006" Value="11" Type="int"/>
+			<Parameter Name="FireTimeRemaining" Description="Fire time remaining, in seconds" Guid="90000000-abcd-1000-0000-000000000007" Value="0" Type="float"/>
+			<Parameter Name="HeatLevel" Description="Current heat level in zelaCampfire" Guid="90000000-abcd-1000-0000-000000000008" Value="0" Type="float"/>
+			<Parameter Name="Class" Guid="90000000-abcd-1000-0000-000000000009" Value="Game.ComponentFlameFurnace" Type="string"/>
+		  </MemberComponentTemplate>
+		</EntityTemplate>
+		
+		
+		
+	</Folder>
+	<!--按钮合成表组件-->
+	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
+	   <MemberComponentTemplate Name="GameSystem1" Guid="11000000-abcd-1000-0000-000000000002" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="11000000-abcd-1000-0000-000000000003" Value="Game.ComponentGameSystem1" Type="string" />
+		</MemberComponentTemplate>		    
+	</EntityTemplate>    
+    <!--治疗buff-->   
+    <Parameter Name="Class" Guid="4e14ce27-fdef-46ca-8ea0-26af43c215e5" new-Value="Game.FCComponentHealth" Type="string" />	
+	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
+	   <MemberComponentTemplate Name="FCHealBuff" Guid="12000000-abcd-1000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="12000000-abcd-1000-0000-000000000002" Value="Game.ComponentHealBuffA" Type="string" />
+	   </MemberComponentTemplate>		
+	</EntityTemplate>
+	<!--加攻击力buff--> 
+	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
+	   <MemberComponentTemplate Name="FCATKBuff" Guid="13000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="13000000-abcd-2000-0000-000000000002" Value="Game.ComponentAttackUP" Type="string" />
+	   </MemberComponentTemplate>		
+	</EntityTemplate>
+	<!--加速buff--> 
+	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
+	   <MemberComponentTemplate Name="FCSpeedBuff" Guid="14000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="14000000-abcd-2000-0000-000000000002" Value="Game.ComponentSpeedUP" Type="string" />
+	   </MemberComponentTemplate>		
+	</EntityTemplate>
+	<!--夜视BUFF--> 
+	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
+	   <MemberComponentTemplate Name="FCNightseeBuff" Guid="15000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="15000000-abcd-2000-0000-000000000002" Value="Game.ComponentNightsight" Type="string" />
+	   </MemberComponentTemplate>		
+	</EntityTemplate>
+</Mod>

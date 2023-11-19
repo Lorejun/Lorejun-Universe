@@ -1,0 +1,35 @@
+<mod1>
+    <ProjectTemplate Name="Project" Guid="85023bf8-1c90-4dd1-9442-e6c13691d078">
+        <MemberSubsystemTemplate Name="zhiwuShengzhang" Guid="10000001-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="10000001-bbdd-0000-0000-000000000001-0000-0000-000000000002" Value="Game.FoodcraftPlantBlockBehavior" Type="string" />
+        </MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="ShumiaoBehavior" Guid="20000000-bbdd-0000-0000-000000000001" InheritanceParent="3830d91c-64fd-4048-ac76-efe4b0e26315" >
+			<Parameter Name="Class" Guid="20000000-bbdd-0000-0000-000000000001-0000-0000-000000000003" Value="Game.NewSubsystemSaplingBlockBehavior" Type="string" />
+        </MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="FCsubsystemPlantataBlockBehavior" Guid="30000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="30000000-bbdd-0000-0000-000000000002" Value="Game.FCSubsystemPlantataBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="YHleaveBlockBehavior" Guid="40000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="40000000-bbdd-0000-0000-000000000002" Value="Game.SubsystemYHleaveBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="FCCPBlockBehavior" Guid="50000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="50000000-bbdd-0000-0000-000000000002" Value="Game.FCSubsystemGrassBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="Town" Guid="60000000-bbdd-0000-0000-000000000001" InheritanceParent="a3914c13-7801-46a6-b23a-9e2b36e9defb">
+			<ParameterSet Name="Towns" Guid="60000000-bbdd-0000-0000-000000000002" />
+			<Parameter Name="Class" Guid="60000000-bbdd-0000-0000-000000000003" Value="Game.FCSubsystemTown" Type="string" />
+	    </MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="TownsChunk" Guid="70000000-bbdd-0000-0000-000000000001" InheritanceParent="a3914c13-7801-46a6-b23a-9e2b36e9defb">
+			<ParameterSet Name="TownsChunks" Guid="70000000-bbdd-0000-0000-000000000002" />
+			<Parameter Name="Class" Guid="70000000-bbdd-0000-0000-000000000003" Value="Game.FCSubsystemTownChunk" Type="string" />
+	    </MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="chocolate" Guid="80000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="80000000-bbdd-0000-0000-000000000002" Value="Game.ChocolateSystem" Type="string"/>
+		</MemberSubsystemTemplate>
+		
+    </ProjectTemplate>
+	<Parameter Name="Class" Guid="3c28d383-dc6e-4d55-8084-5d914abd4d79" new-Value="Game.FCSubsystemSky" Type="string" />
+	
+</mod1>
+	
+	

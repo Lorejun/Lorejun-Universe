@@ -1,0 +1,356 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{85D6F45F-604A-488F-B481-B46F28FEBBE9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>发酵桶工程2</RootNamespace>
+    <AssemblyName>发酵桶工程2</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\1生存战争2.3工程\1.50版本（游戏）\API1.50Gitee\Mods\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\1生存战争2.3工程\1.50版本（游戏）\survivalcraft2.3插件电脑版API1.50\Mods\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Engine, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.5引用\生存战争2.3API1.50\Engine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="EntitySystem, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.5引用\生存战争2.3API1.50\EntitySystem.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.5引用\生存战争2.3API1.50\OpenTK.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Survivalcraft, Version=2.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.5引用\生存战争2.3API1.50\Survivalcraft.exe</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Class1.cs" />
+    <Compile Include="obj\Debug\.NETFramework,Version=v4.8.AssemblyAttributes.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore" />
+    <None Include=".git\config" />
+    <None Include=".git\description" />
+    <None Include=".git\HEAD" />
+    <None Include=".git\hooks\applypatch-msg.sample" />
+    <None Include=".git\hooks\commit-msg.sample" />
+    <None Include=".git\hooks\fsmonitor-watchman.sample" />
+    <None Include=".git\hooks\post-update.sample" />
+    <None Include=".git\hooks\pre-applypatch.sample" />
+    <None Include=".git\hooks\pre-commit.sample" />
+    <None Include=".git\hooks\pre-merge-commit.sample" />
+    <None Include=".git\hooks\pre-push.sample" />
+    <None Include=".git\hooks\pre-rebase.sample" />
+    <None Include=".git\hooks\pre-receive.sample" />
+    <None Include=".git\hooks\prepare-commit-msg.sample" />
+    <None Include=".git\hooks\push-to-checkout.sample" />
+    <None Include=".git\hooks\update.sample" />
+    <None Include=".git\index" />
+    <None Include=".git\info\exclude" />
+    <None Include=".git\logs\HEAD" />
+    <None Include=".git\logs\refs\heads\master" />
+    <None Include=".git\logs\refs\remotes\origin\HEAD" />
+    <None Include=".git\objects\pack\pack-e34e851f29d7a3b246758590bd77bf8275d0dbe7.idx" />
+    <None Include=".git\objects\pack\pack-e34e851f29d7a3b246758590bd77bf8275d0dbe7.pack" />
+    <None Include=".git\packed-refs" />
+    <None Include=".git\refs\heads\master" />
+    <None Include=".git\refs\remotes\origin\HEAD" />
+    <None Include=".vs\Lorejun-Universe\FileContentIndex\1854233c-017b-4280-a19a-3c287e6864ea.vsidx" />
+    <None Include=".vs\Lorejun-Universe\FileContentIndex\2c94f4ed-3944-491c-87a5-061c5897d76c.vsidx" />
+    <None Include=".vs\Lorejun-Universe\FileContentIndex\6f4803ff-d339-4f7d-9706-7e738500e95c.vsidx" />
+    <None Include=".vs\Lorejun-Universe\FileContentIndex\cc98cd45-004a-4fdb-99aa-34f1431e80d8.vsidx" />
+    <None Include=".vs\Lorejun-Universe\v17\.suo" />
+    <None Include=".vs\Lorejun-Universe\v17\.wsuo" />
+    <None Include=".vs\VSWorkspaceState.json" />
+    <None Include="Assets\Lang1\en-US.json" />
+    <None Include="Assets\Lang1\zh-CN.json" />
+    <None Include="Assets\Models\BlockMan.dae" />
+    <None Include="Assets\Models\CraftingTable1.dae" />
+    <None Include="Assets\Models\EmptyFCBucket.dae" />
+    <None Include="Assets\Models\FullBucket.dae" />
+    <None Include="Assets\Models\FullFCBucket.dae" />
+    <None Include="Assets\Models\Furnace1.dae" />
+    <None Include="Assets\Models\Plate.dae" />
+    <None Include="Assets\Models\Pumpkins1.dae" />
+    <None Include="Assets\Models\Spider.dae" />
+    <None Include="Assets\Models\XCraftingTable.dae" />
+    <None Include="Creatures.xdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="foodcraft.cr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="foodcraft.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="LICENSE" />
+    <None Include="modinfo.json" />
+    <None Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
+    <None Include="obj\Debug\Lorejun-Universe.csproj.AssemblyReference.cache" />
+    <None Include="README.md" />
+    <None Include="Test1.xdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="发酵站注册.xdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="生成注册.xdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Audio\Creatures\Drink\drink1.wav" />
+    <Content Include="Assets\Audio\Creatures\Village\ATK\ATK1.wav" />
+    <Content Include="Assets\Audio\Creatures\Village\ATK\ATK2.wav" />
+    <Content Include="Assets\Audio\Creatures\Village\Idle\Idle1.wav" />
+    <Content Include="Assets\Audio\Creatures\Village\Idle\Idle2.wav" />
+    <Content Include="Assets\Audio\Creatures\Village\Idle\Idle3.wav" />
+    <Content Include="Assets\Audio\Creatures\Village\Idle\Idle4.wav" />
+    <Content Include="Assets\Audio\Creatures\Village\Idle\Idle5.wav" />
+    <Content Include="Assets\Audio\Creatures\Village\Pain\Pain1.wav" />
+    <Content Include="Assets\Audio\Creatures\zhizhu\ATK\ATK1.wav" />
+    <Content Include="Assets\Audio\Creatures\zhizhu\ATK\ATK2.wav" />
+    <Content Include="Assets\Audio\Creatures\zhizhu\Idle\Idle1.wav" />
+    <Content Include="Assets\Audio\Creatures\zhizhu\Idle\Idle2.wav" />
+    <Content Include="Assets\Audio\Creatures\zhizhu\Pain\Pain1.wav" />
+    <Content Include="Assets\Audio\Creatures\zhizhu\Pain\Pain2.wav" />
+    <Content Include="Assets\Audio\Creatures\zhizhu\Pain\PainBone.wav" />
+    <Content Include="Assets\Audio\UI\ItemMoved.wav" />
+    <Content Include="Assets\Audio\UI\jichuang.wav" />
+    <Content Include="Assets\Audio\UI\Message.wav" />
+    <Content Include="Assets\Audio\UI\start.wav" />
+    <Content Include="Assets\DT\images\apple0.png" />
+    <Content Include="Assets\DT\images\apple1.png" />
+    <Content Include="Assets\DT\images\apple2.png" />
+    <Content Include="Assets\DT\images\apple3.png" />
+    <Content Include="Assets\DT\images\apple4.png" />
+    <Content Include="Assets\DT\images\apple5.png" />
+    <Content Include="Assets\DT\images\apple6.png" />
+    <Content Include="Assets\DT\images\apple7.png" />
+    <Content Include="Assets\FCCraftingRecipes.xml" />
+    <Content Include="Assets\House\chunkTwohouse.txt" />
+    <Content Include="Assets\House\field.txt" />
+    <Content Include="Assets\House\IronHouse.txt" />
+    <Content Include="Assets\House\jiaotang2.txt" />
+    <Content Include="Assets\House\Livinghouse02.txt" />
+    <Content Include="Assets\House\LivingHouse1.txt" />
+    <Content Include="Assets\House\PetHouse.txt" />
+    <Content Include="Assets\House\shuijing.txt" />
+    <Content Include="Assets\Music\AloneForever.ogg" />
+    <Content Include="Assets\Music\NativeAmerican.ogg" />
+    <Content Include="Assets\Music\NativeAmericanFluteSpirit.ogg" />
+    <Content Include="Assets\Music\NativeAmericanHeart.ogg" />
+    <Content Include="Assets\Music\NativeAmericanPeaceFlute.ogg" />
+    <Content Include="Assets\Shaders\AlphaTested.psh" />
+    <Content Include="Assets\Shaders\AlphaTested.vsh" />
+    <Content Include="Assets\Shaders\Highlight.psh" />
+    <Content Include="Assets\Shaders\Highlight.vsh" />
+    <Content Include="Assets\Shaders\Lit.psh" />
+    <Content Include="Assets\Shaders\Lit.vsh" />
+    <Content Include="Assets\Shaders\Model.psh" />
+    <Content Include="Assets\Shaders\Model.vsh" />
+    <Content Include="Assets\Shaders\Opaque.psh" />
+    <Content Include="Assets\Shaders\Opaque.vsh" />
+    <Content Include="Assets\Shaders\Transparent.psh" />
+    <Content Include="Assets\Shaders\Transparent.vsh" />
+    <Content Include="Assets\Shaders\Unlit.psh" />
+    <Content Include="Assets\Shaders\Unlit.vsh" />
+    <Content Include="Assets\Styles\ButtonStyle_120x60.xml" />
+    <Content Include="Assets\Styles\ButtonStyle_40x40.xml" />
+    <Content Include="Assets\Styles\ButtonStyle_60x40.xml" />
+    <Content Include="Assets\Styles\ButtonStyle_70x60.xml" />
+    <Content Include="Assets\Styles\ButtonStyle_80x40.xml" />
+    <Content Include="Assets\Test1\Dialogs\Test1TextDialog.xml" />
+    <Content Include="Assets\Test1\Textures\Setting.png" />
+    <Content Include="Assets\Test1\Textures\Setting_Click.png" />
+    <Content Include="Assets\Test1\Widgets\Test1ButtonsPanelWidget.xml" />
+    <Content Include="Assets\Textures\amod\apple.png" />
+    <Content Include="Assets\Textures\amod\beer.png" />
+    <Content Include="Assets\Textures\amod\boliping.png" />
+    <Content Include="Assets\Textures\amod\coco.png" />
+    <Content Include="Assets\Textures\amod\coco2.png" />
+    <Content Include="Assets\Textures\amod\cong.png" />
+    <Content Include="Assets\Textures\amod\dangao.png" />
+    <Content Include="Assets\Textures\amod\guazi.png" />
+    <Content Include="Assets\Textures\amod\hamburger.png" />
+    <Content Include="Assets\Textures\amod\huangmengji.png" />
+    <Content Include="Assets\Textures\amod\jiangyou.png" />
+    <Content Include="Assets\Textures\amod\jiaosu.png" />
+    <Content Include="Assets\Textures\amod\mianbaopian.png" />
+    <Content Include="Assets\Textures\amod\orange.png" />
+    <Content Include="Assets\Textures\amod\qiaokeli.png" />
+    <Content Include="Assets\Textures\amod\qingtuan.png" />
+    <Content Include="Assets\Textures\amod\qingzhengyu.png" />
+    <Content Include="Assets\Textures\amod\rawguazi.png" />
+    <Content Include="Assets\Textures\amod\rawjikuai.png" />
+    <Content Include="Assets\Textures\amod\rawqiaokeli.png" />
+    <Content Include="Assets\Textures\amod\rawxiandan.png" />
+    <Content Include="Assets\Textures\amod\readymeat.png" />
+    <Content Include="Assets\Textures\amod\salt.png" />
+    <Content Include="Assets\Textures\amod\shousi.png" />
+    <Content Include="Assets\Textures\amod\shuiping.png" />
+    <Content Include="Assets\Textures\amod\shuxiandan.png" />
+    <Content Include="Assets\Textures\amod\xianbing.png" />
+    <Content Include="Assets\Textures\amod\xiaosurou.png" />
+    <Content Include="Assets\Textures\amod\xigua.png" />
+    <Content Include="Assets\Textures\amod\xigua2.png" />
+    <Content Include="Assets\Textures\amod\xiguapian.png" />
+    <Content Include="Assets\Textures\amod\xiguazhi.png" />
+    <Content Include="Assets\Textures\amod\yanchicken.png" />
+    <Content Include="Assets\Textures\amod\yanfish.png" />
+    <Content Include="Assets\Textures\amod\yanrou.png" />
+    <Content Include="Assets\Textures\amod\yhbeer.png" />
+    <Content Include="Assets\Textures\amod\yinghua.png" />
+    <Content Include="Assets\Textures\amod\yingshifeng.png" />
+    <Content Include="Assets\Textures\amod\youping.png" />
+    <Content Include="Assets\Textures\amod\zhaji.png" />
+    <Content Include="Assets\Textures\Blocks\TFurnace.png" />
+    <Content Include="Assets\Textures\Blocks\XFurnace.png" />
+    <Content Include="Assets\Textures\Creatures\cave_spider.png" />
+    <Content Include="Assets\Textures\Creatures\Village\custom_villager_begger_2.png" />
+    <Content Include="Assets\Textures\Earth.png" />
+    <Content Include="Assets\Textures\Earth2.png" />
+    <Content Include="Assets\Textures\Earth3.png" />
+    <Content Include="Assets\Textures\FCBlocks\appleleave.png" />
+    <Content Include="Assets\Textures\FCBlocks\cocowood.png" />
+    <Content Include="Assets\Textures\FCBlocks\fajiaotong.png" />
+    <Content Include="Assets\Textures\FCBlocks\Fermentation.png" />
+    <Content Include="Assets\Textures\FCBlocks\fumotai.png" />
+    <Content Include="Assets\Textures\FCBlocks\gaolu.png" />
+    <Content Include="Assets\Textures\FCBlocks\glass.png" />
+    <Content Include="Assets\Textures\FCBlocks\lorejunwood.png" />
+    <Content Include="Assets\Textures\FCBlocks\micro.png" />
+    <Content Include="Assets\Textures\FCBlocks\orangeleave.png" />
+    <Content Include="Assets\Textures\FCBlocks\Tool.png" />
+    <Content Include="Assets\Textures\FCBlocks\yhcarpet.png" />
+    <Content Include="Assets\Textures\FCBlocks\yhleave.png" />
+    <Content Include="Assets\Textures\FCBlocks\yhplanks.png" />
+    <Content Include="Assets\Textures\FCBlocks\yhwood.png" />
+    <Content Include="Assets\Textures\FCBlocks\yingshi.png" />
+    <Content Include="Assets\Textures\FCBlocks\ZLS.png" />
+    <Content Include="Assets\Textures\FCDVFood\chilun.png" />
+    <Content Include="Assets\Textures\FCDVFood\cihuatiebang.png" />
+    <Content Include="Assets\Textures\FCDVFood\DVfeng.png" />
+    <Content Include="Assets\Textures\FCDVFood\gangban.png" />
+    <Content Include="Assets\Textures\FCDVFood\gangbang.png" />
+    <Content Include="Assets\Textures\FCDVFood\gangding.png" />
+    <Content Include="Assets\Textures\FCDVFood\gui.png" />
+    <Content Include="Assets\Textures\FCDVFood\guiban.png" />
+    <Content Include="Assets\Textures\FCDVFood\huosai.png" />
+    <Content Include="Assets\Textures\FCDVFood\jiaomujun.png" />
+    <Content Include="Assets\Textures\FCDVFood\jiaosufeng.png" />
+    <Content Include="Assets\Textures\FCDVFood\mada.png" />
+    <Content Include="Assets\Textures\FCDVFood\PDU.png" />
+    <Content Include="Assets\Textures\FCDVFood\tanfeng.png" />
+    <Content Include="Assets\Textures\FCDVFood\tieban.png" />
+    <Content Include="Assets\Textures\FCDVFood\tiefeng.png" />
+    <Content Include="Assets\Textures\FCDVFood\tongban.png" />
+    <Content Include="Assets\Textures\FCDVFood\tongxianquan.png" />
+    <Content Include="Assets\Textures\FCDVFood\xianluban.png" />
+    <Content Include="Assets\Textures\FCDVFood\yeshi.png" />
+    <Content Include="Assets\Textures\FCgongye\chilun.png" />
+    <Content Include="Assets\Textures\FCgongye\cihuatiebang.png" />
+    <Content Include="Assets\Textures\FCgongye\DVfeng.png" />
+    <Content Include="Assets\Textures\FCgongye\gangban.png" />
+    <Content Include="Assets\Textures\FCgongye\gangbang.png" />
+    <Content Include="Assets\Textures\FCgongye\gangding.png" />
+    <Content Include="Assets\Textures\FCgongye\gui.png" />
+    <Content Include="Assets\Textures\FCgongye\guiban.png" />
+    <Content Include="Assets\Textures\FCgongye\huosai.png" />
+    <Content Include="Assets\Textures\FCgongye\ICU.png" />
+    <Content Include="Assets\Textures\FCgongye\jiaomujun.png" />
+    <Content Include="Assets\Textures\FCgongye\jiaosufeng.png" />
+    <Content Include="Assets\Textures\FCgongye\mada.png" />
+    <Content Include="Assets\Textures\FCgongye\PDU.png" />
+    <Content Include="Assets\Textures\FCgongye\tanfeng.png" />
+    <Content Include="Assets\Textures\FCgongye\tieban.png" />
+    <Content Include="Assets\Textures\FCgongye\tiefeng.png" />
+    <Content Include="Assets\Textures\FCgongye\tongban.png" />
+    <Content Include="Assets\Textures\FCgongye\tongxianquan.png" />
+    <Content Include="Assets\Textures\FCgongye\xianluban.png" />
+    <Content Include="Assets\Textures\FCLeaves\Leaves1.png" />
+    <Content Include="Assets\Textures\FCLeaves\Leaves2.png" />
+    <Content Include="Assets\Textures\FCPlants\fcsapling.png" />
+    <Content Include="Assets\Textures\FCPlants\fcsapling测试.png" />
+    <Content Include="Assets\Textures\FCPlants\sunflower.png" />
+    <Content Include="Assets\Textures\FCPlants\备用.png" />
+    <Content Include="Assets\Textures\Gui\Panorama.png" />
+    <Content Include="Assets\Textures\Moon1.png" />
+    <Content Include="Assets\Textures\Moon2.png" />
+    <Content Include="Assets\Textures\Moon3.png" />
+    <Content Include="Assets\Textures\Moon4.png" />
+    <Content Include="Assets\Textures\Moon5.png" />
+    <Content Include="Assets\Textures\Moon6.png" />
+    <Content Include="Assets\Textures\Moon7.png" />
+    <Content Include="Assets\Textures\Moon8.png" />
+    <Content Include="Assets\Textures\Recipes.png" />
+    <Content Include="Assets\Textures\XBlocks.png" />
+    <Content Include="Assets\Textures\YHParticle.png" />
+    <Content Include="Assets\Widgets\FajiaotongWidget.xml" />
+    <Content Include="Assets\Widgets\FCfajiaotong\FermentationWidget.xml" />
+    <Content Include="Assets\Widgets\FCRecipeWidget.xml" />
+    <Content Include="Assets\Widgets\FlameFurnaceWidget.xml" />
+    <Content Include="Assets\Widgets\GaoluWidget.xml" />
+    <Content Include="Assets\Widgets\JichuangWidget.xml" />
+    <Content Include="Assets\Widgets\MicroWidget.xml" />
+    <Content Include="Assets\Widgets\XClothingWidget.xml" />
+    <Content Include="Assets\Widgets\XCraftingRecipe.xml" />
+    <Content Include="Assets\Widgets\XCraftingTableWidget.xml" />
+    <Content Include="Assets\Widgets\XRecipeWidget.xml" />
+    <Content Include="Assets\Widgets\XSmeltingRecipe.xml" />
+    <Content Include="icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Lorejun-Universe.dll" />
+    <Content Include="Lorejun-Universe.pdb" />
+    <Content Include="发酵桶注册新手时代的纪念.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include=".git\objects\info\" />
+    <Folder Include=".git\refs\tags\" />
+    <Folder Include="Assets\Textures\DT\" />
+    <Folder Include="CS源码分类\" />
+    <Folder Include="obj\Debug\TempPE\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

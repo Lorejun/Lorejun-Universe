@@ -1,0 +1,24 @@
+<mymod>
+<ProjectTemplate Name="Project" Guid="85023bf8-1c90-4dd1-9442-e6c13691d078">
+	<MemberSubsystemTemplate Name="FajiaotongBehavior" Guid="00000001-0000-0000-0000-a00000000005" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745" >
+	<Parameter Name="Class" Guid="00000001-0000-0000-0000-a00000000006" Value="Game.SubsystemFajiaotongBlockBehavior" Type="string" />
+	</MemberSubsystemTemplate>	
+</ProjectTemplate>
+
+
+<Folder Name="Entities" Guid="5fcdf35f-7001-442c-883e-e0502b15d291">
+		<EntityTemplate Name="FCFajiaotong" Guid="00000001-0000-0000-0000-a00000000001">
+			<MemberComponentTemplate Name="BlockEntity" Guid="00000001-0000-0000-0000-a00000000002" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e" />
+			<MemberComponentTemplate Name="Fajiaotong" Guid="00000001-0000-0000-0000-a00000000003" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9">
+				<Parameter Name="SlotsCount" Guid="00000001-0000-0000-0000-a00000000004" Value="6" Type="int" />
+				<Parameter Name="FireTimeRemaining" Description="Fire time remaining, in seconds" Guid="00000001-0000-0000-0000-a00000000008" Value="0" Type="float" />
+				<Parameter Name="HeatLevel" Description="Current heat level in furnace" Guid="00000001-0000-0000-0000-a00000000009" Value="0" Type="float" />
+				<Parameter Name="Class" Guid="00000001-0000-0000-0000-a00000000010" Value="Game.ComponentFajiaotong" Type="string" />
+			</MemberComponentTemplate>
+		</EntityTemplate> 
+    </Folder> 
+
+
+
+
+</mymod>

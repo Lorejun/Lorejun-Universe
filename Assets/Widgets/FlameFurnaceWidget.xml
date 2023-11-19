@@ -1,0 +1,39 @@
+<FridgeWidget xmlns="runtime-namespace:Game">
+  <BevelledRectangleWidget Size="614, 382" BevelSize="3" />
+  <LabelWidget Text="材料1" CanvasWidget.Position="22, 62" FontSpacing="8, 0" Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <LabelWidget Text="材料2" CanvasWidget.Position="92, 62" FontSpacing="8, 0" Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <LabelWidget Text="材料3" CanvasWidget.Position="162, 62" FontSpacing="8, 0" Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <LabelWidget Text="材料4" CanvasWidget.Position="232, 62" FontSpacing="8, 0" Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <LabelWidget Text="材料5" CanvasWidget.Position="22, 142" FontSpacing="8, 0" Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <LabelWidget Text="原料" CanvasWidget.Position="92, 142" FontSpacing="8, 0" Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <LabelWidget Text="原料" CanvasWidget.Position="162, 142" FontSpacing="8, 0" Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <LabelWidget Text="原料" CanvasWidget.Position="232, 142" FontSpacing="8, 0" Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <GridPanelWidget Name="InventoryGrid" CanvasWidget.Position="306, 52" ColumnsCount="4" RowsCount="4"/>
+  <GridPanelWidget Name="FlameFurnaceGrid" CanvasWidget.Position="12, 52" ColumnsCount="4" RowsCount="2"/>
+  <CanvasWidget CanvasWidget.Position="90, 210" >
+    <FireWidget Name="Fire" Size="104, 40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <StackPanelWidget Direction="Horizontal">
+      <BevelledRectangleWidget Size="24, 44" BevelSize="-2" CenterColor="0, 0, 0, 0" />
+      <BevelledRectangleWidget Size="24, 44" BevelSize="-2" CenterColor="0, 0, 0, 0" />
+      <BevelledRectangleWidget Size="24, 44" BevelSize="-2" CenterColor="0, 0, 0, 0" />
+      <BevelledRectangleWidget Size="24, 44" BevelSize="-2" CenterColor="0, 0, 0, 0" />
+      <BevelledRectangleWidget Size="24, 44" BevelSize="-2" CenterColor="0, 0, 0, 0" />      
+    </StackPanelWidget>
+  </CanvasWidget>  
+  <ValueBarWidget Name="Progress" CanvasWidget.Position="100, 260" LayoutDirection="Horizontal" BarsCount="8" FlipDirection="false" LitBarColor="96, 48, 0" UnlitBarColor="48, 48, 48, 80" BarSize="12, 12" BarSubtexture="{Textures/Atlas/ProgressBar}"/>
+  <InventorySlotWidget Name="FuelSlot" CanvasWidget.Position="60, 288">
+    <LabelWidget Text="燃料"  Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  </InventorySlotWidget>
+  <InventorySlotWidget Name="ResultSlot" CanvasWidget.Position="220, 288" >
+    <LabelWidget Text="产品"  Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  </InventorySlotWidget>  
+  <InventorySlotWidget Name="RemainsSlot" CanvasWidget.Position="220, 208">
+    <LabelWidget Text="副产品"  Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  </InventorySlotWidget>  
+  <LabelWidget CanvasWidget.Position="12, 14" Text="炼药锅"  Color="255, 255, 255, 192"/>
+  <LabelWidget CanvasWidget.Position="306, 14" Text="背包"  Color="255, 255, 255, 192"/>  
+  <ArrowLineWidget Color="0, 0, 0, 96" Width="8" ArrowWidth="0" PointsString="30, 210; 30, 324; 50, 324" AbsoluteCoordinates="true"/>
+  <ArrowLineWidget Color="0, 0, 0, 96" Width="8" ArrowWidth="24" PointsString="150, 324; 196, 324" AbsoluteCoordinates="true"/>
+  
+</FridgeWidget>
+

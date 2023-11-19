@@ -1,0 +1,17 @@
+<CraftingRecipeWidget xmlns="runtime-namespace:Game">
+  <StackPanelWidget Direction="Vertical">
+    <CanvasWidget Name="CraftingRecipeWidget.Canvas" HorizontalAlignment="Center" Margin="0, 10">
+      <BevelledRectangleWidget Size="360, 230" BevelSize="3" />
+      <CanvasWidget CanvasWidget.Position="80, 4" Size="230, 54">      
+      <StackPanelWidget Direction="Vertical">
+         <LabelWidget Name="CraftingRecipeWidget.Name" FontScale="0.5" HorizontalAlignment="Center" Margin="0, 10"/>
+         <CanvasWidget Size="0, 2" />               
+         <LabelWidget Name="CraftingRecipeWidget.Description" FontScale="0.5" HorizontalAlignment="Center" VerticalAlignment="Near" TextAnchor="HorizontalCenter" WordWrap="true"/>
+      </StackPanelWidget>
+      </CanvasWidget>      
+      <GridPanelWidget Name="CraftingRecipeWidget.Ingredients" CanvasWidget.Position="84, 84" ColumnsCount="4" RowsCount="4" Margin="20, 0"/>
+      <XCraftingRecipeSlotWidget Name="CraftingRecipeWidget.Result" CanvasWidget.Position="260, 128"/>
+      <ArrowLineWidget Color="0, 0, 0, 96" Width="8" ArrowWidth="24" PointsString="220, 142; 240, 142" AbsoluteCoordinates="true"/>
+    </CanvasWidget>
+  </StackPanelWidget> 
+</CraftingRecipeWidget>

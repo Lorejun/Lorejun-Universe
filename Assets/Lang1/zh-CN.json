@@ -1,0 +1,56 @@
+{
+
+	"Blocks": {	
+		"Qingzhengyu": {
+			"DisplayName": "清蒸鱼",
+			"Description": "清蒸鱼由鱼烧制而成。营养丰富，鲜美可口。"			
+			"CRDescription:0": "制作清蒸鱼"			
+		}			
+		"Qingtuan": {
+			"DisplayName": "青团",
+			"Description": "来自中国浙江的美食。由青草加面团制成。"			
+			"CRDescription:0": "制作青团"			
+		}															
+		"Shousi": {
+			"DisplayName": "寿司",
+			"Description": "来自东洋的美食……"			
+			"CRDescription:0": "制作寿司"			
+		}															
+		"FrozenFishBlock:0": {
+			"DisplayName": "冷冻鱼肉",
+			"Description": "一种被冷冻的食物，可以更好地保存你的物品，它也会不断地融化，变成生的，请将它们好好保存，它们可以为你保存更长的时间。"			
+			"CRDescription:0": "冷藏鱼肉"			
+		}					
+		"CookedBirdBlock:0": {
+			"DisplayName": "烤鸟肉",
+			"Description": "烤熟的鸟肉，相比起生的更有营养，保质期更长，是不错的食物。",
+			"CRDescription:0": "烘烤生鸟肉来提升营养价值并使它更易保存"
+			"CRDescription:1": "解冻食物"						
+		},
+		"CookedMeatBlock:0": {
+			"DisplayName": "烤肉",
+			"Description": "烤熟的肉，相比起生的更有营养，保质期更长，是不错的食物。",
+			"CRDescription:0": "烘烤生肉来提升营养价值并使它更易保存"
+			"CRDescription:1": "解冻食物"						
+		},
+		"CookedFishBlock:0": {
+			"DisplayName": "烤鱼",
+			"Description": "烤熟的鱼，相比起生的更有营养，保质期更长，是不错的食物。",
+			"CRDescription:0": "烘烤生鱼肉来提升营养价值并使它更易保存"
+			"CRDescription:1": "解冻食物"			
+		},						
+		"FrozenPumpkinBlock:0": {
+			"DisplayName": "冷冻南瓜",
+			"Description": "一种被冷冻的食物，可以更好地保存你的物品，它也会不断地融化，变成生的，请将它们好好保存，它们可以为你保存更长的时间。"			
+			"CRDescription:0": "冷藏南瓜"			
+		}															
+		"PumpkinBlock:0": {
+			"DisplayName": "南瓜",
+			"Description": "南瓜是一种可食用的瓜类作物，通常几个一起生长，你可以在温暖的地方找到它们。南瓜可以生吃或者制作南瓜汤，你可以掏空它获得种子或者制作一个南瓜灯笼。"
+			"CRDescription:0": "解冻南瓜"									
+		},																										
+	},
+	
+	
+
+}

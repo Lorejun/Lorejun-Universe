@@ -1,0 +1,9 @@
+<mod>
+	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
+		<MemberComponentTemplate Name="ComponentTest1" Guid="11111111-0000-0000-cdda-000000000000" InheritanceParent="b05700ed-7e4e-4679-98f5-b597f421496b">
+			<Parameter Name="Class" Value="Test1.ComponentTest1" Type="string" />
+			<Parameter Name="DeveloperModeOn" Description="储存开发者模式是否开启" Value="false" Type="bool" />
+		</MemberComponentTemplate>
+	</EntityTemplate>
+
+</mod>

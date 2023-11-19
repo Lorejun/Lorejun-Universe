@@ -1,0 +1,44 @@
+<WaterPurifierWidget xmlns="runtime-namespace:Game">
+	<BevelledRectangleWidget Size="800, 600" BevelSize="3" />
+	<CanvasWidget CanvasWidget.Position="28, 40" Size="52, 72">
+		<LabelWidget CanvasWidget.Position="0, 0" Text="硝石转换器"  Color="255, 255, 255, 192"/>
+		<LabelWidget Text="原料"  FontSpacing="8, 0" CanvasWidget.Position="4, 80" Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+		<GridPanelWidget Name="WaterPurifierGrid" CanvasWidget.Position="0, 60" ColumnsCount="1" RowsCount="1"/>
+		<InventorySlotWidget Name="FuelSlot" CanvasWidget.Position="0, 166">
+			<LabelWidget Text="煤炭"  Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+		</InventorySlotWidget>
+		<InventorySlotWidget Name="ResultSlot" CanvasWidget.Position="0, 268" />
+		<ValueBarWidget Name="Progress" CanvasWidget.Position="100, 140" LayoutDirection="Vertical" BarsCount="8" FlipDirection="false" LitBarColor="0, 128, 128" UnlitBarColor="48, 48, 48, 80" BarSize="12, 12" BarSubtexture="{Textures/Atlas/ProgressBar}"/>
+		<LabelWidget CanvasWidget.Position="186, 14" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/> 
+		<LabelWidget CanvasWidget.Position="186, 15" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 16" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 17" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 18" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 19" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 20" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 31" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 41" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 71" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 101" Text="信息碎片？.... ... 公元2080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 131" Text="好消息！好消息！魁明院长！（怎么了，岳明？）"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 161" Text="我们成功了，初代硝石转换器！！农业将迎来新时代！"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 191" Text="....................%￥#@》？？"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 221" Text="信息碎片？.... ... 公元3080年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 251" Text="今天是公元3080年的11月20日。硝石转换器问世已经1000年了。"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 281" Text="但是最近两年，一种新型的植物病毒于全球范围内爆发……"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 311" Text="全世界所有顶尖的农业病毒学家和魔法理论学家都对此束手无策。"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 341" Text="我的老师魁明，已经去世200年了。如果他在的话，想必……"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 371" Text="……一定会有方法。魁明老师，我该怎么做？这个世界，可能会"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 401" Text="因为这种病毒而毁灭……所有植物都会消亡。我该怎么办？"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 431" Text="信息碎片？.... ... 公元3090年……"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 461" Text="由于魔法科技过度开发对环境的破坏，我们开始了转换器的研究……"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 491" Text="……很成功……我们以硝石转换器为模板，开发出了各种转换器……"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 521" Text="信息碎片？.... ... 公元3100年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 522" Text="信息碎片？.... ... 公元3100年"  Color="255, 255, 255, 192"/>
+		<LabelWidget CanvasWidget.Position="186, 551" Text="我是岳明的学生，林郁杰。我接手了转换器的项目……"  Color="255, 255, 255, 192"/>
+
+		<ArrowLineWidget Color="0, 0, 0, 96" Width="8" ArrowWidth="0" CanvasWidget.Position="-110, 0" PointsString="182, 88; 216, 88; 216, 118" AbsoluteCoordinates="true"/>
+		<ArrowLineWidget Color="0, 0, 0, 96" Width="8" ArrowWidth="24" CanvasWidget.Position="-110, -20" PointsString="216, 278; 216, 308" AbsoluteCoordinates="true"/>
+	</CanvasWidget>
+	
+</WaterPurifierWidget>

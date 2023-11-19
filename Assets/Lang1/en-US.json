@@ -1,0 +1,56 @@
+{
+
+	"Blocks": {	
+		"FridgeBlock:0": {
+			"DisplayName": "Fridge",
+			"Description": "A high-tech item that can be used to freeze items, to achieve the effect of refrigeration, refrigerated items can be put into a furnace to remelt."			
+			"CRDescription:0": "Make a Fridge"			
+		}					
+		"FrozenBirdBlock:0": {
+			"DisplayName": "Frozen Bird",
+			"Description": "A frozen food will preserve your items better, it will continue to melt and become raw, please keep them well, they will last longer for you."
+			"CRDescription:0": "Frozen a bird"			
+		}															
+		"FrozenMeatBlock:0": {
+			"DisplayName": "Frozen Meat",
+			"Description": "A frozen food will preserve your items better, it will continue to melt and become raw, please keep them well, they will last longer for you."
+			"CRDescription:0": "Frozen a meat"			
+		}															
+		"FrozenFishBlock:0": {
+			"DisplayName": "Frozen Fish",
+			"Description": "A frozen food will preserve your items better, it will continue to melt and become raw, please keep them well, they will last longer for you."			
+			"CRDescription:0": "Frozen a fish"			
+		}					
+		"CookedBirdBlock:0": {
+			"DisplayName": "Cooked Bird",
+			"Description": "Cooked bird meat. Very tasty and nutritious meal.",
+			"CRDescription:0": "Cook raw bird to increase its nutritional value and make it preserve better"
+			"CRDescription:1": "Thaw food"						
+		},
+		"CookedMeatBlock:0": {
+			"DisplayName": "Cooked Meat",
+			"Description": "Cooked meat. A very tasty and nutritious meal.",
+			"CRDescription:0": "Cook raw meat to increase its nutritional value and make it preserve better"
+			"CRDescription:1": "Thaw food"						
+		},		
+		"CookedFishBlock:0": {
+			"DisplayName": "Cooked Fish",
+			"Description": "Cooked fish. A very tasty and nutritious meal.",
+			"CRDescription:0": "Cook raw fish to increase its nutritional value and make it preserve better"
+			"CRDescription:1": "Thaw food"						
+		},								
+		"FrozenPumpkinBlock:0": {
+			"DisplayName": "Frozen Pumpkin",
+			"Description": "A frozen food will preserve your items better, it will continue to melt and become raw, please keep them well, they will last longer for you."			
+			"CRDescription:0": "Frozen a frozen pumpkin"			
+		}															
+		"PumpkinBlock:0": {
+			"DisplayName": "Pumpkin",
+			"Description": "Pumpkins are large, orange vegetables that grow in groups of 5 to 10 plants. When collected, they can be eaten, cooked into pumpkin soup or crafted into Jack O'Lanterns."
+			"CRDescription:0": "Thaw pumpkin"						
+		},																																																																					
+	},
+	
+	
+	
+}

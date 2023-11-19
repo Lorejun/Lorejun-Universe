@@ -1,0 +1,7 @@
+<XRecipes>
+    <!--AK47-->
+    <Recipe Result="StoneAxeBlock" ResultCount="1" RequiredHeatLevel="0" a="cobblestone" b="stoneaxe" Description="使用用石头进行附魔">
+      " a"
+      "aba"
+    </Recipe>
+</XRecipes>
