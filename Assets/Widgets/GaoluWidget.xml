@@ -4,8 +4,8 @@
     <LabelWidget Text="[FurnaceWidget:1]"  FontSpacing="8, 0" Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
   </CanvasWidget>
   <GridPanelWidget Name="InventoryGrid" CanvasWidget.Position="286, 52" ColumnsCount="4" RowsCount="4"/>
-  <GridPanelWidget Name="FurnaceGrid" CanvasWidget.Position="28, 52" ColumnsCount="2" RowsCount="1"/>
-  <CanvasWidget CanvasWidget.Position="64, 130" >
+  <GridPanelWidget Name="FurnaceGrid" CanvasWidget.Position="28, 52" ColumnsCount="4" RowsCount="4"/>
+  <CanvasWidget CanvasWidget.Position="14, 218" >
     <FireWidget Name="Fire" Size="68, 40" HorizontalAlignment="Center" VerticalAlignment="Center"/>
     <StackPanelWidget Direction="Horizontal">
       <BevelledRectangleWidget Size="24, 44" BevelSize="-2" CenterColor="0, 0, 0, 0" />
@@ -14,7 +14,7 @@
     </StackPanelWidget>
   </CanvasWidget>
   <ValueBarWidget Name="Progress" CanvasWidget.Position="210, 120" LayoutDirection="Vertical" BarsCount="8" FlipDirection="false" LitBarColor="96, 48, 0" UnlitBarColor="48, 48, 48, 80" BarSize="12, 12" BarSubtexture="{Textures/Atlas/ProgressBar}"/>
-  <InventorySlotWidget Name="FuelSlot" CanvasWidget.Position="64, 180">
+  <InventorySlotWidget Name="FuelSlot" CanvasWidget.Position="14, 268">
     <LabelWidget Text="煤块"  Color="0, 0, 0, 64" HorizontalAlignment="Center" VerticalAlignment="Center"/>
   </InventorySlotWidget>
   <InventorySlotWidget Name="ResultSlot" CanvasWidget.Position="180, 268" />

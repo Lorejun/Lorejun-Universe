@@ -26,31 +26,31 @@
 		</Recipe>
 		
 		
-		<!-- 高炉区    -->
-		<Recipe Result="FCItemBlock:4" ResultCount="1" RequiredHeatLevel="900" a="sand" b="fcitem:16" Description="粗硅">
+		<!-- 高炉区   <Recipe Result="FCItemBlock:4" ResultCount="1" RequiredHeatLevel="2" a="sand" b="fcitem:16" Description="粗硅">
 		  "ab"
 		</Recipe>
-		<Recipe Result="GlassBlock" ResultCount="10" RequiredHeatLevel="900" a="sand" b="cobblestone" Description="快速烧玻璃">
+		<Recipe Result="GlassBlock" ResultCount="10" RequiredHeatLevel="2" a="sand" b="cobblestone" Description="快速烧玻璃">
 		  "ab"
 		</Recipe>
-		<Recipe Result="FCItemBlock:15" ResultCount="2" RequiredHeatLevel="900" a="ironingot" b="fcitem:16"  Description="钢锭">
+		<Recipe Result="FCItemBlock:15" ResultCount="2" RequiredHeatLevel="2" a="ironingot" b="fcitem:16"  Description="钢锭">
 		  "ab"
 		</Recipe>
-		<Recipe Result="GraniteBlock" ResultCount="2" RequiredHeatLevel="900" a="cobblestone" Description="[0]">
+		<Recipe Result="GraniteBlock" ResultCount="2" RequiredHeatLevel="2" a="cobblestone" Description="[0]">
 		  "aa"
 		</Recipe>
-		<Recipe Result="IronIngotBlock" ResultCount="2" RequiredHeatLevel="900" a="ironorechunk" Description="[0]">
+		<Recipe Result="IronIngotBlock" ResultCount="2" RequiredHeatLevel="2" a="ironorechunk" Description="[0]">
 		  "aa"
 		</Recipe>
-		<Recipe Result="CopperIngotBlock" ResultCount="2" RequiredHeatLevel="900" a="malachitechunk" Description="[0]">
+		<Recipe Result="CopperIngotBlock" ResultCount="2" RequiredHeatLevel="2" a="malachitechunk" Description="[0]">
 		  "aa"
 		</Recipe>
-		<Recipe Result="GermaniumChunkBlock" ResultCount="2" RequiredHeatLevel="900" a="germaniumorechunk" Description="[0]">
+		<Recipe Result="GermaniumChunkBlock" ResultCount="2" RequiredHeatLevel="2" a="germaniumorechunk" Description="[0]">
 		  "aa"
 		</Recipe>
-		<Recipe Result="BrickBlock" ResultCount="2" RequiredHeatLevel="900" a="clay" Description="[0]">
+		<Recipe Result="BrickBlock" ResultCount="2" RequiredHeatLevel="2" a="clay" Description="[0]">
 		  "aa"
-		</Recipe>
+		</Recipe> -->
+		
 		
 		<!-- 机床区    -->
 		
@@ -430,7 +430,10 @@
 		  "aa"
 		  "aa"
 		</Recipe>
-		
+		<Recipe Result="LightDustBlock" ResultCount="4" RequiredHeatLevel="0" a="lightstone" Description="萤石块分解">
+		  "a"
+			
+		</Recipe>
 		<Recipe Result="FCSeedBlock:0" ResultCount="4" RequiredHeatLevel="0" a="xiguapian" Description="西瓜片提取西瓜种子">
 		  "a"
 		</Recipe>

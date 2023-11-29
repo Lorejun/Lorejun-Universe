@@ -26,6 +26,11 @@
 		<MemberSubsystemTemplate Name="chocolate" Guid="80000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
 			<Parameter Name="Class" Guid="80000000-bbdd-0000-0000-000000000002" Value="Game.ChocolateSystem" Type="string"/>
 		</MemberSubsystemTemplate>
+		<!--附魔台系统-->
+		<MemberSubsystemTemplate Name="MusicPlayer" Guid="90000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="90000000-bbdd-0000-0000-000000000002" Value="Game.FCMusicManager" Type="string"/>
+		</MemberSubsystemTemplate>
+		
 		
     </ProjectTemplate>
 	<Parameter Name="Class" Guid="3c28d383-dc6e-4d55-8084-5d914abd4d79" new-Value="Game.FCSubsystemSky" Type="string" />

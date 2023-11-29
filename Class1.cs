@@ -20,172 +20,739 @@ using Engine.Input;
 using System.Text;
 using System.Threading.Tasks;
 using Engine.Audio;
+using Test1;
 
-/*namespace Game 
+
+namespace Game 
 {
+    public  class FCMusicManager :Subsystem,IUpdateable
+    {
+        public SubsystemPlayers m_subsystemPlayer;
+        public ComponentPlayer m_componentPlayer;
+        public ComponentTest1 m_componentTest1;
+		public bool flag_surface = false;
+        public bool flag_cave = false;
+        public bool flag_space = false;
+        public bool flag_defualt = false;
+        public UpdateOrder UpdateOrder
+        {
+            get
+            {
+                return UpdateOrder.Default;
+            }
+        }
+        public override void OnEntityAdded(Entity entity)
+        {
+            m_componentPlayer = m_subsystemPlayer.ComponentPlayers[0];
+            m_componentTest1 = m_componentPlayer.Entity.FindComponent<ComponentTest1>();
+        }
+
+        public static bool IsPlaying
+        {
+            get
+            {
+                return m_sound != null && m_sound.State > SoundState.Stopped;
+            }
+        }
+
+        public static float Volume
+        {
+            get
+            {
+                return SettingsManager.MusicVolume * 0.6f;
+            }
+        }
+
+        public void Update(float dt)
+        {
+            Point3 point = Terrain.ToCell(m_componentPlayer.ComponentBody.Position);//玩家所在方块坐标
+           //用来判断位置变换。
+			if(m_fadeSound != null||m_sound!=null)
+			{
+                if (point.Y <= 54)
+                {
+					if(flag_cave==false)
+					{
+						StopMusic();//如果位置变换但当前音乐不是洞穴音乐，开始变换。
+					}
+                    //洞穴音乐
+                    m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(20f, 30f);//3分半-4分钟                                                       
+
+
+                }
+                else if (point.Y > 54 && point.Y <= 256)
+                {
+                    if (flag_surface == false)
+                    {
+                        StopMusic();//如果位置变换但当前音乐不是洞穴音乐，开始变换。
+                    }
+                    //地表
+                    m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(20f, 30f);//3分半-4分钟      
+                }
+                else if (point.Y > 1000)
+                {
+                    if (flag_space == false)
+                    {
+                        StopMusic();//如果位置变换但当前音乐不是洞穴音乐，开始变换。
+                    }
+                    //宇宙
+                    m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(20f, 30f);//3分半-4分钟      
+                }
+                else
+                {
+                    if (flag_defualt == false)
+                    {
+                        StopMusic();//如果位置变换但当前音乐不是洞穴音乐，开始变换。
+                    }
+                    //默认地表
+                    m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(20f, 30f);//3分半-4分钟      
+                }
+            }
+            // 检查是否有音乐正在淡出
+            if (m_fadeSound != null)
+            {
+                //// 减少淡出音乐的音量
+                m_fadeSound.Volume = MathUtils.Min(m_fadeSound.Volume - 0.1f * Volume * Time.FrameDuration, Volume);
+                // // 如果淡出音乐的音量已降至0或以下，则释放音乐资源并将其置为null
+                if (m_fadeSound.Volume <= 0f)
+                {
+                    m_fadeSound.Dispose();
+                    m_fadeSound = null;
+                }
+            }
+            //// 检查当前是否有音乐正在播放，并且是否到达淡入音乐的时间
+            if (m_sound != null && Time.FrameStartTime >= m_fadeStartTime)
+            {
+                //增加音乐的音量进行淡入,直到音量和设置里的音量相同
+                m_sound.Volume = MathUtils.Min(m_sound.Volume + 0.33f * Volume * Time.FrameDuration, Volume);
+            }
+            //// 检查当前是否没有音乐混合播放或音量为0
+            if ( Volume == 0f)
+            {
+                StopMusic();
+                return;
+            }
+            //// 检查当前音乐混合类型是否为菜单，并且是否到了播放下一首歌的时间并且没有音乐正在播放,这里是设置音乐播放的核心，前面是对音乐淡入淡出的控制
+            if (  Time.FrameStartTime >= m_nextSongTime && IsPlaying==false)
+            {
+				//float startPercentage = IsPlaying ? m_random.Float(0f, 0.75f) : 0f;
+				float startPercentage = 0f;//播放开始的片段锁定在开头，即完整播放。
+
+                string ContentMusicPath = string.Empty;//这里貌似无作用
+                if (!string.IsNullOrEmpty(ContentMusicPath))
+                {
+                    PlayMusic(ContentMusicPath, startPercentage);
+                    m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(40f, 60f);
+                    return;
+                }
+                if (point.Y <= 54)
+                {
+                    PlayMusic("BackgroundMusic/CaveMusic", startPercentage);//洞穴音乐
+					flag_cave = true;
+                     // 洞穴音乐
+                   
+
+                }
+                else if (point.Y > 54 && point.Y <= 256)
+                {
+                    PlayMusic("BackgroundMusic/SurfaceMusic", startPercentage);//地表
+					flag_surface = true;
+                    
+                }
+                else if (point.Y > 1000)
+                {
+                    PlayMusic("BackgroundMusic/SpaceMusic", startPercentage);//宇宙
+                   flag_space = true;
+                }
+                else
+                {
+
+                    PlayMusic("BackgroundMusic/SurfaceMusic", startPercentage);//默认地表
+					flag_defualt = true;
+                }
+                // 如果ContentMusicPath为空，使用随机数选择要播放的音乐
+                /*switch (m_random.Int(0, 5))
+                {
+                    case 0:
+                        PlayMusic("BackgroundMusic/NativeAmericanFluteSpirit", startPercentage);
+                        break;
+                    case 1:
+                        PlayMusic("BackgroundMusic/AloneForever", startPercentage);
+                        break;
+                    case 2:
+                        PlayMusic("BackgroundMusic/NativeAmerican", startPercentage);
+                        break;
+                    case 3:
+                        PlayMusic("BackgroundMusic/NativeAmericanHeart", startPercentage);
+                        break;
+                    case 4:
+                        PlayMusic("BackgroundMusic/NativeAmericanPeaceFlute", startPercentage);
+                        break;
+                    case 5:
+                        PlayMusic("BackgroundMusic/NativeIndianChant", startPercentage);
+                        break;
+                }*/
+                Log.Information(string.Format("音乐已经播放！"));
+                m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(212f, 240f);//3分半-4分钟
+            }
+        }
+
+        public override void Load(ValuesDictionary valuesDictionary)
+        {
+            m_subsystemPlayer = Project.FindSubsystem<SubsystemPlayers>();
+            base.Load(valuesDictionary);
+        }
+
+        public override void Save(ValuesDictionary valuesDictionary)
+        {
+            base.Save(valuesDictionary);
+        }
+
+        public void PlayMusic(string name, float startPercentage)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                StopMusic();
+                return;
+            }
+            try
+            {
+                StopMusic();
+                m_fadeStartTime = Time.FrameStartTime + 2.0;
+                float volume = (m_fadeSound != null) ? 0f : Volume;
+                StreamingSource streamingSource = ContentManager.Get<StreamingSource>(name, ".ogg").Duplicate();
+                streamingSource.Position = (long)(MathUtils.Saturate(startPercentage) * (float)(streamingSource.BytesCount / (long)streamingSource.ChannelsCount / 2L)) / 16L * 16L;
+                m_sound = new StreamingSound(streamingSource, volume, 1f, 0f, false, true, 1f);
+                m_sound.Play();
+            }
+            catch
+            {
+                Log.Warning("Error playing music \"{0}\".", new object[]
+                {
+                    name
+                });
+            }
+        }
+
+        public  void StopMusic()
+        {
+
+            if (m_sound != null)
+            {
+                if (m_fadeSound != null)
+                {
+                    m_fadeSound.Dispose();
+                }
+                m_sound.Stop();
+				if (flag_cave == true)
+				{
+					flag_cave = false;
+				}
+                if (flag_surface == true)
+                {
+                    flag_surface = false;
+                }
+                if (flag_space == true)
+                {
+                    flag_space = false;
+                }
+                if (flag_defualt == true)
+                {
+                    flag_defualt = false;
+                }
+                m_fadeSound = m_sound;
+                m_sound = null;
+            }
+        }
+
+        public const float m_fadeSpeed = 0.33f;
+
+        public const float m_fadeWait = 2f;
+
+        public static StreamingSound m_fadeSound;
+
+        public static StreamingSound m_sound;
+
+        public static double m_fadeStartTime;
+
+        
+
+        public static double m_nextSongTime;
+
+        public static Random m_random = new Random();
+
+        
+    }
+
     #region 音乐
-    public static class FCMusicManager
-	{
-		public static FCMusicManager.Mix CurrentMix
-		{
-			get
-			{
-				return FCMusicManager.m_currentMix;
-			}
-			set
-			{
-				if (value != FCMusicManager.m_currentMix)
-				{
-					FCMusicManager.m_currentMix = value;
-					FCMusicManager.m_nextSongTime = 0.0;
-				}
-			}
-		}
 
-		public static bool IsPlaying
-		{
-			get
-			{
-				return FCMusicManager.m_sound != null && FCMusicManager.m_sound.State > SoundState.Stopped;
-			}
-		}
+    /*public class FCSubsystemAudio : SubsystemAudio
+    {
+        public new ReadOnlyList<Vector3> ListenerPositions
+        {
+            //定义了一个 ListenerPositions 属性，它返回监听者的位置列表。这是一个只读列表，确保外部代码不能修改它，但能够获取监听者的当前位置信息。
+            get
+            {
+                return new ReadOnlyList<Vector3>(this.m_listenerPositions);
+            }
+        }
 
-		public static float Volume
-		{
-			get
-			{
-				return SettingsManager.MusicVolume * 0.6f;
-			}
-		}
+        public new UpdateOrder UpdateOrder
+        {
+            //定义了一个 UpdateOrder 属性，它指定了子系统应该在更新循环的什么阶段被调用。这里使用 UpdateOrder.Default，表示使用默认的更新顺序。
+            get
+            {
+                return UpdateOrder.Default;
+            }
+        }
 
-		public static void Update()
-		{
-			if (FCMusicManager.m_fadeSound != null)
-			{
-				FCMusicManager.m_fadeSound.Volume = MathUtils.Min(FCMusicManager.m_fadeSound.Volume - 0.33f * FCMusicManager.Volume * Time.FrameDuration, FCMusicManager.Volume);
-				if (FCMusicManager.m_fadeSound.Volume <= 0f)
-				{
-					FCMusicManager.m_fadeSound.Dispose();
-					FCMusicManager.m_fadeSound = null;
-				}
-			}
-			if (FCMusicManager.m_sound != null && Time.FrameStartTime >= FCMusicManager.m_fadeStartTime)
-			{
-				FCMusicManager.m_sound.Volume = MathUtils.Min(FCMusicManager.m_sound.Volume + 0.33f * FCMusicManager.Volume * Time.FrameDuration, FCMusicManager.Volume);
-			}
-			if (FCMusicManager.m_currentMix == FCMusicManager.Mix.None || FCMusicManager.Volume == 0f)
-			{
-				FCMusicManager.StopMusic();
-				return;
-			}
-			if (FCMusicManager.m_currentMix == FCMusicManager.Mix.Menu && (Time.FrameStartTime >= FCMusicManager.m_nextSongTime || !FCMusicManager.IsPlaying))
-			{
-				float startPercentage = FCMusicManager.IsPlaying ? FCMusicManager.m_random.Float(0f, 0.75f) : 0f;
-				string ContentMusicPath = string.Empty;
-				ModsManager.HookAction("MenuPlayMusic", delegate (ModLoader loader)
-				{
-					loader.MenuPlayMusic(out ContentMusicPath);
-					return false;
-				});
-				if (!string.IsNullOrEmpty(ContentMusicPath))
-				{
-					FCMusicManager.PlayMusic(ContentMusicPath, startPercentage);
-					FCMusicManager.m_nextSongTime = Time.FrameStartTime + (double)FCMusicManager.m_random.Float(40f, 60f);
-					return;
-				}
-				switch (FCMusicManager.m_random.Int(0, 5))
-				{
-					case 0:
-						MusicManager.PlayMusic("FCMusic/OP", startPercentage);
-						break;
-					case 1:
-						MusicManager.PlayMusic("FCMusic/Lord", startPercentage);
-						break;
-					case 2:
-						MusicManager.PlayMusic("FCMusic/Dreamlibrary", startPercentage);
-						break;
-					case 3:
-						MusicManager.PlayMusic("FCMusic/cat", startPercentage);
-						break;
-					case 4:
-						MusicManager.PlayMusic("FCMusic/Snowkingdom", startPercentage);
-						break;
-					case 5:
-						MusicManager.PlayMusic("FCMusic/OP", startPercentage);
-						break;
-				}
-				FCMusicManager.m_nextSongTime = Time.FrameStartTime + (double)FCMusicManager.m_random.Float(40f, 60f);
-			}
-		}
+        public new float CalculateListenerDistanceSquared(Vector3 p)
+        {
+            //定义了一个方法 CalculateListenerDistanceSquared，它计算从给定点 p 到最近的监听者位置的平方距离。这个方法被用于声音的3D空间处理，例如确定声源与监听者之间的距离。
+            float num = float.MaxValue;
+            for (int i = 0; i < m_listenerPositions.Count; i++)
+            {
+                float num2 = Vector3.DistanceSquared(m_listenerPositions[i], p);
+                if (num2 < num)
+                {
+                    num = num2;
+                }
+            }
+            return num;
+        }
 
-		public static void Initialize()
-		{
-		}
+        public new float CalculateListenerDistance(Vector3 p)
+        {
+            //CalculateListenerDistance 方法使用 CalculateListenerDistanceSquared 的结果来返回真实的听众距离。
+            return MathUtils.Sqrt(this.CalculateListenerDistanceSquared(p));
+        }
 
-		public static void PlayMusic(string name, float startPercentage)
-		{
-			if (string.IsNullOrEmpty(name))
-			{
-				FCMusicManager.StopMusic();
-				return;
-			}
-			try
-			{
-				FCMusicManager.StopMusic();
-				FCMusicManager.m_fadeStartTime = Time.FrameStartTime + 2.0;
-				float volume = (FCMusicManager.m_fadeSound != null) ? 0f : FCMusicManager.Volume;
-				StreamingSource streamingSource = ContentManager.Get<StreamingSource>(name, ".ogg").Duplicate();
-				streamingSource.Position = (long)(MathUtils.Saturate(startPercentage) * (float)(streamingSource.BytesCount / (long)streamingSource.ChannelsCount / 2L)) / 16L * 16L;
-				FCMusicManager.m_sound = new StreamingSound(streamingSource, volume, 1f, 0f, false, true, 1f);
-				FCMusicManager.m_sound.Play();
-			}
-			catch
-			{
-				Log.Warning("Error playing music \"{0}\".", new object[]
-				{
-					name
-				});
-			}
-		}
+        public new void Mute()
+        {
+            //Mute 方法循环遍历所有 m_sounds 中的 Sound 对象，如果它们正在播放，则将它们暂停并标记为静音。
+            foreach (Sound sound in this.m_sounds)
+            {
+                if (sound.State == SoundState.Playing)
+                {
+                    this.m_mutedSounds[sound] = true;
+                    sound.Pause();
+                }
+            }
+        }
 
-		public static void StopMusic()
-		{
-			if (FCMusicManager.m_sound != null)
-			{
-				if (FCMusicManager.m_fadeSound != null)
-				{
-					FCMusicManager.m_fadeSound.Dispose();
-				}
-				FCMusicManager.m_sound.Stop();
-				FCMusicManager.m_fadeSound = FCMusicManager.m_sound;
-				FCMusicManager.m_sound = null;
-			}
-		}
+        public new void Unmute()
+        {
+            //Unmute 方法重新开始播放所有被静音的声音，并清除 m_mutedSounds 字典。
+            foreach (Sound sound in this.m_mutedSounds.Keys)
+            {
+                sound.Play();
+            }
+            this.m_mutedSounds.Clear();
+        }
 
-		public const float m_fadeSpeed = 0.33f;
+        public new void PlaySound(string name, float volume, float pitch, float pan, float delay)
+        {
+            //这是 PlaySound 方法的重载之一，它将播放指定的声音。这个版本接受声音名称、音量、音调、立体声平衡和延迟作为参数。它计算声音应该播放的时间，
+			//并将这个声音信息添加到 m_queuedSounds 列表中。同时更新 m_nextSoundTime 确保在正确的时间播放声音。
+           
+            double num = this.m_subsystemTime.GameTime + (double)delay;
+            this.m_nextSoundTime = MathUtils.Min(this.m_nextSoundTime, num);
+            this.m_queuedSounds.Add(new FCSubsystemAudio.SoundInfo
+            {
+                Time = num,//延迟
+                Name = name,//声音名称
+                Volume = volume,//音量
+                Pitch = pitch,//音调
+                Pan = pan//立体声平衡
+            });
+        }
 
-		public const float m_fadeWait = 2f;
+        public new void PlaySound(string name, float volume, float pitch, Vector3 position, float minDistance, float delay)
+        {
+            // //这是 PlaySound 方法的另一个重载，它还考虑了声音源的3D空间位置。它使用 CalculateVolume 方法来计算基于距离的音量衰减，并调用第一个重载版本的 PlaySound 方法。
+            float num = this.CalculateVolume(this.CalculateListenerDistance(position), minDistance, 2f);
+            this.PlaySound(name, volume * num, pitch, 0f, delay);
+        }
 
-		public static StreamingSound m_fadeSound;
+        public new void PlaySound(string name, float volume, float pitch, Vector3 position, float minDistance, bool autoDelay)
+        {
+           
+            //这是 PlaySound 方法的第三个重载，它接受一个布尔值 autoDelay，用来决定是否自动计算声音到达监听者的延迟。如果 autoDelay 为 true，则使用 CalculateDelay 方法计算延迟。
+            float num = this.CalculateVolume(this.CalculateListenerDistance(position), minDistance, 2f);
+            this.PlaySound(name, volume * num, pitch, 0f, autoDelay ? this.CalculateDelay(position) : 0f);
+        }
 
-		public static StreamingSound m_sound;
+        public new void PlayRandomSound(string directory, float volume, float pitch, float pan, float delay)
+        {
+            //这个方法从指定目录随机选择并播放一个声音。首先，它获取目录中的内容列表，并在内容存在的情况下随机选择一个条目进行播放。如果目录为空或不存在，则记录警告。
+            ReadOnlyList<ContentInfo> readOnlyList = ContentManager.List(directory);
+            if (readOnlyList.Count > 0)
+            {
+                int index = this.m_random.Int(0, readOnlyList.Count - 1);
+                this.PlaySound(readOnlyList[index].ContentPath, volume, pitch, pan, delay);
+                return;
+            }
+            Log.Warning("Sounds directory \"{0}\" not found or empty.", new object[]
+            {
+                directory
+            });
+        }
 
-		public static double m_fadeStartTime;
+        public new void PlayRandomSound(string directory, float volume, float pitch, Vector3 position, float minDistance, float delay)
+        {
+            //这个重载版本的 PlayRandomSound 方法考虑声音的3D位置。它计算根据距离和最小听距调整后的音量，并传递给先前定义的 PlayRandomSound 方法。
+            float num = this.CalculateVolume(this.CalculateListenerDistance(position), minDistance, 2f);
+            this.PlayRandomSound(directory, volume * num, pitch, 0f, delay);
+        }
 
-		public static FCMusicManager.Mix m_currentMix;
+        public new void PlayRandomSound(string directory, float volume, float pitch, Vector3 position, float minDistance, bool autoDelay)
+        {
+            //这个方法与上一个类似，但它接受一个布尔值 autoDelay 来决定是否自动计算声音到达监听者的延迟时间。
+            float num = this.CalculateVolume(this.CalculateListenerDistance(position), minDistance, 2f);
+            this.PlayRandomSound(directory, volume * num, pitch, 0f, autoDelay ? this.CalculateDelay(position) : 0f);
+        }
 
-		public static double m_nextSongTime;
+       
 
-		public static Random m_random = new Random();
+        public new float CalculateVolume(float distance, float minDistance, float rolloffFactor = 2f)
+        {
+            //CalculateVolume 方法根据距离计算音量，以实现音量随距离增加而衰减的效果。当声音距离小于最小听距时，音量为完全值。否则，它根据距离和衰减因子计算衰减后的音量。
+            if (distance > minDistance)
+            {
+                return minDistance / (minDistance + MathUtils.Max(rolloffFactor * (distance - minDistance), 0f));
+            }
+            return 1f;
+        }
 
-		public enum Mix
-		{
-			None,
-			Menu
-		}
-	}
-    #endregion
+        public new float CalculateDelay(Vector3 position)
+        {
+            //方法计算声音从来源到监听者的延迟时间。它使用先前的 CalculateListenerDistance 方法来获取距离，然后计算延迟。
+            return this.CalculateDelay(this.CalculateListenerDistance(position));
+        }
+
+        public new float CalculateDelay(float distance)
+        {
+            //这个重载的 CalculateDelay 方法直接接收距离来计算延迟。它按每100单位距离的声音传播速度（可能假设为声速）来计算延迟，并限制最大延迟为5秒。
+            return MathUtils.Min(distance / 100f, 5f);
+        }
+        public  void FCAddSound(string name, float volume, float pitch, float pan, float delay)
+        {
+            //这是 PlaySound 方法的重载之一，它将播放指定的声音。这个版本接受声音名称、音量、音调、立体声平衡和延迟作为参数。它计算声音应该播放的时间，
+            //并将这个声音信息添加到 m_queuedSounds 列表中。同时更新 m_nextSoundTime 确保在正确的时间播放声音。
+
+            double num = this.m_subsystemTime.GameTime + (double)delay;
+            this.m_nextSoundTime = MathUtils.Min(this.m_nextSoundTime, num);
+            this.m_queuedSounds.Add(new FCSubsystemAudio.SoundInfo
+            {
+                Time = num,//延迟
+                Name = name,//声音名称
+                Volume = volume,//音量
+                Pitch = pitch,//音调
+                Pan = pan//立体声平衡
+            });
+        }
+        public new Sound CreateSound(string name)
+        {
+            //CreateSound 方法通过 ContentManager 获取声音资源并创建一个新的 Sound 实例。创建的声音添加到 m_sounds 列表中，并返回给调用者。
+            Sound sound = new Sound(ContentManager.Get<SoundBuffer>(name, null), 1f, 1f, 0f, false, false);
+            this.m_sounds.Add(sound);
+            return sound;
+        }
+        public  struct CurrentSoundInfo
+        {
+            public double Time;
+
+            public string Name;
+
+            public float Volume;
+
+            public float Pitch;
+
+            public float Pan;
+        }
+
+        private Sound currentMusic;
+        private Sound currentMusic2;
+        private float currentVolume = 1.0f;//音量
+        private const float VolumeTransitionSpeed = 0.5f; // 音量过渡速度
+        public new void Update(float dt)
+        {
+            // 获取玩家的位置
+            Point3 position = Terrain.ToCell(m_componentPlayer.ComponentBody.Position);//玩家所在方块坐标
+
+            // 根据玩家的 Y 坐标决定播放哪首背景音乐
+            
+            if (position.Y < 64)
+            {
+                FCAddSound("Audio/BackgroundMusic/CaveMusic", currentVolume, 1f, 0f, 0f); // 洞穴音乐
+                currentMusic = CreateSound("Audio/BackgroundMusic/CaveMusic");
+
+            }
+            else if (position.Y > 64 && position.Y <= 256)
+            {
+                FCAddSound("Audio/BackgroundMusic/SurfaceMusic", currentVolume, 1f, 0f, 0f);  // 地表音乐
+                currentMusic = CreateSound("Audio/BackgroundMusic/CaveMusic");
+            }
+            else if (position.Y > 1000)
+            {
+                FCAddSound("Audio/BackgroundMusic/SpaceMusic", currentVolume, 1f, 0f, 0f);  // 宇宙音乐
+                currentMusic = CreateSound("Audio/BackgroundMusic/CaveMusic");
+            }
+            else
+            {
+                FCAddSound("Audio/BackgroundMusic/SurfaceMusic", currentVolume, 1f, 0f, 0f);  // 默认音乐
+                currentMusic = CreateSound("Audio/BackgroundMusic/CaveMusic");
+            }
+            
+
+			
+
+            // 如果需要播放新的音乐
+            if (currentMusic == null || currentMusic.Name != trackToPlay)
+            {
+                if (currentMusic != null)
+                {
+                    // 渐渐降低当前音乐的音量，准备切换
+                    currentVolume -= dt * VolumeTransitionSpeed;
+                    if (currentVolume <= 0)
+                    {
+                        // 停止当前音乐并开始播放新音乐
+                        currentMusic.Stop();
+                        currentMusic = PlayMusic(trackToPlay, 1.0f);
+                        currentVolume = 0;
+                    }
+                }
+                else
+                {
+                    // 播放新音乐
+                    currentMusic = PlayMusic(trackToPlay, currentVolume);
+                    currentVolume = 1.0f;
+                }
+            }
+
+            // 更新当前音乐的音量
+            if (currentMusic != null)
+            {
+                currentMusic.Volume = MathHelper.Clamp(currentVolume, 0, 1);
+            }
+
+            // 调用基类更新方法来处理其他声音事件
+            
+            if (this.m_subsystemTime.GameTime < this.m_nextSoundTime)
+            {
+                return;
+            }
+            this.m_nextSoundTime = double.MaxValue;
+            int i = 0;
+            while (i < m_queuedSounds.Count)
+            {
+                FCSubsystemAudio.SoundInfo soundInfo = m_queuedSounds[i];
+                if (this.m_subsystemTime.GameTime >= soundInfo.Time)
+                {
+                    if (this.m_subsystemTime.GameTimeFactor == 1f && this.m_subsystemTime.FixedTimeStep == null && soundInfo.Volume * SettingsManager.SoundsVolume > AudioManager.MinAudibleVolume && this.UpdateCongestion(soundInfo.Name, soundInfo.Volume))
+                    {
+                        AudioManager.PlaySound(soundInfo.Name, soundInfo.Volume, soundInfo.Pitch, soundInfo.Pan);
+                    }
+                    this.m_queuedSounds.RemoveAt(i);
+                }
+                else
+                {
+                    this.m_nextSoundTime = MathUtils.Min(this.m_nextSoundTime, soundInfo.Time);
+                    i++;
+                }
+            }
+        }
+
+       
+
+        
+
+        // PlayMusic 等其他方法的实现保持不变
+        /*public new void Update(float dt)
+        {
+            Point3 Position = Terrain.ToCell(m_componentPlayer.ComponentBody.Position);//玩家所在方块坐标
+                                                                                       // 根据玩家的 Y 坐标决定播放哪首背景音乐
+            string trackToPlay = GetTrackBasedOnPlayerPosition(playerPosition);
+
+
+
+
+        }*/
+    /*public ComponentPlayer m_componentPlayer;
+    public override void Load(ValuesDictionary valuesDictionary)
+    {
+        this.m_subsystemTime = base.Project.FindSubsystem<SubsystemTime>(true);
+        this.m_subsystemViews = base.Project.FindSubsystem<SubsystemGameWidgets>(true);
+
+    }
+    public override void OnEntityAdded(Entity entity)
+    {
+        m_componentPlayer = entity.FindComponent<ComponentPlayer>();
+    }
+    public override void Dispose()
+    {
+        foreach (Sound sound in this.m_sounds)
+        {
+            sound.Dispose();
+        }
+    }
+
+    public new bool UpdateCongestion(string name, float volume)
+    {
+        FCSubsystemAudio.Congestion congestion;
+        if (!this.m_congestions.TryGetValue(name, out congestion))
+        {
+            congestion = new FCSubsystemAudio.Congestion();
+            this.m_congestions.Add(name, congestion);
+        }
+        double realTime = Time.RealTime;
+        double lastUpdateTime = congestion.LastUpdateTime;
+        double lastPlayedTime = congestion.LastPlayedTime;
+        float num = (lastUpdateTime > 0.0) ? ((float)(realTime - lastUpdateTime)) : 0f;
+        congestion.Value = MathUtils.Max(congestion.Value - 10f * num, 0f);
+        congestion.LastUpdateTime = realTime;
+        if (congestion.Value <= 6f && (lastPlayedTime == 0.0 || volume > congestion.LastPlayedVolume || realTime - lastPlayedTime >= 0.0))
+        {
+            congestion.LastPlayedTime = realTime;
+            congestion.LastPlayedVolume = volume;
+            congestion.Value += 1f;
+            return true;
+        }
+        return false;
+    }
+
+    public new SubsystemTime m_subsystemTime;
+
+    public new SubsystemGameWidgets m_subsystemViews;
+
+    public new Random m_random = new Random();
+
+    public new List<Vector3> m_listenerPositions = new List<Vector3>();
+
+    public new Dictionary<string, FCSubsystemAudio.Congestion> m_congestions = new Dictionary<string, FCSubsystemAudio.Congestion>();
+
+    public new double m_nextSoundTime;
+
+    public new List<FCSubsystemAudio.SoundInfo> m_queuedSounds = new List<FCSubsystemAudio.SoundInfo>();
+    public new List<FCSubsystemAudio.SoundInfo> m_queuedSoundsName = new List<FCSubsystemAudio.SoundInfo>();
+
+    public new List<Sound> m_sounds = new List<Sound>();
+
+    public new Dictionary<Sound, bool> m_mutedSounds = new Dictionary<Sound, bool>();
+
+    public new class Congestion
+    {
+        public double LastUpdateTime;
+
+        public double LastPlayedTime;
+
+        public float LastPlayedVolume;
+
+        public float Value;
+    }
+
+    public new struct SoundInfo
+    {
+        public double Time;
+
+        public string Name;
+
+        public float Volume;
+
+        public float Pitch;
+
+        public float Pan;
+    }
+}
+/*public class MusicPlayer : SubsystemAudio
+{
+    private string currentMusicName;
+    private Sound currentMusicSound;
+
+    // 播放音乐
+    public void PlayMusic(string musicName, float volume = 1f, bool isLooped = true)
+    {
+        // 如果尝试播放当前已经在播放的音乐，则不执行任何操作
+        if (currentMusicName == musicName && currentMusicSound?.State == SoundState.Playing)
+        {
+            return;
+        }
+
+        // 停止当前音乐（如果有）
+        StopMusic();
+
+        // 创建新的音乐 Sound 对象
+        currentMusicSound = CreateSound(musicName);
+        currentMusicSound.Volume = volume;
+        currentMusicSound.IsLooped = isLooped;
+
+        // 播放音乐
+        currentMusicSound.Play();
+
+        // 更新当前播放音乐的名称
+        currentMusicName = musicName;
+    }
+
+    // 暂停音乐
+    public void PauseMusic()
+    {
+        if (currentMusicSound?.State == SoundState.Playing)
+        {
+            currentMusicSound.Pause();
+        }
+    }
+
+    // 停止音乐
+    public void StopMusic()
+    {
+        if (currentMusicSound != null)
+        {
+            currentMusicSound.Stop();
+            currentMusicSound.Dispose();
+            currentMusicSound = null;
+            currentMusicName = null;
+        }
+    }
+
+    // 设置音乐音量
+    public void SetMusicVolume(float volume)
+    {
+        if (currentMusicSound != null)
+        {
+            currentMusicSound.Volume = volume;
+        }
+    }
+
+    // 处理音乐播放器的更新
+    public new void Update(float dt)
+    {
+        base.Update(dt);
+
+        // 音乐播放器的额外逻辑（如果有的话）可以放在这里
+        // 比如，可以添加逻辑来处理音乐淡入淡出等
+    }
+
+    // 重写 Load 方法来初始化音乐播放器
+    public override void Load(ValuesDictionary valuesDictionary)
+    {
+        base.Load(valuesDictionary); // 调用基类加载方法
+
+        // 初始化音乐播放器的状态和资源
+        // ...
+    }
+
+    // 重写 Dispose 方法来清理音乐播放器资源
+    public override void Dispose()
+    {
+        base.Dispose(); // 调用基类清理方法
+
+        // 清理音乐播放器特有的资源
+        StopMusic();
+    }
 }*/
+    #endregion
+
+}//音乐系统
 
 namespace Test1 //界面测试
 {
@@ -196,7 +763,8 @@ namespace Test1 //界面测试
 		public BevelledButtonWidget m_button1;
 		public BevelledButtonWidget m_button2;
 		public BevelledButtonWidget m_button3;
-		public BevelledButtonWidget m_button10;
+        public BevelledButtonWidget m_button4;
+        public BevelledButtonWidget m_button10;
 		public Test1ButtonsPanelWidget(ComponentTest1 componentTest1)
 		{
 			m_componentTest1 = componentTest1;
@@ -205,7 +773,8 @@ namespace Test1 //界面测试
 			m_button1 = Children.Find<BevelledButtonWidget>("Button1");//通过Name属性获取子界面，若xml中不存在对应的Name则会出错
 			m_button2 = Children.Find<BevelledButtonWidget>("Button2");
 			m_button3 = Children.Find<BevelledButtonWidget>("Button3");
-			m_button10 = Children.Find<BevelledButtonWidget>("Button10");
+            m_button4 = Children.Find<BevelledButtonWidget>("Button4");
+            m_button10 = Children.Find<BevelledButtonWidget>("Button10");
 		}
 
 		public override void Update()
@@ -236,6 +805,10 @@ namespace Test1 //界面测试
 					YHLZ=false;
 					m_componentTest1.m_componentPlayer.ComponentGui.DisplaySmallMessage("樱花粒子已经关闭！", Color.Pink, true, true);//显示通知
 				}
+            }
+			if(m_button4.IsClicked)
+			{
+				m_componentTest1.m_componentPlayer.ComponentGui.ModalPanelWidget = new XRecipeWidget();
             }
 			if (m_button10.IsClicked)
 			{
@@ -294,7 +867,7 @@ namespace Test1 //界面测试
 	{//此组件用于添加打开界面的按钮，可将该组件全部功能合并至任意一个仅注册在玩家身上的组件
 		bool isbuffing = false;
 		
-		List<Component> m_RDlist = new List<Component>();	
+		
 		public SubsystemTerrain m_systemTerrain;
 		public NewModLoaderShengcheng Shengcheng1;
 		public FCSubsystemTown m_subsystemtown;
@@ -322,7 +895,7 @@ namespace Test1 //界面测试
 		public LabelWidget Buffscreen = new LabelWidget()
 		{//定义buff显示界面
 			Text = "Loading",//显示的文字，这段是默认文字，因为Update一启动就会覆盖这个文字
-			FontScale = 0.7f,//字体大小
+			FontScale = 0.5f,//字体大小
 			IsHitTestVisible = false,//是否能点击，为true的话可能会挡住重叠在它下方的界面，出现点不到下方界面的情况
 			HorizontalAlignment = WidgetAlignment.Near,//居右对齐(由于界面对齐以左上角为原点，因此水平方向的Near就是居左，Far就是居右，Center居中)
 			VerticalAlignment = WidgetAlignment.Center,//居下对齐(由于界面对齐以左上角为原点，因此垂直方向的Near就是居上，Far就是居下，Center居中)
@@ -330,30 +903,50 @@ namespace Test1 //界面测试
 		};
 
 		public bool DeveloperModeOn;//开发者模式是否开启
-		
 
-		public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
+
+
+
+        public SubsystemTime m_subsystemTime;
+
+
+        public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
 		{
 			base.Load(valuesDictionary, idToEntityMap);
 			m_systemTerrain = Project.FindSubsystem<SubsystemTerrain>(true);
-			
 			m_componentPlayer = Entity.FindComponent<ComponentPlayer>(true);
+			m_subsystemTime = Project.FindSubsystem<SubsystemTime>(true);
 
-			componentNightsight = Entity.FindComponent<ComponentNightsight>(true);
+
+            componentNightsight = Entity.FindComponent<ComponentNightsight>(true);
 			componentSpeedUP = Entity.FindComponent<ComponentSpeedUP>(true);
 			componentHealBuffA = Entity.FindComponent<ComponentHealBuffA>(true);
 			componentAttackUP = Entity.FindComponent<ComponentAttackUP>(true);
+
+
 			m_componentPlayer.GuiWidget.Children.Find<StackPanelWidget>("MoreContents", true).Children.Add(m_test1Button);//将按钮添加至玩家右上角省略号内
 			m_componentPlayer.GameWidget.Children.Find<CanvasWidget>("Gui", true).Children.Add(m_test1Display);//将文字界面添加至屏幕
 			m_componentPlayer.GameWidget.Children.Find<CanvasWidget>("Gui", true).Children.Add(Buffscreen);//将buff界面添加至屏幕
 			DeveloperModeOn = valuesDictionary.GetValue("DeveloperModeOn", false);//从project.xml中获取储存的值，若获取失败则采用false
 			Shengcheng1 = new NewModLoaderShengcheng();
-		}
+
+			//灵能sen值组件
+            m_mp = valuesDictionary.GetValue<float>("MagicPower", 1f);
+            m_sen = valuesDictionary.GetValue<float>("Sen", 100f);
+			isLowSen = valuesDictionary.GetValue<bool>("IsSenLow", false);//默认返回不处于低sen状态
+			m_Maxmp = valuesDictionary.GetValue<float>("MaxMagicPower", 100f);
+        }
 		public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
 		{
 			base.Save(valuesDictionary, entityToIdMap);
 			valuesDictionary.SetValue("DeveloperModeOn", DeveloperModeOn);//将该变量值储存到project.xml，防止重进存档后变回默认值
-		}
+            valuesDictionary.SetValue<float>("MagicPower", MagicPower);//将该变量值储存到project.xml，防止重进存档后变回默认值
+            valuesDictionary.SetValue<float>("Sen", Sen);//将该变量值储存到project.xml，防止重进存档后变回默认值
+            valuesDictionary.SetValue<bool>("IsSenLow", IsSenLow);//将该变量值储存到project.xml，防止重进存档后变回默认值
+            valuesDictionary.SetValue<float>("MaxMagicPower", MaxMagicPower);//将该变量值储存到project.xml，防止重进存档后变回默认值
+
+
+        }
 
 		public override void OnEntityRemoved()
 		{
@@ -362,7 +955,16 @@ namespace Test1 //界面测试
 			m_componentPlayer.GameWidget.Children.Find<CanvasWidget>("Gui", true).Children.Remove(m_test1Display);//移除文字界面，原因同上
 			m_componentPlayer.GameWidget.Children.Find<CanvasWidget>("Gui", true).Children.Remove(Buffscreen);//移除文字界面，原因同上
 		}
-		public static int GetTemperatureAdjustmentAtHeight(int y)
+
+        public override void OnEntityAdded()
+        {
+            base.OnEntityAdded();
+			if(IsSenLow==true)
+			{
+                base.Project.FindSubsystem<SubsystemBlocksTexture>(true).BlocksTexture = ContentManager.Get<Texture2D>("BlocksSen");
+            }
+        }
+        public static int GetTemperatureAdjustmentAtHeight(int y)
 		{//该静态方法从原版复制过来，用于计算高度变化带来的温度修正
 			return (int)MathUtils.Round((y > 64) ? (-0.0008f * MathUtils.Sqr(y - 64)) : (0.1f * (64 - y)));
 		}
@@ -373,11 +975,99 @@ namespace Test1 //界面测试
 		public ComponentSpeedUP componentSpeedUP;
         public ComponentNightsight componentNightsight;
         public bool buffscreenIsVisible = true;
-		public async void Update(float dt)
+		
+		
+
+
+		public float m_mp=1f;
+		public float MagicPower
 		{
-			
-			#region 开发者模式
-			if (DeveloperModeOn)
+			get { return m_mp; }
+		}
+
+
+		public float m_Maxmp;//最大灵力值
+        public float MaxMagicPower
+        {
+            get { return m_Maxmp; }
+        }
+
+
+        public float m_sen;
+        public float Sen
+        {
+            get { return m_sen; }
+        }
+
+        public bool isLowSen = false;//控制材质变化
+
+		public bool IsSenLow
+		{
+			get { return isLowSen; }
+		}
+        #region  更新区块
+        public void UpdateAllChunks(float time, TerrainChunkState chunkState)
+        {
+            bool flag = time == 0f;
+            if (flag)
+            {
+                m_systemTerrain.TerrainUpdater.DowngradeAllChunksState(chunkState, true);
+            }
+            Time.QueueTimeDelayedExecution(Time.RealTime + (double)time, delegate
+            {
+                m_systemTerrain.TerrainUpdater.DowngradeAllChunksState(chunkState, true);
+            });
+        }
+        #endregion
+        public async void Update(float dt)
+		{
+			if (m_sen > 100f)
+			{
+				m_sen = 100f;
+			}
+			else if(m_sen<0)
+			{
+				m_sen = 0f;
+			}
+			if (m_sen <30&& m_sen >= 20)
+			{
+                bool flag = m_subsystemTime.PeriodicGameTimeEvent(3.0, 0.0);
+				if(flag)
+				{
+                    m_componentPlayer.ComponentGui.DisplayLargeMessage("Sen值过低！请立刻恢复Sen值！", null, 1.5f, 0f);
+                }
+               
+            }
+           
+            if (m_sen<20)
+			{
+				if(isLowSen==false)
+				{
+                    m_componentPlayer.ComponentGui.DisplayLargeMessage("低Sen状态！！！它看到你了……", null, 3f, 0f);
+                    base.Project.FindSubsystem<SubsystemBlocksTexture>(true).BlocksTexture = ContentManager.Get<Texture2D>("BlocksSen");
+                    UpdateAllChunks(0f, TerrainChunkState.InvalidLight);
+					isLowSen = true;
+                }
+                
+            }
+			else
+			{
+				if(m_sen>=20f)//sen恢复到20以上，切换sen值状态
+				{
+					if(isLowSen== true)
+					{
+                        m_componentPlayer.ComponentGui.DisplayLargeMessage("成功脱离低Sen！", null, 1.5f, 0f);
+                        base.Project.FindSubsystem<SubsystemBlocksTexture>(true).BlocksTexture = BlocksTexturesManager.DefaultBlocksTexture;
+                        UpdateAllChunks(0f, TerrainChunkState.InvalidLight);
+						isLowSen = false;
+                    }
+                   
+                }
+              
+            }
+            
+            #region 开发者模式
+            if (DeveloperModeOn)
 			{//开发者模式打开
 				m_test1Display.IsVisible = true;//文字界面可见
 
@@ -408,12 +1098,16 @@ namespace Test1 //界面测试
 			{
                 Buffscreen.IsVisible = true;
                 string buffinfo = "状态栏";
-                string txt2 = string.Format("当前生命{0}",(int)m_componentPlayer.ComponentHealth.AttackResilience);//传入变量组成第一段文字
+                string txt2 = string.Format("当前生命:{0}/{1}", (int)(m_componentPlayer.ComponentHealth.Health* m_componentPlayer.ComponentHealth.AttackResilience), (int)m_componentPlayer.ComponentHealth.AttackResilience);//获取最大生命值和当前生命值
                 buffinfo = buffinfo + "\n" + txt2;
-                string txt3 = string.Format("当前攻击力{0}", (int)m_componentPlayer.ComponentMiner.AttackPower);//传入变量组成第一段文字
+                string txt3 = string.Format("当前攻击力:{0}", (int)m_componentPlayer.ComponentMiner.AttackPower);//传入变量组成第一段文字
                 buffinfo = buffinfo + "\n" + txt3;
-                string txt4 = string.Format("当前速度{0}", (int)m_componentPlayer.ComponentLocomotion.WalkSpeed);//传入变量组成第一段文字
+                string txt4 = string.Format("当前速度:{0}", (int)m_componentPlayer.ComponentLocomotion.WalkSpeed);//传入变量组成第一段文字
                 buffinfo = buffinfo + "\n" + txt4;
+                string txt5 = string.Format("当前灵力:{0}/{1}", (int)(MagicPower*MaxMagicPower),(int)MaxMagicPower);//传入变量组成第一段文字
+                buffinfo = buffinfo + "\n" + txt5;
+                string txt6 = string.Format("当前sen值:{0}", (int)Sen);//传入变量组成第一段文字
+                buffinfo = buffinfo + "\n" + txt6;
                 if (componentHealBuffA.m_HealDuration > 0 || componentAttackUP.m_ATKDuration > 0 || componentSpeedUP.m_SpeedDuration > 0||componentNightsight.m_NightseeDuration>0)//是否处于buff的前置判断
                 {
                     isbuffing = true;
@@ -453,7 +1147,7 @@ namespace Test1 //界面测试
 
                 }
                 Buffscreen.Text = buffinfo;
-            }
+            }//玩家信息状态栏目
            
            
 
@@ -595,128 +1289,230 @@ namespace Test1 //界面测试
 
 
 }
+
+namespace Game
+{
+    /*public class FCSubsystemBlocksTexture : Subsystem
+    {
+        public Texture2D BlocksTexture { get; set; }
+
+        public override void Load(ValuesDictionary valuesDictionary)
+        {
+            Display.DeviceReset += Display_DeviceReset;
+            this.LoadBlocksTexture();
+        }
+
+        public override void Dispose()
+        {
+            Display.DeviceReset -= Display_DeviceReset;
+            DisposeBlocksTexture();
+        }
+
+        public void LoadBlocksTexture()
+        {
+            SubsystemGameInfo subsystemGameInfo = Project.FindSubsystem<SubsystemGameInfo>(true);
+            BlocksTexture = BlocksTexturesManager.LoadTexture(subsystemGameInfo.WorldSettings.BlocksTextureName);
+        }
+
+        public void DisposeBlocksTexture()
+        {
+            if (BlocksTexture != null && !ContentManager.IsContent(BlocksTexture))
+            {
+                BlocksTexture.Dispose();
+                BlocksTexture = null;
+            }
+        }
+
+        public void Display_DeviceReset()
+        {
+            LoadBlocksTexture();
+        }
+    }*/
+
+
+}//sen值子系统
+
 namespace Game
 {
     #region 新生命组件
     public class FCComponentHealth : ComponentHealth, IUpdateable
     {
-        
-       
+        /*public float MaxHealth//获取最大生命值
+		{
+			get { return m_maxhealth; }
 
+		}
+
+		public float m_maxhealth;*/
+        public new ComponentPlayer m_componentPlayer;
+        public ComponentTest1 m_componentTest1;
+       
         public new void Update(float dt)
         {
-            this.AttackResilience = this.m_attackResilience * this.AttackResilienceFactor;
-            this.FallResilience = this.m_fallResilience * this.FallResilienceFactor;
-            this.FireResilienceFactor = this.m_fireResilience * this.FireResilienceFactor;
-            Vector3 position = this.m_componentCreature.ComponentBody.Position;
-            if (this.Health > 0f && this.Health < 1f)
+            
+            //抗性值用来决定生物对攻击、跌落和火焰的抗性。这些值可能会因装备或其他游戏效果而变化。
+            AttackResilience = m_attackResilience * AttackResilienceFactor;
+            FallResilience = m_fallResilience * FallResilienceFactor;
+            FireResilienceFactor = m_fireResilience * FireResilienceFactor;
+            Vector3 position = m_componentCreature.ComponentBody.Position;
+            if (Health > 0f && Health < 1f)
             {
+                //如果生物的健康值在0到1之间（存活状态），但不是满血，它将根据不同的条件（游戏模式、睡眠状态、饥饿度）进行自然恢复。
                 float num = 0f;
-                if (this.m_componentPlayer != null)
+                if (m_componentPlayer != null)
                 {
-                    if (this.m_subsystemGameInfo.WorldSettings.GameMode == GameMode.Harmless)
+                    if (m_subsystemGameInfo.WorldSettings.GameMode == GameMode.Harmless)
                     {
                         num = 0.016666668f;
                     }
-                    else if (this.m_componentPlayer.ComponentSleep.SleepFactor == 1f && this.m_componentPlayer.ComponentVitalStats.Food > 0f)
+                    else if (m_componentPlayer.ComponentSleep.SleepFactor == 1f && m_componentPlayer.ComponentVitalStats.Food > 0f)
                     {
                         num = 0.0016666667f;
                     }
-                    else if (this.m_componentPlayer.ComponentVitalStats.Food > 0.5f)
+                    else if (m_componentPlayer.ComponentVitalStats.Food > 0.5f)
                     {
                         num = 0.0011111111f;
                     }
+
                 }
                 else
                 {
                     num = 0.0011111111f;
                 }
-                this.Heal(this.m_subsystemGameInfo.TotalElapsedGameTimeDelta * num);
-            }
-            if (this.BreathingMode == BreathingMode.Air)
-            {
-                int cellContents = this.m_subsystemTerrain.Terrain.GetCellContents(Terrain.ToCell(position.X), Terrain.ToCell(this.m_componentCreature.ComponentCreatureModel.EyePosition.Y), Terrain.ToCell(position.Z));
-                this.Air = ((BlocksManager.Blocks[cellContents] is FluidBlock || position.Y > 259f) ? MathUtils.Saturate(this.Air - dt / this.AirCapacity) : 1f);
-            }
-            else if (this.BreathingMode == BreathingMode.Water)
-            {
-                this.Air = ((this.m_componentCreature.ComponentBody.ImmersionFactor > 0.25f) ? 1f : MathUtils.Saturate(this.Air - dt / this.AirCapacity));
-            }
-            if (this.m_componentCreature.ComponentBody.ImmersionFactor > 0f && this.m_componentCreature.ComponentBody.ImmersionFluidBlock is MagmaBlock)
-            {
-                this.Injure(2f * this.m_componentCreature.ComponentBody.ImmersionFactor * dt, null, false, LanguageControl.Get(base.GetType().Name, 1));
-                float num2 = 1.1f + 0.1f * (float)MathUtils.Sin(12.0 * this.m_subsystemTime.GameTime);
-                this.m_redScreenFactor = MathUtils.Max(this.m_redScreenFactor, num2 * 1.5f * this.m_componentCreature.ComponentBody.ImmersionFactor);
-            }
-            float num3 = MathUtils.Abs(this.m_componentCreature.ComponentBody.CollisionVelocityChange.Y);
-            if (!this.m_wasStanding && num3 > this.FallResilience)
-            {
-                float num4 = MathUtils.Sqr(MathUtils.Max(num3 - this.FallResilience, 0f)) / 15f;
-                if (this.m_componentPlayer != null)
-                {
-                    num4 /= this.m_componentPlayer.ComponentLevel.ResilienceFactor;
+               
+                Heal(m_subsystemGameInfo.TotalElapsedGameTimeDelta * num);
+                if (m_componentTest1 != null)
+				{
+					if(m_componentTest1.m_sen<=70&& m_componentTest1.m_sen >= 25)
+					{
+                        m_componentTest1.m_sen = m_componentTest1.m_sen + (0.5f * dt);//缓慢恢复san值
+                    }
+                   
                 }
-                this.Injure(num4, null, false, LanguageControl.Get(base.GetType().Name, 2));
+                   
             }
-            this.m_wasStanding = (this.m_componentCreature.ComponentBody.StandingOnValue != null || this.m_componentCreature.ComponentBody.StandingOnBody != null);
-           
-            bool flag = this.m_subsystemTime.PeriodicGameTimeEvent(1.0, 0.0);
-            if (flag && this.Air == 0f)
+
+
+            if (BreathingMode == BreathingMode.Air)
+            {
+                //如果生物需要呼吸空气，它会检查当前位置是否在水下或者高于一定的高度（259单位），并相应地减少空气值。
+
+                
+                int cellContents = m_subsystemTerrain.Terrain.GetCellContents(Terrain.ToCell(position.X), Terrain.ToCell(m_componentCreature.ComponentCreatureModel.EyePosition.Y), Terrain.ToCell(position.Z));
+                Air = ((BlocksManager.Blocks[cellContents] is FluidBlock || position.Y > 259f) ? MathUtils.Saturate(Air - dt / AirCapacity) : 1f);
+            }
+            else if (BreathingMode == BreathingMode.Water)
+            {
+                ////如果生物需要呼吸水，它会检查浸水度是否超过一定的值，并相应地减少空气值。
+                Air = ((m_componentCreature.ComponentBody.ImmersionFactor > 0.25f) ? 1f : MathUtils.Saturate(Air - dt / AirCapacity));
+            }
+
+            //当生物的身体一定程度上浸没在岩浆中时，将会受到伤害，并且屏幕会有红色效果表示痛苦。
+            if (m_componentCreature.ComponentBody.ImmersionFactor > 0f && m_componentCreature.ComponentBody.ImmersionFluidBlock is MagmaBlock)
+            {
+                Injure(2f * m_componentCreature.ComponentBody.ImmersionFactor * dt, null, false, LanguageControl.Get(base.GetType().Name, 1));
+				
+                float num2 = 1.1f + 0.1f * (float)MathUtils.Sin(12.0 * m_subsystemTime.GameTime);
+                m_redScreenFactor = MathUtils.Max(m_redScreenFactor, num2 * 1.5f * m_componentCreature.ComponentBody.ImmersionFactor);
+            }
+
+            //方法计算了生物因为撞击地面而产生的速度变化。如果速度变化大于生物的跌落抗性，将会造成伤害。
+            float num3 = MathUtils.Abs(m_componentCreature.ComponentBody.CollisionVelocityChange.Y);
+            if (!m_wasStanding && num3 > FallResilience)
+            {
+                float num4 = MathUtils.Sqr(MathUtils.Max(num3 - FallResilience, 0f)) / 15f;
+                if (m_componentPlayer != null)
+                {
+                    num4 /= m_componentPlayer.ComponentLevel.ResilienceFactor;
+                    //m_componentTest1.m_sen = m_componentTest1.m_sen - 1 * dt;//受伤减少sen值
+                }
+                Injure(num4, null, false, LanguageControl.Get(base.GetType().Name, 2));
+
+            }
+            m_wasStanding = (m_componentCreature.ComponentBody.StandingOnValue != null || m_componentCreature.ComponentBody.StandingOnBody != null);
+
+
+            //每秒进行一次检查，用于处理窒息和着火的伤害。窒息伤害发生在没有空气时（空气值为0），着火伤害则是当生物处于火焰中或触碰到火焰时。
+            bool flag = m_subsystemTime.PeriodicGameTimeEvent(1.0, 0.0);
+            if (flag && Air == 0f)
             {
                 float num5 = 0.12f;
-                if (this.m_componentPlayer != null)
+                if (m_componentPlayer != null)
                 {
-                    num5 /= this.m_componentPlayer.ComponentLevel.ResilienceFactor;
+                    num5 /= m_componentPlayer.ComponentLevel.ResilienceFactor;
                 }
-                this.Injure(num5, null, false, LanguageControl.Get(base.GetType().Name, 7));
+                Injure(num5, null, false, LanguageControl.Get(base.GetType().Name, 7));
+                //m_componentTest1.m_sen = m_componentTest1.m_sen - 1 * dt;//受伤减少sen值
             }
-            if (flag && (this.m_componentOnFire.IsOnFire || this.m_componentOnFire.TouchesFire))
+            if (flag && (m_componentOnFire.IsOnFire || m_componentOnFire.TouchesFire))
             {
-                float num6 = 1f / this.FireResilience;
-                if (this.m_componentPlayer != null)
+                float num6 = 1f / FireResilience;
+                if (m_componentPlayer != null)
                 {
-                    num6 /= this.m_componentPlayer.ComponentLevel.ResilienceFactor;
+                    num6 /= m_componentPlayer.ComponentLevel.ResilienceFactor;
                 }
-                this.Injure(num6, this.m_componentOnFire.Attacker, false, LanguageControl.Get(base.GetType().Name, 5));
+                Injure(num6, m_componentOnFire.Attacker, false, LanguageControl.Get(base.GetType().Name, 5));
+                //m_componentTest1.m_sen = m_componentTest1.m_sen - 1 * dt;//受伤减少sen值
             }
-            if (flag && this.CanStrand && this.m_componentCreature.ComponentBody.ImmersionFactor < 0.25f)
+            if (flag && CanStrand && m_componentCreature.ComponentBody.ImmersionFactor < 0.25f)
             {
-                int? standingOnValue = this.m_componentCreature.ComponentBody.StandingOnValue;
+                //如果生物可以搁浅，并且在地面上但不浸水，将会受到伤害。
+                int? standingOnValue = m_componentCreature.ComponentBody.StandingOnValue;
                 int num7 = 0;
-                if (!(standingOnValue.GetValueOrDefault() == num7 & standingOnValue != null) || this.m_componentCreature.ComponentBody.StandingOnBody != null)
+                if (!(standingOnValue.GetValueOrDefault() == num7 & standingOnValue != null) || m_componentCreature.ComponentBody.StandingOnBody != null)
                 {
-                    this.Injure(0.05f, null, false, LanguageControl.Get(base.GetType().Name, 6));
+                    Injure(0.05f, null, false, LanguageControl.Get(base.GetType().Name, 6));
                 }
             }
-            this.HealthChange = this.Health - this.m_lastHealth;
-            this.m_lastHealth = this.Health;
-            if (this.m_redScreenFactor > 0.01f)
+
+            //记录上一次更新后健康值的变化。
+            HealthChange = Health - m_lastHealth;
+            m_lastHealth = Health;
+            //如果存在红屏效果，随着时间推移减弱这个效果。
+            if (m_redScreenFactor > 0.01f)
             {
-                this.m_redScreenFactor *= MathUtils.Pow(0.2f, dt);
+                m_redScreenFactor *= MathUtils.Pow(0.2f, dt);
             }
             else
             {
-                this.m_redScreenFactor = 0f;
+                m_redScreenFactor = 0f;
             }
-            if (this.HealthChange < 0f)
+
+
+            //当生物受伤时（健康值减少），播放疼痛声音，增加红屏效果，如果是玩家，则让健康条组件闪烁。
+            if (HealthChange < 0f)
             {
-                this.m_componentCreature.ComponentCreatureSounds.PlayPainSound();
-                this.m_redScreenFactor += -4f * this.HealthChange;
-                ComponentPlayer componentPlayer2 = this.m_componentPlayer;
+                m_componentCreature.ComponentCreatureSounds.PlayPainSound();
+				
+               
+                m_redScreenFactor += -4f * HealthChange;
+                ComponentPlayer componentPlayer2 = m_componentPlayer;
                 if (componentPlayer2 != null)
                 {
-                    componentPlayer2.ComponentGui.HealthBarWidget.Flash(MathUtils.Clamp((int)((0f - this.HealthChange) * 30f), 0, 10));
+                    componentPlayer2.ComponentGui.HealthBarWidget.Flash(MathUtils.Clamp((int)((0f - HealthChange) * 30f), 0, 10));
+                   
+                    if (m_componentTest1 != null)
+                    {
+                        m_componentTest1.m_sen = m_componentTest1.m_sen - 1f ;//受伤减少sen值
+                    }
+
                 }
             }
-            if (this.m_componentPlayer != null)
+
+            //如果生物是玩家，更新红屏效果的因子，以及玩家的健康条显示值。
+            if (m_componentPlayer != null)
             {
-                this.m_componentPlayer.ComponentScreenOverlays.RedoutFactor = MathUtils.Max(this.m_componentPlayer.ComponentScreenOverlays.RedoutFactor, this.m_redScreenFactor);
+                m_componentPlayer.ComponentScreenOverlays.RedoutFactor = MathUtils.Max(m_componentPlayer.ComponentScreenOverlays.RedoutFactor, m_redScreenFactor);
             }
-            if (this.m_componentPlayer != null)
+            if (m_componentPlayer != null)
             {
-                this.m_componentPlayer.ComponentGui.HealthBarWidget.Value = this.Health;
+                m_componentPlayer.ComponentGui.HealthBarWidget.Value = Health;
             }
-            if (this.Health == 0f && this.HealthChange < 0f)
+
+            //当健康值为0且健康值有所下降，检查是否有Mod挂钩要求阻止后续的死亡掉落逻辑。
+
+           // 如果没有阻止，则产生死亡粒子效果，丢弃所有物品，并记录死亡时间。
+            if (Health == 0f && HealthChange < 0f)
             {
                 bool pass = false;
                 ModsManager.HookAction("DeadBeforeDrops", delegate (ModLoader loader)
@@ -728,29 +1524,81 @@ namespace Game
                 });
                 if (!pass)
                 {
-                    Vector3 position2 = this.m_componentCreature.ComponentBody.Position + new Vector3(0f, this.m_componentCreature.ComponentBody.StanceBoxSize.Y / 2f, 0f);
-                    float x = this.m_componentCreature.ComponentBody.StanceBoxSize.X;
-                    this.m_subsystemParticles.AddParticleSystem(new KillParticleSystem(this.m_subsystemTerrain, position2, x));
-                    Vector3 position3 = (this.m_componentCreature.ComponentBody.BoundingBox.Min + this.m_componentCreature.ComponentBody.BoundingBox.Max) / 2f;
+                    Vector3 position2 = m_componentCreature.ComponentBody.Position + new Vector3(0f, m_componentCreature.ComponentBody.StanceBoxSize.Y / 2f, 0f);
+                    float x = m_componentCreature.ComponentBody.StanceBoxSize.X;
+                    m_subsystemParticles.AddParticleSystem(new KillParticleSystem(m_subsystemTerrain, position2, x));
+                    Vector3 position3 = (m_componentCreature.ComponentBody.BoundingBox.Min + m_componentCreature.ComponentBody.BoundingBox.Max) / 2f;
                     foreach (IInventory inventory in base.Entity.FindComponents<IInventory>())
                     {
                         inventory.DropAllItems(position3);
                     }
-                    this.DeathTime = new double?(this.m_subsystemGameInfo.TotalElapsedGameTime);
+                    DeathTime = new double?(m_subsystemGameInfo.TotalElapsedGameTime);
                 }
             }
-            if (this.Health <= 0f && this.CorpseDuration > 0f)
+            if (Health <= 0f && CorpseDuration > 0f)
             {
-                double? num8 = this.m_subsystemGameInfo.TotalElapsedGameTime - this.DeathTime;
-                double num9 = (double)this.CorpseDuration;
+                double? num8 = m_subsystemGameInfo.TotalElapsedGameTime - DeathTime;
+                double num9 = (double)CorpseDuration;
                 if (num8.GetValueOrDefault() > num9 & num8 != null)
                 {
-                    this.m_componentCreature.ComponentSpawn.Despawn();
+                    m_componentCreature.ComponentSpawn.Despawn();
                 }
             }
         }
+        public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
+        {
+            valuesDictionary.SetValue<float>("Health", Health);
+            valuesDictionary.SetValue<float>("Air", Air);
+            if (DeathTime != null)
+            {
+                valuesDictionary.SetValue<double?>("DeathTime", DeathTime);
+            }
+            if (!string.IsNullOrEmpty(CauseOfDeath))
+            {
+                valuesDictionary.SetValue<string>("CauseOfDeath", CauseOfDeath);
+            }
+        }
 
+        public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
+        {
+            m_subsystemTime = base.Project.FindSubsystem<SubsystemTime>(true);
+            m_subsystemTimeOfDay = base.Project.FindSubsystem<SubsystemTimeOfDay>(true);
+            m_subsystemTerrain = base.Project.FindSubsystem<SubsystemTerrain>(true);
+            m_subsystemParticles = base.Project.FindSubsystem<SubsystemParticles>(true);
+            m_subsystemGameInfo = base.Project.FindSubsystem<SubsystemGameInfo>(true);
+            m_subsystemPickables = base.Project.FindSubsystem<SubsystemPickables>(true);
+            m_componentCreature = base.Entity.FindComponent<ComponentCreature>(true);
+            m_componentPlayer = base.Entity.FindComponent<ComponentPlayer>();
+            m_componentOnFire = base.Entity.FindComponent<ComponentOnFire>(true);
+            AttackResilience = valuesDictionary.GetValue<float>("AttackResilience");
+            FallResilience = valuesDictionary.GetValue<float>("FallResilience");
+            FireResilience = valuesDictionary.GetValue<float>("FireResilience");
+            m_attackResilience = AttackResilience;
+            m_fallResilience = FallResilience;
+            m_fireResilience = FireResilience;
+            CorpseDuration = valuesDictionary.GetValue<float>("CorpseDuration");
+            BreathingMode = valuesDictionary.GetValue<BreathingMode>("BreathingMode");
+            CanStrand = valuesDictionary.GetValue<bool>("CanStrand");
+            Health = valuesDictionary.GetValue<float>("Health");
+            Air = valuesDictionary.GetValue<float>("Air");
+            AirCapacity = valuesDictionary.GetValue<float>("AirCapacity");
+            double value = valuesDictionary.GetValue<double>("DeathTime");
+            AttackResilienceFactor = 1f;
+            FallResilienceFactor = 1f;
+            FireResilienceFactor = 1f;
+            HealFactor = 1f;
+            DeathTime = ((value >= 0.0) ? new double?(value) : null);
+            CauseOfDeath = valuesDictionary.GetValue<string>("CauseOfDeath");
+            if (m_subsystemGameInfo.WorldSettings.GameMode == GameMode.Creative && base.Entity.FindComponent<ComponentPlayer>() != null)
+            {
+                IsInvulnerable = true;
+            }
+            m_componentTest1 = m_componentPlayer?.Entity.FindComponent<ComponentTest1>();
+
+        }
         
+
+
     }
     #endregion
 
@@ -2923,7 +3771,8 @@ namespace Game
 			//1 heal 2.Atk 3.速度
 			ComponentPlayer componentPlayer = componentMiner.ComponentPlayer;
             BuffManager buffManager = new BuffManager(componentPlayer);
-			int F987ID = Terrain.ExtractContents(componentMiner.ActiveBlockValue);
+            var m_componentTest1 = componentPlayer.Entity.FindComponent<ComponentTest1>();
+            int F987ID = Terrain.ExtractContents(componentMiner.ActiveBlockValue);
 			if (componentPlayer != null)
 			{
 				if(componentMiner.ActiveBlockValue==959)
@@ -2932,7 +3781,13 @@ namespace Game
 					componentPlayer.ComponentVitalStats.Stamina +=0.7f;//耐力
 					
 					componentPlayer.ComponentGui.DisplaySmallMessage("吃了巧克力,你不再感到饥饿。你感觉浑身充满了力量！（耐力和饱食度大量恢复！）", Color.White, true, true);
-					AudioManager.PlaySound("Audio/Creatures/HumanEat/HumanEat1", 1f, 0f, 0f);
+                    if (m_componentTest1 != null)
+					{
+                        m_componentTest1.m_sen += 20f;//提升sen值！
+                    }
+                       
+
+                    AudioManager.PlaySound("Audio/Creatures/HumanEat/HumanEat1", 1f, 0f, 0f);
 					componentMiner.RemoveActiveTool(1);
 				} //巧克力
 				else if(componentMiner.ActiveBlockValue == 932)
@@ -2989,7 +3844,12 @@ namespace Game
 					componentPlayer.ComponentVitalStats.Sleep = 1f;
 					
 					componentPlayer.ComponentGui.DisplaySmallMessage("喝下了咖啡,你的疲劳一扫而空！", Color.White, true, true);
-					AudioManager.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f);
+                    if (m_componentTest1 != null)
+					{
+                        m_componentTest1.m_sen += 20f;
+                    }
+                        
+                    AudioManager.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f);
 					componentMiner.RemoveActiveTool(1);
 				} //咖啡
 				else if (componentMiner.ActiveBlockValue == 968)
@@ -3004,8 +3864,12 @@ namespace Game
 					
 
 					componentPlayer.ComponentHealth.Injure(0.1f,null,false,"粗制的樱花酒似乎有些许副作用……");
-
-					componentPlayer.ComponentGui.DisplaySmallMessage("喝下樱花酒，你的攻击力和速度略微提升！", Color.White, true, true);
+                    if (m_componentTest1 != null)
+					{
+                        m_componentTest1.m_sen -= 1f;
+                    }
+                       
+                    componentPlayer.ComponentGui.DisplaySmallMessage("喝下樱花酒，你的攻击力和速度略微提升！", Color.White, true, true);
 					AudioManager.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f);
 					componentMiner.RemoveActiveTool(1);
                 }//樱花酒
@@ -3030,9 +3894,11 @@ namespace Game
 		{
 			base.Load(valuesDictionary);
 			m_subsystemTerrain = base.Project.FindSubsystem<SubsystemTerrain>(true);
+
 			
 		}
 
+		public ComponentTest1 m_componentTest1;
 		public ComponentHealth componentHealth;
 
 		public ComponentVitalStats componentVitalStats;
@@ -3093,27 +3959,27 @@ namespace Game
 
 		private static float[] m_sizes = new float[]
 		{
-			0.7f,
-			0.7f,
-			0.7f,
-			0.6f,
-			0.5f,
 			0.5f,
 			1f,
-			0.5f,
-			0.5f,
 			1f,
-			0.5f,
-			0.5f,
-			0.5f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f,
+            1f, //传动活塞
+			1f, //钢锭
 			1f,
-			0.5f, //传动活塞
-			0.6f, //钢锭
 			1f,
 			1f,
-			1f,
-			0.5f,
-		};
+            1f,
+        };
 
 		public override IEnumerable<int> GetCreativeValues()
 		{
@@ -3134,26 +4000,26 @@ namespace Game
 
 		private int[] m_maxStick = new int[]
 		{
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
-			100,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
+			1024,
 		};
 		//类名字
 		public override string GetDisplayName(SubsystemTerrain subsystemTerrain, int value)
@@ -3175,45 +4041,45 @@ namespace Game
             "基础的闪烁可可豆",
             "基础的闪烁可可粉",
             "夜视药水I",
-			"酵素粉enzyme powder",
-			"硅板silicon plate",
-			"精制淀粉refined starch",
-			"偏导芯片bias chip",
-			"齿轮gear",
-			"钢棒steel rod",
-			"酵母菌yeast",
-			"活塞universal piston",
-			"钢锭steelIngot",
-			"碳粉",
-			"铁粉",
-			"磁化铁棒",
-			"基础马达",
+            "治疗药水I",
+            "攻击力药水I",
+            "速度药水I",
+            "跳跃药水I",
+            "经验药水I",
+            "灵能药水I",
+            "剧毒药水I",
+            "致盲药水I",
+            "瘟疫药水I",
+            "迟缓药水I",
+            "眩晕药水I",
+            "降sen药水I",
+            "升sen药水I",
 
 
 		};
 
 		private static string[] m_textureNames = new string[]
 		{
-			"Textures/FCDVFood/tongban",
-			"Textures/FCDVFood/tieban",
-			"Textures/FCDVFood/gangban",
-			"Textures/FCDVFood/tongxianquan",
-			"Textures/FCDVFood/gui",
-			"Textures/FCDVFood/xianluban",
-			"Textures/FCDVFood/yeshi",
-			"Textures/FCDVFood/jiaosufeng",
-			"Textures/FCDVFood/guiban",
-			"Textures/FCDVFood/DVfeng",
-			"Textures/FCDVFood/PDU",
-			"Textures/FCDVFood/chilun",//齿轮
-			"Textures/FCDVFood/gangbang",
-			"Textures/FCDVFood/jiaomujun",
-			"Textures/FCDVFood/huosai",//活塞
-			"Textures/FCDVFood/gangding",
-			"Textures/FCDVFood/tanfeng",
-			"Textures/FCDVFood/tiefeng",
-			"Textures/FCDVFood/cihuatiebang",
-			"Textures/FCDVFood/mada",
+			"Textures/FCDVFood/EnMP",
+			"Textures/FCDVFood/BSmelon",
+			"Textures/FCDVFood/BSaplle",
+			"Textures/FCDVFood/BSorange",
+			"Textures/FCDVFood/BSCocobean",
+			"Textures/FCDVFood/BSCoco",
+            "Textures/FCDVFood/yeshi",
+            "Textures/FCDVFood/Heal",
+			"Textures/FCDVFood/ATKUP",
+			"Textures/FCDVFood/Speed",
+			"Textures/FCDVFood/Jump",//齿轮
+			"Textures/FCDVFood/EXP",
+			"Textures/FCDVFood/MP",
+			"Textures/FCDVFood/Poison",//剧毒
+			"Textures/FCDVFood/Blind",
+            "Textures/FCDVFood/Disease",
+			"Textures/FCDVFood/Slowdown",
+			"Textures/FCDVFood/Dizzy",
+			"Textures/FCDVFood/SenDown",
+			"Textures/FCDVFood/Senup",
 
 		};
 		//动态材质
@@ -3234,10 +4100,10 @@ namespace Game
 		{
 			Lingneng, //1实体灵能
 			BsShiningMelon, //2基础的闪烁西瓜
-			gangban,//3基础的闪烁苹果
-			Tongxianquan,//4.基础的闪烁橘子
-			SI,//5.基础的闪烁可可豆
-			Xianluban,//6基础的闪烁可可粉
+			Bsapple,//3基础的闪烁苹果
+			Bsorange,//4.基础的闪烁橘子
+			Cocobean,//5.基础的闪烁可可豆
+			Coco,//6基础的闪烁可可粉
 			NightSeeI, //7夜视药水I
 			HealI,//8治疗I
 			ATKUPI, //9 攻击力加成1
@@ -3275,21 +4141,22 @@ namespace Game
             "基础的闪烁可可豆",
             "基础的闪烁可可粉",
             "夜视药水I",
-			"酵素粉enzyme powder",
-			"硅板silicon plate",
-			"精制淀粉refined starch由研磨机磨制，可以和酵母菌合成酵素粉",
-			"偏导芯片bias chip",
-			"齿轮gear",
-			"钢棒steel rod",
-			"酵母菌yeast可以和精制淀粉合成酵素粉发酵，由微观提取机器提取",
-			"通用活塞universal piston",
-			"钢锭steelIngot",
-			"碳粉Carbon powder",
-			"铁粉Iron powder",
-			"磁化铁棒Magnetized iron rod",
-			"基础马达，用于制造各种机器。",
+            "治疗药水I",
+            "攻击力药水I",
+            "速度药水I",
+            "跳跃药水I",
+            "经验药水I",
+            "灵能药水I",
+            "剧毒药水I",
+            "致盲药水I",
+            "瘟疫药水I",
+            "迟缓药水I",
+            "眩晕药水I",
+            "降sen药水I",
+            "升sen药水I",
 
-		};
+
+        };
 	}
 
     #endregion
@@ -3766,8 +4633,9 @@ namespace Game
 	}
 	public class ComponentSpeedUP : Component, IUpdateable
 	{
-		public bool isadded = false;
+		
 		public float Speed_first;
+		public float Speed_Now;
 		public float SpeedRate
 		{
 			get
@@ -3814,9 +4682,10 @@ namespace Game
 			{
 				m_SpeedDuration = 0f;
 				m_componentPlayer.ComponentGui.DisplaySmallMessage("速度强化结束！", Color.LightGreen, true, false);
-				isadded = false;
+				
 				m_componentPlayer.ComponentLocomotion.WalkSpeed= Speed_first;
-				Speed_first = 4f;
+				Speed_first = 0f;
+				Speed_Now = 0f;
 			}
 
 		}
@@ -3827,14 +4696,24 @@ namespace Game
 			{
 				if (m_SpeedDuration > 0 && SpeedRate > 0)//如果持续时间大于0，说明处于生命恢复状态
 				{
-					if (isadded == false)
+					if (Speed_first == 0)
 					{
-						Speed_first = m_componentPlayer.ComponentLocomotion.WalkSpeed;
+						Speed_first = m_componentPlayer.ComponentLocomotion.WalkSpeed;//记录初始速度保证回档
 						m_componentPlayer.ComponentLocomotion.WalkSpeed = m_componentPlayer.ComponentLocomotion.WalkSpeed * (1f + SpeedRate / 100) + 1;
-						isadded = true;
-					}
+						Speed_Now = m_componentPlayer.ComponentLocomotion.WalkSpeed;//时刻记录速度
 
-					m_SpeedDuration = m_SpeedDuration - dt;
+
+                    }
+					else
+					{
+						if(m_componentPlayer.ComponentLocomotion.WalkSpeed>=4f)
+						{
+                            Speed_Now = m_componentPlayer.ComponentLocomotion.WalkSpeed;
+                        }
+                       
+                    }
+					m_componentPlayer.ComponentLocomotion.WalkSpeed = Speed_Now; //同步速度
+                    m_SpeedDuration = m_SpeedDuration - dt;
 					if (m_SpeedDuration <= 0)
 					{
 						StopBuff();
@@ -3865,12 +4744,17 @@ namespace Game
 			m_SpeedDuration = valuesDictionary.GetValue<float>("SpeedDuration", 0f);
 			m_SpeedRate = valuesDictionary.GetValue<float>("SpeedRate", 1f);
 
-		}
+			Speed_first = valuesDictionary.GetValue<float>("SpeedFirst", 0f);
+			Speed_Now = valuesDictionary.GetValue<float>("SpeedNow", 3f);
+
+        }
 		public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
 		{
 			valuesDictionary.SetValue<float>("SpeedDuration", m_SpeedDuration);
 			valuesDictionary.SetValue<float>("SpeedRate", m_SpeedRate);
-		}
+            valuesDictionary.SetValue<float>("SpeedFirst", Speed_first);
+            valuesDictionary.SetValue<float>("SpeedNow", Speed_Now);
+        }
 		public SubsystemGameInfo m_subsystemGameInfo;
 
 		public SubsystemTerrain m_subsystemTerrain;
@@ -9715,9 +10599,18 @@ namespace Game
 	}
     #endregion
 
-    #region 子系统天空
+    #region FC子系统天空
 	public class FCSubsystemSky:SubsystemSky, IDrawable, IUpdateable
 	{
+		public SubsystemPlayers m_subsystemPlayer;
+		public ComponentPlayer m_componentPlayer;
+		public ComponentTest1 m_componentTest1;
+
+        public override void OnEntityAdded(Entity entity)
+        {
+            m_componentPlayer = m_subsystemPlayer.ComponentPlayers[0];
+            m_componentTest1 = m_componentPlayer.Entity.FindComponent<ComponentTest1>();
+        }
 
         public float FCCalculateLightIntensity(float timeOfDay, Camera camera)
         {
@@ -9801,6 +10694,17 @@ namespace Game
             float f2 = MathUtils.Saturate((direction.Y - 0.1f) / 0.4f);
             float s2 = num * MathUtils.Sqr(MathUtils.Saturate(0f - vector.X));
             float s3 = num2 * MathUtils.Sqr(MathUtils.Saturate(vector.X));
+            if (m_componentTest1 != null)
+            {
+                if (m_componentTest1.Sen < 20)
+                {
+					return new Color(0.2f, 0f, 0f);
+                }
+                else
+                {
+                    return new Color(Vector3.Lerp(v5 + v6 * s2 + v7 * s3, v4, f2));
+                }
+            }
             return new Color(Vector3.Lerp(v5 + v6 * s2 + v7 * s3, v4, f2));
         }
         public  void FillSkyVertexBuffer(SubsystemSky.SkyDome skyDome, float timeOfDay, float precipitationIntensity, int temperature,Camera camera)
@@ -9823,6 +10727,7 @@ namespace Game
         }
         public new void Draw(Camera camera, int drawOrder)
         {
+			//第一个和雾有关
             if (drawOrder == this.m_drawOrders[0])
             {
                 this.ViewUnderWaterDepth = 0f;
@@ -9844,7 +10749,7 @@ namespace Game
                         this.ViewUnderMagmaDepth = surfaceHeight.Value + 1f - viewPosition.Y;
                     }
                 }
-                if (this.ViewUnderWaterDepth > 0f)
+                if (this.ViewUnderWaterDepth > 0f)//水下
                 {
                     int seasonalHumidity = this.m_subsystemTerrain.Terrain.GetSeasonalHumidity(x, z);
                     int temperature = this.m_subsystemTerrain.Terrain.GetSeasonalTemperature(x, z) + SubsystemWeather.GetTemperatureAdjustmentAtHeight(y);
@@ -9858,11 +10763,11 @@ namespace Game
                     this.VisibilityRangeYMultiplier = 1f;
                     this.m_viewIsSkyVisible = false;
                 }
-                else if (this.ViewUnderMagmaDepth > 0f)
+                else if (this.ViewUnderMagmaDepth > 0f)//岩浆
                 {
                     this.m_viewFogRange.X = 0f;
                     this.m_viewFogRange.Y = 0.1f;
-                    this.m_viewFogColor = new Color(255, 80, 0);
+                    this.m_viewFogColor = new Color(255, 80, 0);//雾气颜色
                     this.VisibilityRangeYMultiplier = 1f;
                     this.m_viewIsSkyVisible = false;
                 }
@@ -9883,7 +10788,53 @@ namespace Game
                 {
                     this.m_viewFogRange = new Vector2(100000f, 100000f);
                 }
-                if (!this.DrawSkyEnabled || !this.m_viewIsSkyVisible || SettingsManager.SkyRenderingMode == SkyRenderingMode.Disabled)
+                if (m_componentTest1.Sen < 20)//如果sen小于20
+                {
+                    
+
+                    float RangeFactor = m_componentTest1.Sen / 20f;
+                    m_viewFogColor = Color.DarkRed;
+					
+                    m_viewFogRange.X = MathUtils.Lerp(3f, 15f, RangeFactor);//表示雾气的起始距离，也就是从摄像机多远的地方开始雾化的效果。
+                    m_viewFogRange.Y = MathUtils.Lerp(16f, 30f,RangeFactor);//表示雾气的结束距离，即雾气效果完全覆盖视野的最大距离,sen越低。离人越近。
+                    FlatBatch2D flatBatch2D = this.m_primitivesRenderer2d.FlatBatch(-1, DepthStencilState.None, RasterizerState.CullNoneScissor, BlendState.Opaque);
+                    int count = flatBatch2D.TriangleVertices.Count;
+                    ModsManager.HookAction("ViewFogColor", delegate (ModLoader modLoader)
+                    {
+                        modLoader.ViewFogColor(this.ViewUnderWaterDepth, this.ViewUnderMagmaDepth, ref this.m_viewFogColor);
+                        return false;
+                    });
+
+                    flatBatch2D.QueueQuad(Vector2.Zero, camera.ViewportSize, 0f, this.m_viewFogColor);
+                    flatBatch2D.TransformTriangles(camera.ViewportMatrix, count, -1);
+                    this.m_primitivesRenderer2d.Flush(true, int.MaxValue);
+                    return;
+
+                }
+                else if (m_componentTest1.Sen <= 10)//如果sen小于10
+                {
+
+
+                    float RangeFactor = m_componentTest1.Sen / 20f;
+                    m_viewFogColor = Color.DarkRed;
+                    m_viewIsSkyVisible = false;
+                    m_viewFogRange.X = MathUtils.Lerp(3f, 15f, RangeFactor);//表示雾气的起始距离，也就是从摄像机多远的地方开始雾化的效果。
+                    m_viewFogRange.Y = MathUtils.Lerp(16f, 30f, RangeFactor);//表示雾气的结束距离，即雾气效果完全覆盖视野的最大距离,sen越低。离人越近。
+                    FlatBatch2D flatBatch2D = this.m_primitivesRenderer2d.FlatBatch(-1, DepthStencilState.None, RasterizerState.CullNoneScissor, BlendState.Opaque);
+                    int count = flatBatch2D.TriangleVertices.Count;
+                    ModsManager.HookAction("ViewFogColor", delegate (ModLoader modLoader)
+                    {
+                        modLoader.ViewFogColor(this.ViewUnderWaterDepth, this.ViewUnderMagmaDepth, ref this.m_viewFogColor);
+                        return false;
+                    });
+
+                    flatBatch2D.QueueQuad(Vector2.Zero, camera.ViewportSize, 0f, this.m_viewFogColor);
+                    flatBatch2D.TransformTriangles(camera.ViewportMatrix, count, -1);
+                    this.m_primitivesRenderer2d.Flush(true, int.MaxValue);
+                    return;
+
+                }
+                else if (!this.DrawSkyEnabled || !this.m_viewIsSkyVisible || SettingsManager.SkyRenderingMode == SkyRenderingMode.Disabled)
                 {
                     FlatBatch2D flatBatch2D = this.m_primitivesRenderer2d.FlatBatch(-1, DepthStencilState.None, RasterizerState.CullNoneScissor, BlendState.Opaque);
                     int count = flatBatch2D.TriangleVertices.Count;
@@ -9892,10 +10843,12 @@ namespace Game
                         modLoader.ViewFogColor(this.ViewUnderWaterDepth, this.ViewUnderMagmaDepth, ref this.m_viewFogColor);
                         return false;
                     });
+
                     flatBatch2D.QueueQuad(Vector2.Zero, camera.ViewportSize, 0f, this.m_viewFogColor);
                     flatBatch2D.TransformTriangles(camera.ViewportMatrix, count, -1);
                     this.m_primitivesRenderer2d.Flush(true, int.MaxValue);
                     return;
+
                 }
             }
             else if (drawOrder == this.m_drawOrders[1])
@@ -9974,6 +10927,7 @@ namespace Game
         {
             base.Load(valuesDictionary);
             this.m_EarthTexture = ContentManager.Get<Texture2D>("Textures/Earth");
+			m_subsystemPlayer = Project.FindSubsystem<SubsystemPlayers>();
         }
         public Texture2D m_EarthTexture;
         public new void DrawSunAndMoon(Camera camera)
@@ -10006,6 +10960,19 @@ namespace Game
             {
                 return;
             }
+			if(m_componentTest1!= null)
+			{
+                if (m_componentTest1.Sen < 30)
+                {
+                    m_cloudsTexture = ContentManager.Get<Texture2D>("Textures/CloudsSen", null);
+                }
+                else
+                {
+                    m_cloudsTexture = ContentManager.Get<Texture2D>("Textures/Clouds", null);
+                }
+            }
+			
+            
             float globalPrecipitationIntensity = this.m_subsystemWeather.GlobalPrecipitationIntensity;
             float num = MathUtils.Lerp(0.03f, 1f, MathUtils.Sqr(this.SkyLightIntensity)) * MathUtils.Lerp(1f, 0.2f, globalPrecipitationIntensity);
             this.m_cloudsLayerColors[0] = Color.White * (num * 0.75f);
@@ -10015,7 +10982,7 @@ namespace Game
             double gameTime = this.m_subsystemTime.GameTime;
             Vector3 viewPosition = camera.ViewPosition;
             Vector2 v = new Vector2((float)MathUtils.Remainder(0.0020000000949949026 * gameTime - (double)(viewPosition.X / 1900f * 1.75f), 1.0) + viewPosition.X / 1900f * 1.75f, (float)MathUtils.Remainder(0.0020000000949949026 * gameTime - (double)(viewPosition.Z / 1900f * 1.75f), 1.0) + viewPosition.Z / 1900f * 1.75f);
-            TexturedBatch3D texturedBatch3D = this.m_primitivesRenderer3d.TexturedBatch(this.m_cloudsTexture, false, 2, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, SamplerState.LinearWrap);
+            TexturedBatch3D texturedBatch3D = this.m_primitivesRenderer3d.TexturedBatch(m_cloudsTexture, false, 2, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, SamplerState.LinearWrap);
             DynamicArray<VertexPositionColorTexture> triangleVertices = texturedBatch3D.TriangleVertices;
             DynamicArray<int> triangleIndices = texturedBatch3D.TriangleIndices;
             int count = triangleVertices.Count;
@@ -11328,7 +12295,7 @@ namespace Game
 			}
 			if (this.m_smeltingRecipe != null) //如果当前有熔炼配方，则逐渐增加熔炼进度，直到达到1。
 			{
-				this.m_smeltingProgress = MathUtils.Min(this.m_smeltingProgress + 0.01f * dt, 1f);
+				this.m_smeltingProgress = MathUtils.Min(this.m_smeltingProgress + 0.02f * dt, 1f);
 				if (this.m_smeltingProgress >= 1f)                //当熔炼进度达到1时，进行以下操作：
 				{
 					for (int i = 0; i < this.m_furnaceSize; i++)  //1.遍历熔炉中的槽，减少非空槽的物品数量。
@@ -11416,7 +12383,7 @@ namespace Game
 																				//调用CraftingRecipesManager.FindMatchingRecipe方法，
 																				//通过给定的热量级别、熔炼配方的材料和玩家的等级，查找匹配的熔炼配方（craftingRecipe）。
 				float playerLevel = (componentPlayer != null) ? componentPlayer.PlayerData.Level : 1f;
-				CraftingRecipe craftingRecipe = CraftingRecipesManager.FindMatchingRecipe(this.m_subsystemTerrain, this.m_matchedIngredients, heatLevel, playerLevel);
+				CraftingRecipe craftingRecipe = XCraftingRecipesManager.FindMatchingRecipe(this.m_subsystemTerrain, this.m_matchedIngredients, heatLevel, playerLevel);
 				if (craftingRecipe != null && craftingRecipe.ResultValue != 0) //如果找到了匹配的熔炼配方，并且配方的结果物品不为0，继续执行以下判断：
 				{
 					if (craftingRecipe.RequiredHeatLevel != 1000f) //1.如果配方要求的热量级别小于等于0，则将熔炼配方设置为null，表示没有匹配的熔炼配方。
@@ -12079,311 +13046,247 @@ namespace Game
 	#region 高炉组件
 	public class FCComponentGaolu : ComponentInventoryBase, IUpdateable
 	{
-		public int RemainsSlotIndex
-		{
-			get
-			{
-				return this.SlotsCount - 1;
-			}
-		}
+        private SubsystemTerrain m_subsystemTerrain;
 
-		public int ResultSlotIndex
-		{
-			get
-			{
-				return this.SlotsCount - 2;
-			}
-		}
+        private SubsystemExplosions m_subsystemExplosions;
 
-		public int FuelSlotIndex
-		{
-			get
-			{
-				return this.SlotsCount - 3;
-			}
-		}
+        private ComponentBlockEntity m_componentBlockEntity;
 
-		public float HeatLevel
-		{
-			get
-			{
-				return this.m_heatLevel;
-			}
-		}
+        private int m_furnaceSize;
 
-		public float SmeltingProgress
-		{
-			get
-			{
-				return this.m_smeltingProgress;
-			}
-		}
+        private string[] m_matchedIngredients = new string[16];
 
-		public UpdateOrder UpdateOrder
-		{
-			get
-			{
-				return UpdateOrder.Default;
-			}
-		}
+        private float m_fireTimeRemaining;
 
-		public override int GetSlotCapacity(int slotIndex, int value)
-		{
-			if (slotIndex != this.FuelSlotIndex)
-			{
-				return base.GetSlotCapacity(slotIndex, value);
-			}
-			if (BlocksManager.Blocks[Terrain.ExtractContents(value)].GetFuelHeatLevel(value) > 0f)
-			{
-				return base.GetSlotCapacity(slotIndex, value);
-			}
-			return 0;
-		}
+        private float m_heatLevel;
 
-		public override void AddSlotItems(int slotIndex, int value, int count)
-		{
-			this.m_updateSmeltingRecipe = true;
-			base.AddSlotItems(slotIndex, value, count);
-		}
+        private bool m_updateSmeltingRecipe;
 
-		public override int RemoveSlotItems(int slotIndex, int count)
-		{
-			this.m_updateSmeltingRecipe = true;
-			return base.RemoveSlotItems(slotIndex, count);
-		}
+        private CraftingRecipe m_smeltingRecipe;
 
-		public void Update(float dt)
-		{
-			Point3 coordinates = this.m_componentBlockEntity.Coordinates;  //获取熔炉所在方块实体的坐标。
+        private float m_smeltingProgress;
 
-			if (this.m_heatLevel == 900f)//如果熔炉的热量级别=1000，开始烧
+        public int RemainsSlotIndex => SlotsCount - 1;
 
-			{
-				this.m_fireTimeRemaining = MathUtils.Max(0f, this.m_fireTimeRemaining - dt); //那么减少火焰剩余时间（m_fireTimeRemaining）的值，确保其不小于0。
-				if (this.m_fireTimeRemaining == 0f)
-				{
-					this.m_heatLevel = 0f;  //如果火焰剩余时间为0，则将熔炉的热量级别（m_heatLevel）设置为0。
-				}
-			}
-			if (this.m_updateSmeltingRecipe)  //如果需要更新熔炼配方（m_updateSmeltingRecipe为true），则进行以下操作：
-			{
-				this.m_updateSmeltingRecipe = false; //获取燃料槽（FuelSlotIndex）的物品热量级别（heatLevel）。
-				float heatLevel = 0f;
-				if (this.m_heatLevel > 0f)       //如果熔炉的热量级别大于0，则使用当前热量级别作为heatLevel。
-				{
-					heatLevel = this.m_heatLevel;
-				}
-				else
-				{
-					ComponentInventoryBase.Slot slot = this.m_slots[this.FuelSlotIndex];     //否则，获取燃料槽中物品的热量级别，并将其赋值给heatLevel。
-					if (slot.Count > 0)
-					{
-						int num = Terrain.ExtractContents(slot.Value);
-						heatLevel = BlocksManager.Blocks[num].GetFuelHeatLevel(slot.Value);
-					}
-				}
-				CraftingRecipe craftingRecipe = this.FindFCGLSmeltingRecipe(heatLevel);    //查找匹配heatLevel的熔炼配方（FindSmeltingRecipe方法），并将其设置为当前的熔炼配方（m_smeltingRecipe）。
-				if (craftingRecipe != this.m_smeltingRecipe)
-				{
-					this.m_smeltingRecipe = ((craftingRecipe != null && craftingRecipe.ResultValue != 0) ? craftingRecipe : null);
-					this.m_smeltingProgress = 0f;  //如果找到了新的熔炼配方，将熔炼进度（m_smeltingProgress）重置为0。
-				}
-			}
-			if (this.m_smeltingRecipe == null)   //如果当前没有熔炼配方（m_smeltingRecipe为null），则将熔炉的热量级别和火焰剩余时间都设置为0。
-			{
-				this.m_heatLevel = 0f;
-				this.m_fireTimeRemaining = 0f;
-			}
-			if (this.m_smeltingRecipe != null && this.m_fireTimeRemaining <= 0f)   //如果当前有熔炼配方，并且火焰剩余时间小于等于0，则进行以下操作：
-			{
-				ComponentInventoryBase.Slot slot2 = this.m_slots[this.FuelSlotIndex];    //1.获取燃料槽（FuelSlotIndex）的物品热量级别。
-				if (slot2.Count > 0)
-				{
-					int num2 = Terrain.ExtractContents(slot2.Value);   //2.如果燃料物品的爆炸压力大于0，则将燃料槽的物品数量设置为0，并尝试引爆相应方块。
-					Block block = BlocksManager.Blocks[num2];
-					if (block.GetExplosionPressure(slot2.Value) > 0f)
-					{
-						slot2.Count = 0;
-						this.m_subsystemExplosions.TryExplodeBlock(coordinates.X, coordinates.Y, coordinates.Z, slot2.Value);
-					}
-					else if (block.GetFuelHeatLevel(slot2.Value) > 0f)   //3.否则，如果燃料物品的热量级别大于0，则减少燃料槽的物品数量，并根据燃料物品的热量级别设置火焰剩余时间和熔炉的热量级别。
-					{
-						slot2.Count--;
-						this.m_fireTimeRemaining = block.GetFuelFireDuration(slot2.Value);
-						this.m_heatLevel = block.GetFuelHeatLevel(slot2.Value);
-					}
-				}
-			}
-			if (this.m_fireTimeRemaining <= 0f)    //如果火焰剩余时间小于等于0，则将当前的熔炼配方和熔炼进度重置为null和0。
-			{
-				this.m_smeltingRecipe = null;
-				this.m_smeltingProgress = 0f;
-			}
-			if (this.m_smeltingRecipe != null) //如果当前有熔炼配方，则逐渐增加熔炼进度，直到达到1。
-			{
-				this.m_smeltingProgress = MathUtils.Min(this.m_smeltingProgress + 0.2f * dt, 1f);
-				if (this.m_smeltingProgress >= 1f)                //当熔炼进度达到1时，进行以下操作：
-				{
-					for (int i = 0; i < this.m_furnaceSize; i++)  //1.遍历熔炉中的槽，减少非空槽的物品数量。
-					{
-						if (this.m_slots[i].Count > 0)
-						{
-							this.m_slots[i].Count--;
-						}
-					}   //2.将熔炉中结果物品槽（ResultSlotIndex）的值设置为熔炼配方的结果物品值，并增加对应的数量。
-					this.m_slots[this.ResultSlotIndex].Value = this.m_smeltingRecipe.ResultValue;
-					this.m_slots[this.ResultSlotIndex].Count += this.m_smeltingRecipe.ResultCount;
-					if (this.m_smeltingRecipe.RemainsValue != 0 && this.m_smeltingRecipe.RemainsCount > 0)//3.如果熔炼配方还有剩余物品，将熔炉中剩余物品槽（RemainsSlotIndex）的值设置为剩余物品的值，并增加对应的数量。
-					{
-						this.m_slots[this.RemainsSlotIndex].Value = this.m_smeltingRecipe.RemainsValue;
-						this.m_slots[this.RemainsSlotIndex].Count += this.m_smeltingRecipe.RemainsCount;
-					}
-					this.m_smeltingRecipe = null;
-					this.m_smeltingProgress = 0f;    //4.将熔炼配方和熔炼进度重置为null和0，并设置需要更新熔炼配方的标志为true。
-					this.m_updateSmeltingRecipe = true;
-				}
-			}//获取熔炉所在区块，并检查该区块是否处于有效状态。如果是有效状态，则根据熔炉的热量级别，将熔炉所在方块的内容值替换为对应的熔炉方块。
-			TerrainChunk chunkAtCell = this.m_subsystemTerrain.Terrain.GetChunkAtCell(coordinates.X, coordinates.Z);
-			if (chunkAtCell != null && chunkAtCell.State == TerrainChunkState.Valid)
-			{
-				int cellValue = this.m_subsystemTerrain.Terrain.GetCellValue(coordinates.X, coordinates.Y, coordinates.Z);
-				this.m_subsystemTerrain.ChangeCell(coordinates.X, coordinates.Y, coordinates.Z, Terrain.ReplaceContents(cellValue, (this.m_heatLevel > 0f) ? 976 : 975), true);
-			}
-		}
+        public int ResultSlotIndex => SlotsCount - 2;
 
-		public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
-		{
+        public int FuelSlotIndex => SlotsCount - 3;
 
+        public float HeatLevel => m_heatLevel;
 
-			base.Load(valuesDictionary, idToEntityMap);
-			this.m_subsystemTerrain = base.Project.FindSubsystem<SubsystemTerrain>(true);
-			this.m_subsystemExplosions = base.Project.FindSubsystem<SubsystemExplosions>(true);
-			this.m_componentBlockEntity = base.Entity.FindComponent<ComponentBlockEntity>(true);
-			this.m_furnaceSize = this.SlotsCount - 3;
-			if (this.m_furnaceSize < 1 || this.m_furnaceSize > 3)
-			{
-				throw new InvalidOperationException("Invalid furnace size.");
-			}
-			this.m_fireTimeRemaining = valuesDictionary.GetValue<float>("FireTimeRemaining");
-			this.m_heatLevel = valuesDictionary.GetValue<float>("HeatLevel");
-			this.m_updateSmeltingRecipe = true;
+        public float SmeltingProgress => m_smeltingProgress;
 
+        public UpdateOrder UpdateOrder => UpdateOrder.Default;
 
+        public override int GetSlotCapacity(int slotIndex, int value)
+        {
+            if (slotIndex == FuelSlotIndex)
+            {
+                if (BlocksManager.Blocks[Terrain.ExtractContents(value)].FuelHeatLevel > 0f)
+                {
+                    return base.GetSlotCapacity(slotIndex, value);
+                }
+                return 0;
+            }
+            return base.GetSlotCapacity(slotIndex, value);
+        }
 
+        public override void AddSlotItems(int slotIndex, int value, int count)
+        {
+            base.AddSlotItems(slotIndex, value, count);
+            m_updateSmeltingRecipe = true;
+        }
 
+        public override int RemoveSlotItems(int slotIndex, int count)
+        {
+            m_updateSmeltingRecipe = true;
+            return base.RemoveSlotItems(slotIndex, count);
+        }
 
-		}
+        public void Update(float dt)
+        {
+            Point3 coordinates = m_componentBlockEntity.Coordinates;
+            if (m_heatLevel == 2f)//如果热值是11
+            {
+                m_fireTimeRemaining = MathUtils.Max(0f, m_fireTimeRemaining - dt);
+                if (m_fireTimeRemaining == 0f)
+                {
+                    m_heatLevel = 0f;
+                }
+            }
+            if (m_updateSmeltingRecipe)
+            {
+                m_updateSmeltingRecipe = false;
+                float heatLevel = 0f;
+                if (m_heatLevel > 0f)
+                {
+                    heatLevel = m_heatLevel;
+                }
+                else
+                {
+                    Slot slot = m_slots[FuelSlotIndex];
+                    if (slot.Count > 0)
+                    {
+                        int num = Terrain.ExtractContents(slot.Value);
+                        heatLevel = BlocksManager.Blocks[num].FuelHeatLevel;
+                    }
+                }
+                CraftingRecipe craftingRecipe = FindSmeltingRecipe(heatLevel);
+                if (craftingRecipe != m_smeltingRecipe)
+                {
+                    m_smeltingRecipe = craftingRecipe;
+                    m_smeltingProgress = 0f;
+                }
+            }
+            if (m_smeltingRecipe == null)
+            {
+                m_heatLevel = 0f;
+                m_fireTimeRemaining = 0f;
+            }
+            if (m_smeltingRecipe != null && m_fireTimeRemaining <= 0f)
+            {
+                Slot slot2 = m_slots[FuelSlotIndex];
+                if (slot2.Count > 0)
+                {
+                    int num2 = Terrain.ExtractContents(slot2.Value);
+                    Block block = BlocksManager.Blocks[num2];
+                    if (block.GetExplosionPressure(slot2.Value) > 0f)
+                    {
+                        slot2.Count = 0;
+                        m_subsystemExplosions.TryExplodeBlock(coordinates.X, coordinates.Y, coordinates.Z, slot2.Value);
+                    }
+                    else if (block.FuelHeatLevel > 0f)
+                    {
+                        slot2.Count--;
+                        m_fireTimeRemaining = block.FuelFireDuration;
+                        m_heatLevel = block.FuelHeatLevel;
+                    }
+                }
+            }
+            if (m_fireTimeRemaining <= 0f)
+            {
+                m_smeltingRecipe = null;
+                m_smeltingProgress = 0f;
+            }
+            if (m_smeltingRecipe != null)
+            {
+                m_smeltingProgress = MathUtils.Min(m_smeltingProgress + 0.2f * dt, 1f);
+                if (m_smeltingProgress >= 1f)
+                {
+                    for (int i = 0; i < 16; i++)
+                    {
+                        if (m_slots[i].Count > 0)
+                        {
+                            m_slots[i].Count--;
+                        }
+                    }
+                    m_slots[ResultSlotIndex].Value = m_smeltingRecipe.ResultValue;
+                    m_slots[ResultSlotIndex].Count += m_smeltingRecipe.ResultCount;
+                    if (m_smeltingRecipe.RemainsValue != 0 && m_smeltingRecipe.RemainsCount > 0)
+                    {
+                        m_slots[RemainsSlotIndex].Value = m_smeltingRecipe.RemainsValue;
+                        m_slots[RemainsSlotIndex].Count += m_smeltingRecipe.RemainsCount;
+                    }
+                    m_smeltingRecipe = null;
+                    m_smeltingProgress = 0f;
+                    m_updateSmeltingRecipe = true;
+                }
+            }
+            TerrainChunk chunkAtCell = m_subsystemTerrain.Terrain.GetChunkAtCell(coordinates.X, coordinates.Z);
+            if (chunkAtCell != null && chunkAtCell.State == TerrainChunkState.Valid)
+            {
+                int cellValue = m_subsystemTerrain.Terrain.GetCellValue(coordinates.X, coordinates.Y, coordinates.Z);
+                m_subsystemTerrain.ChangeCell(coordinates.X, coordinates.Y, coordinates.Z, Terrain.ReplaceContents(cellValue, (m_heatLevel > 0f) ? 976 : 975));
+            }
+        }
 
-		public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
-		{
+        public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
+        {
+            base.Load(valuesDictionary, idToEntityMap);
+            m_subsystemTerrain = base.Project.FindSubsystem<SubsystemTerrain>(true);
+            m_subsystemExplosions = base.Project.FindSubsystem<SubsystemExplosions>(true);
+            m_componentBlockEntity = base.Entity.FindComponent<ComponentBlockEntity>(true);
+            m_furnaceSize = SlotsCount - 3;
+            if (m_furnaceSize < 1 || m_furnaceSize > 16)
+            {
+                throw new InvalidOperationException("Invalid furnace size.");
+            }
+            m_fireTimeRemaining = valuesDictionary.GetValue<float>("FireTimeRemaining");
+            m_heatLevel = valuesDictionary.GetValue<float>("HeatLevel");
+            m_updateSmeltingRecipe = true;
+        }
 
-			base.Save(valuesDictionary, entityToIdMap);
-			valuesDictionary.SetValue<float>("FireTimeRemaining", this.m_fireTimeRemaining);
-			valuesDictionary.SetValue<float>("HeatLevel", this.m_heatLevel);
+        public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
+        {
+            base.Save(valuesDictionary, entityToIdMap);
+            valuesDictionary.SetValue("FireTimeRemaining", m_fireTimeRemaining);
+            valuesDictionary.SetValue("HeatLevel", m_heatLevel);
+        }
 
+        private CraftingRecipe FindSmeltingRecipe(float heatLevel)
+        {
+            if (heatLevel ==2f)
+            {
+                for (int i = 0; i < this.m_furnaceSize; i++)
+                {
+                    int slotValue = this.GetSlotValue(i);
+                    int num = Terrain.ExtractContents(slotValue);
+                    int num2 = Terrain.ExtractData(slotValue);
+                    if (this.GetSlotCount(i) > 0)
+                    {
+                        Block block = BlocksManager.Blocks[num];
+                        this.m_matchedIngredients[i] = block.GetCraftingId(slotValue) + ":" + num2.ToString(CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        this.m_matchedIngredients[i] = null;
+                    }
+                }
+                ComponentPlayer componentPlayer = base.FindInteractingPlayer();
+                float playerLevel = (componentPlayer != null) ? componentPlayer.PlayerData.Level : 1f;
+                CraftingRecipe craftingRecipe = XCraftingRecipesManager.FindMatchingRecipe(this.m_subsystemTerrain, this.m_matchedIngredients, heatLevel, playerLevel);
+                if (craftingRecipe != null && craftingRecipe.ResultValue != 0)
+                {
+                    if (craftingRecipe.RequiredHeatLevel != 2f)//如果配方的要求热度小于1，则为null
+                    {
+                        craftingRecipe = null;
+                    }
+                    if (craftingRecipe != null)
+                    {
+                        ComponentInventoryBase.Slot slot = this.m_slots[this.ResultSlotIndex];
+                        int num3 = Terrain.ExtractContents(craftingRecipe.ResultValue);
+                        if (slot.Count != 0 && (craftingRecipe.ResultValue != slot.Value || craftingRecipe.ResultCount + slot.Count > BlocksManager.Blocks[num3].GetMaxStacking(craftingRecipe.ResultValue)))
+                        {
+                            craftingRecipe = null;
+                        }
+                    }
+                    if (craftingRecipe != null && craftingRecipe.RemainsValue != 0 && craftingRecipe.RemainsCount > 0)
+                    {
+                        if (this.m_slots[this.RemainsSlotIndex].Count == 0 || this.m_slots[this.RemainsSlotIndex].Value == craftingRecipe.RemainsValue)
+                        {
+                            if (BlocksManager.Blocks[Terrain.ExtractContents(craftingRecipe.RemainsValue)].GetMaxStacking(craftingRecipe.RemainsValue) - this.m_slots[this.RemainsSlotIndex].Count < craftingRecipe.RemainsCount)
+                            {
+                                craftingRecipe = null;
+                            }
+                        }
+                        else
+                        {
+                            craftingRecipe = null;
+                        }
+                    }
+                }
+                if (craftingRecipe != null && !string.IsNullOrEmpty(craftingRecipe.Message) && componentPlayer != null)
+                {
+                    componentPlayer.ComponentGui.DisplaySmallMessage(craftingRecipe.Message, Color.White, true, true);
+                }
+                return craftingRecipe;
+            }
+            return null;
 
-
-
-		}
-
-		public virtual CraftingRecipe FindFCGLSmeltingRecipe(float heatLevel)
-		{
-			if (heatLevel == 900f)  //首先，检查热量级别是否大于0。如果不大于0，则直接返回null，表示没有匹配的熔炼配方。
-			{
-				for (int i = 0; i < this.m_furnaceSize; i++)    //如果热量级别大于0，那么对熔炉中的每个槽进行遍历，获取每个槽中的物品的内容值（slotValue）。
-				{
-					int slotValue = this.GetSlotValue(i);
-					int num = Terrain.ExtractContents(slotValue);//根据内容值获取所在方块的类型（num）和数据值（num2）。
-					int num2 = Terrain.ExtractData(slotValue);
-					if (this.GetSlotCount(i) > 0)//如果该槽中有物品（GetSlotCount(i) > 0），则获取该物品所对应的方块类型（block）的配方ID，并将其和数据值拼接成一个字符串，存储在m_matchedIngredients数组中的对应位置。
-					{
-						Block block = BlocksManager.Blocks[num];
-						this.m_matchedIngredients[i] = block.GetCraftingId(slotValue) + ":" + num2.ToString(CultureInfo.InvariantCulture);
-					}
-					else //如果该槽中没有物品，将对应位置的m_matchedIngredients数组元素设置为null。
-					{
-						this.m_matchedIngredients[i] = null;
-					}
-				}
-				ComponentPlayer componentPlayer = base.FindInteractingPlayer(); //获取当前与熔炉交互的玩家（componentPlayer），并获取玩家的等级（playerLevel）。
-																				//调用CraftingRecipesManager.FindMatchingRecipe方法，
-																				//通过给定的热量级别、熔炼配方的材料和玩家的等级，查找匹配的熔炼配方（craftingRecipe）。
-				float playerLevel = (componentPlayer != null) ? componentPlayer.PlayerData.Level : 1f;
-				CraftingRecipe craftingRecipe = CraftingRecipesManager.FindMatchingRecipe(this.m_subsystemTerrain, this.m_matchedIngredients, heatLevel, playerLevel);
-				if (craftingRecipe != null && craftingRecipe.ResultValue != 0) //如果找到了匹配的熔炼配方，并且配方的结果物品不为0，继续执行以下判断：
-				{
-					if (craftingRecipe.RequiredHeatLevel != 900f) //1.如果配方要求的热量级别小于等于0，则将熔炼配方设置为null，表示没有匹配的熔炼配方。
-					{
-						craftingRecipe = null;
-					}
-
-					if (craftingRecipe != null) //2.如果配方要求的热量级别大于0，继续执行以下判断：
-					{
-						ComponentInventoryBase.Slot slot = this.m_slots[this.ResultSlotIndex]; //获取结果物品槽（ResultSlotIndex）中的物品槽对象（slot）
-						int num3 = Terrain.ExtractContents(craftingRecipe.ResultValue); //获取熔炼配方的结果物品类型（num3）
-
-						//如果结果物品槽中已经有物品，并且该物品的类型与熔炼配方的结果物品类型不一致，
-						//或者结果物品数量加上结果配方的数量大于该方块类型的最大堆叠数量，
-						//则将熔炼配方设置为null，表示没有匹配的熔炼配方。
-						if (slot.Count != 0 && (craftingRecipe.ResultValue != slot.Value || craftingRecipe.ResultCount + slot.Count > BlocksManager.Blocks[num3].GetMaxStacking(craftingRecipe.ResultValue)))
-						{
-							craftingRecipe = null;
-						}
-					}
+        }
 
 
-					if (craftingRecipe != null && craftingRecipe.RemainsValue != 0 && craftingRecipe.RemainsCount > 0)
-					{
-						//如果熔炼配方还有剩余物品，并且剩余物品槽（RemainsSlotIndex）中没有物品，或者剩余物品槽中的物品类型与剩余物品的类型一致，继续执行以下判断：
-						if (this.m_slots[this.RemainsSlotIndex].Count == 0 || this.m_slots[this.RemainsSlotIndex].Value == craftingRecipe.RemainsValue)
-						{
-
-
-							//如果该方块类型的最大堆叠数量减去剩余物品槽中物品的数量小于剩余物品的数量，则将熔炼配方设置为null，表示没有匹配的熔炼配方。
-							if (BlocksManager.Blocks[Terrain.ExtractContents(craftingRecipe.RemainsValue)].GetMaxStacking(craftingRecipe.RemainsValue) - this.m_slots[this.RemainsSlotIndex].Count < craftingRecipe.RemainsCount)
-							{
-								craftingRecipe = null;
-							}
-						}//否则，继续执行下一步
-						else//如果剩余物品槽中的物品类型与剩余物品的类型不一致，则将熔炼配方设置为null，表示没有匹配的熔炼配方。
-						{
-							craftingRecipe = null;
-						}
-					}
-				}
-
-				//如果找到了匹配的熔炼配方，并且配方有提示信息，并且当前与熔炉交互的玩家不为空，就将提示信息显示在玩家的界面上。
-				if (craftingRecipe != null && !string.IsNullOrEmpty(craftingRecipe.Message) && componentPlayer != null)
-				{
-					componentPlayer.ComponentGui.DisplaySmallMessage(craftingRecipe.Message, Color.White, true, true);
-				}
-				return craftingRecipe; //返回找到的匹配的熔炼配方。
-			}
-			return null;
-		}
-
-		public SubsystemTerrain m_subsystemTerrain;
-
-		public SubsystemExplosions m_subsystemExplosions;
-
-		public ComponentBlockEntity m_componentBlockEntity;
-
-		public int m_furnaceSize;
-
-		public string[] m_matchedIngredients = new string[9];
-
-		public float m_fireTimeRemaining;
-
-		public float m_heatLevel;
-
-		public bool m_updateSmeltingRecipe;
-
-		public CraftingRecipe m_smeltingRecipe;
-
-		public float m_smeltingProgress;
-
-
-	}
+    }
 
 	#endregion
 
@@ -12418,7 +13321,7 @@ namespace Game
 			{
 				for (int l = 0; l < this.m_furnaceGrid.ColumnsCount; l++)
 				{
-					InventorySlotWidget inventorySlotWidget2 = new InventorySlotWidget();
+					InventorySlotWidget inventorySlotWidget2 = new InventorySlotWidget { Size = new Vector2(40f,40f)};
 					inventorySlotWidget2.AssignInventorySlot(componentGaolu, num++);
 					this.m_furnaceGrid.Children.Add(inventorySlotWidget2);
 					this.m_furnaceGrid.SetWidgetCell(inventorySlotWidget2, new Point2(l, k));
@@ -12675,7 +13578,7 @@ namespace Game
 			}
 			ComponentPlayer componentPlayer = base.FindInteractingPlayer();
 			float playerLevel = (componentPlayer != null) ? componentPlayer.PlayerData.Level : 1f;
-			CraftingRecipe craftingRecipe = FCCraftingRecipesManager.FindMatchingRecipe(base.Project.FindSubsystem<SubsystemTerrain>(true), this.m_matchedIngredients, 10f, playerLevel);
+			CraftingRecipe craftingRecipe = CraftingRecipesManager.FindMatchingRecipe(base.Project.FindSubsystem<SubsystemTerrain>(true), this.m_matchedIngredients, 10f, playerLevel);
 			if (craftingRecipe != null && craftingRecipe.ResultValue != 0)
 			{
 				this.m_matchedRecipe = craftingRecipe;
@@ -13696,10 +14599,10 @@ namespace Game
 
 		public Random m_random = new Random();
 	}
-	#endregion
+    #endregion
 
-	#region 合成表
-	public class ComponentGameSystem1 : ComponentInventoryBase, IUpdateable
+    #region FC配方管理器
+    /*public class ComponentGameSystem1 : ComponentInventoryBase, IUpdateable
 	{
 		UpdateOrder IUpdateable.UpdateOrder => ((IUpdateable)componentPlayer).UpdateOrder;
 
@@ -13792,12 +14695,298 @@ namespace Game
 				//LeftControlsContainer为gui左下角
 			}
 		}
-	}
+	}*/
+
+    public static class FCNewCraftingRecipesManager
+    {
+        public static List<CraftingRecipe> m_recipes = new List<CraftingRecipe>();
+
+        public static ReadOnlyList<CraftingRecipe> Recipes => new ReadOnlyList<CraftingRecipe>(m_recipes);
+
+        public static void Initialize()
+        {
+            foreach (XElement item in ContentManager.Get<XElement>("FCNewCraftingRecipes").Descendants("Recipe"))
+            {
+                var craftingRecipe = new CraftingRecipe();
+                craftingRecipe.Ingredients = new string[16];
+                string attributeValue = XmlUtils.GetAttributeValue<string>(item, "Result");
+                string desc = XmlUtils.GetAttributeValue<string>(item, "Description");
+                if (desc.StartsWith("[") && desc.EndsWith("]") && LanguageControl.TryGetBlock(attributeValue, "CRDescription:" + desc.Substring(1, desc.Length - 2), out var r)) desc = r;
+                craftingRecipe.ResultValue = DecodeResult(attributeValue);
+                craftingRecipe.ResultCount = XmlUtils.GetAttributeValue<int>(item, "ResultCount");
+                string attributeValue2 = XmlUtils.GetAttributeValue(item, "Remains", string.Empty);
+                if (!string.IsNullOrEmpty(attributeValue2))
+                {
+                    craftingRecipe.RemainsValue = DecodeResult(attributeValue2);
+                    craftingRecipe.RemainsCount = XmlUtils.GetAttributeValue<int>(item, "RemainsCount");
+                }
+                craftingRecipe.RequiredHeatLevel = XmlUtils.GetAttributeValue<float>(item, "RequiredHeatLevel");
+                craftingRecipe.RequiredPlayerLevel = XmlUtils.GetAttributeValue(item, "RequiredPlayerLevel", 1f);
+                craftingRecipe.Description = desc;
+                craftingRecipe.Message = XmlUtils.GetAttributeValue<string>(item, "Message", null);
+                if (craftingRecipe.ResultCount > BlocksManager.Blocks[Terrain.ExtractContents(craftingRecipe.ResultValue)].GetMaxStacking(craftingRecipe.ResultValue))
+                {
+                    throw new InvalidOperationException($"In recipe for \"{attributeValue}\" ResultCount is larger than max stacking of result block.");
+                }
+                if (craftingRecipe.RemainsValue != 0 && craftingRecipe.RemainsCount > BlocksManager.Blocks[Terrain.ExtractContents(craftingRecipe.RemainsValue)].GetMaxStacking(craftingRecipe.RemainsValue))
+                {
+                    throw new InvalidOperationException($"In Recipe for \"{attributeValue2}\" RemainsCount is larger than max stacking of remains block.");
+                }
+                var dictionary = new Dictionary<char, string>();
+                foreach (XAttribute item2 in from a in item.Attributes()
+                                             where a.Name.LocalName.Length == 1 && char.IsLower(a.Name.LocalName[0])
+                                             select a)
+                {
+                    DecodeIngredient(item2.Value, out string craftingId, out int? data);
+                    if (BlocksManager.FindBlocksByCraftingId(craftingId).Length == 0)
+                    {
+                        throw new InvalidOperationException($"Block with craftingId \"{item2.Value}\" not found.");
+                    }
+                    if (data.HasValue && (data.Value < 0 || data.Value > 262143))
+                    {
+                        throw new InvalidOperationException($"Data in recipe ingredient \"{item2.Value}\" must be between 0 and 0x3FFFF.");
+                    }
+                    dictionary.Add(item2.Name.LocalName[0], item2.Value);
+                }
+                string[] array = item.Value.Trim().Split(new string[] { "\n" }, StringSplitOptions.None);
+                for (int i = 0; i < array.Length; i++)
+                {
+                    int num = array[i].IndexOf('"');
+                    int num2 = array[i].LastIndexOf('"');
+                    if (num < 0 || num2 < 0 || num2 <= num)
+                    {
+                        throw new InvalidOperationException("Invalid recipe line.");
+                    }
+                    string text = array[i].Substring(num + 1, num2 - num - 1);
+                    for (int j = 0; j < text.Length; j++)
+                    {
+                        char c = text[j];
+                        if (char.IsLower(c))
+                        {
+                            string text2 = dictionary[c];
+                            craftingRecipe.Ingredients[j + i * 4] = text2;
+                        }
+                    }
+                }
+
+                m_recipes.Add(craftingRecipe);
+                /*
+				Block[] blocks = BlocksManager.Blocks;
+				foreach (Block block in blocks)
+				{
+					m_recipes.AddRange(block.GetProceduralCraftingRecipes());
+				}
+				*/
+                m_recipes.Sort(delegate (CraftingRecipe r1, CraftingRecipe r2)
+                {
+                    int y = r1.Ingredients.Count((string s) => !string.IsNullOrEmpty(s));
+                    int x = r2.Ingredients.Count((string s) => !string.IsNullOrEmpty(s));
+                    return Comparer<int>.Default.Compare(x, y);
+                });
+            }
+        }
+
+        public static CraftingRecipe FindMatchingRecipe(SubsystemTerrain terrain, string[] ingredients, float heatLevel, float playerLevel)
+        {
+            CraftingRecipe craftingRecipe = null;
+            if (craftingRecipe != null)
+            {
+                if (heatLevel < craftingRecipe.RequiredHeatLevel)
+                {
+                    craftingRecipe = null;
+                }
+
+            }
+            /*
+            Block[] blocks = BlocksManager.Blocks;
+            for (int i = 0; i < blocks.Length; i++)
+            {
+                CraftingRecipe adHocCraftingRecipe = blocks[i].GetAdHocCraftingRecipe(terrain, ingredients, heatLevel, playerLevel);
+                if (adHocCraftingRecipe != null && MatchRecipe(adHocCraftingRecipe.Ingredients, ingredients))
+                {
+                    craftingRecipe = adHocCraftingRecipe;
+                    break;
+                }
+            }
+            */
+            if (craftingRecipe == null)
+            {
+                foreach (CraftingRecipe recipe in Recipes)
+                {
+                    if (MatchRecipe(recipe.Ingredients, ingredients))
+                    {
+                        craftingRecipe = recipe;
+                        break;
+                    }
+                }
+            }
 
 
-	#endregion
-	#region 合成表
-	public class FCRecipeWidget : CanvasWidget
+                /*if (heatLevel < craftingRecipe.RequiredHeatLevel)
+				 {
+					 craftingRecipe = ((!(heatLevel > 0f)) ? new CraftingRecipe
+					 {
+						 Message = "使用熔炉来熔炼这个物品"
+					 } : new CraftingRecipe
+					 {
+						 Message = "需要更高温度来熔炼这个物品，可通过寻找更好的燃料解决"
+					 });
+				 }
+				 else if (playerLevel < craftingRecipe.RequiredPlayerLevel)
+				 {
+					 craftingRecipe = ((!(craftingRecipe.RequiredHeatLevel > 0f)) ? new CraftingRecipe
+					 {
+						 Message = String.Format("你需要达到等级{0}才能制作这个物品", craftingRecipe.RequiredPlayerLevel)
+					 } : new CraftingRecipe
+					 {
+						 Message = String.Format("你需要达到等级{0}才能熔炼这个物品", craftingRecipe.RequiredPlayerLevel)
+					 });
+				 }*/
+				 
+            return craftingRecipe;
+        }
+
+        public static bool MatchRecipe(string[] requiredIngredients, string[] actualIngredient)
+        {
+            if (requiredIngredients.Length <= 9 || actualIngredient.Length <= 9)
+            {
+                return BaseMatchRecipe(requiredIngredients, actualIngredient);
+            }
+            string[] array = new string[16];
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = -4; j <= 4; j++)
+                {
+                    for (int k = -4; k <= 4; k++)
+                    {
+                        bool flip = (i != 0) ? true : false;
+                        if (!TransformRecipe(array, requiredIngredients, k, j, flip))
+                        {
+                            continue;
+                        }
+                        bool flag = true;
+                        for (int l = 0; l < 4 * 4; l++)
+                        {
+                            if (l == actualIngredient.Length || !CompareIngredients(array[l], actualIngredient[l]))
+                            {
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if (flag)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static bool BaseMatchRecipe(string[] requiredIngredients, string[] actualIngredients)
+        {
+            string[] array = new string[9];
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = -3; j <= 3; j++)
+                {
+                    for (int k = -3; k <= 3; k++)
+                    {
+                        bool flip = (i != 0) ? true : false;
+                        if (!TransformRecipe(array, requiredIngredients, k, j, flip))
+                        {
+                            continue;
+                        }
+                        bool flag = true;
+                        for (int l = 0; l < 9; l++)
+                        {
+                            if (l == actualIngredients.Length || !CompareIngredients(array[l], actualIngredients[l]))
+                            {
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if (flag)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static int DecodeResult(string result)
+        {
+            string[] array = result.Split((new char[1] { ':' }));
+            Block block = BlocksManager.FindBlockByTypeName(array[0], true);
+            return Terrain.MakeBlockValue(data: (array.Length >= 2) ? int.Parse(array[1], CultureInfo.InvariantCulture) : 0, contents: block.BlockIndex, light: 0);
+        }
+
+        public static void DecodeIngredient(string ingredient, out string craftingId, out int? data)
+        {
+            string[] array = ingredient.Split((new char[1] { ':' }));
+            craftingId = array[0];
+            data = ((array.Length >= 2) ? new int?(int.Parse(array[1], CultureInfo.InvariantCulture)) : null);
+        }
+
+        public static bool TransformRecipe(string[] transformedIngredients, string[] ingredients, int shiftX, int shiftY, bool flip)
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                transformedIngredients[i] = null;
+            }
+            for (int j = 0; j < 4; j++)
+            {
+                for (int k = 0; k < 4; k++)
+                {
+                    int num = (flip ? (4 - k - 1) : k) + shiftX;
+                    int num2 = j + shiftY;
+                    string text = ingredients[k + j * 4];
+                    if (num >= 0 && num2 >= 0 && num < 4 && num2 < 4)
+                    {
+                        transformedIngredients[num + num2 * 4] = text;
+                    }
+                    else if (!string.IsNullOrEmpty(text))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private static bool CompareIngredients(string requiredIngredient, string actualIngredient)
+        {
+            if (requiredIngredient == null)
+            {
+                return actualIngredient == null;
+            }
+            if (actualIngredient == null)
+            {
+                return requiredIngredient == null;
+            }
+            DecodeIngredient(requiredIngredient, out string craftingId, out int? data);
+            DecodeIngredient(actualIngredient, out string craftingId2, out int? data2);
+            if (!data2.HasValue)
+            {
+                throw new InvalidOperationException("Actual ingredient data not specified.");
+            }
+            if (craftingId == craftingId2)
+            {
+                if (!data.HasValue)
+                {
+                    return true;
+                }
+                return data.Value == data2.Value;
+            }
+            return false;
+        }
+    }
+    #endregion
+    #region 合成表
+
+    public class FCRecipeWidget : CanvasWidget//打开配方表
 	{
 		internal class Order
 		{
@@ -13837,9 +15026,9 @@ namespace Game
 			XElement node = ContentManager.Get<XElement>("Widgets/FCRecipeWidget");
 			LoadContents(this, node);
 			m_blocksList = Children.Find<ListPanelWidget>("BlocksList");
-			m_smeltingRecipeWidget = Children.Find<XSmeltingRecipeWidget>("SmeltingRecipe");
-			m_craftingRecipeWidget = Children.Find<XCraftingRecipeWidget>("CraftingRecipe");
-			m_prevRecipeButton = Children.Find<ButtonWidget>("PreviousRecipe");
+			m_smeltingRecipeWidget = Children.Find<XSmeltingRecipeWidget>("SmeltingRecipe");//这是熔融配方的界面
+            m_craftingRecipeWidget = Children.Find<XCraftingRecipeWidget>("CraftingRecipe");//这是总合成表里面的子合成表组件界面
+            m_prevRecipeButton = Children.Find<ButtonWidget>("PreviousRecipe");
 			m_nextRecipeButton = Children.Find<ButtonWidget>("NextRecipe");
 			m_prevCategoryButton = Children.Find<ButtonWidget>("PreviousCategory");
 			m_nextCategoryButton = Children.Find<ButtonWidget>("NextCategory");
@@ -13861,7 +15050,7 @@ namespace Game
 				int value = (int)item;
 				m_recipeIndex = 0;
 				m_craftingRecipes.Clear();
-				m_craftingRecipes.AddRange(XCraftingRecipesManager.Recipes.Where((CraftingRecipe r) => r.ResultValue == value && r.ResultValue != 0));
+				m_craftingRecipes.AddRange(FCNewCraftingRecipesManager.Recipes.Where((CraftingRecipe r) => r.ResultValue == value && r.ResultValue != 0));
 			};
 		}
 
@@ -13878,7 +15067,7 @@ namespace Game
 			if (m_blocksList.SelectedItem is int)
 			{
 				value = (int)m_blocksList.SelectedItem;
-				num = XCraftingRecipesManager.Recipes.Count((CraftingRecipe r) => r.ResultValue == value);
+				num = FCNewCraftingRecipesManager.Recipes.Count((CraftingRecipe r) => r.ResultValue == value);
 			}
 			if (m_prevCategoryButton.IsClicked || Input.Left)
 			{
@@ -14309,7 +15498,7 @@ namespace Game
 			m_craftingResultSlot = Children.Find<InventorySlotWidget>("CraftingResultSlot");
 			m_craftingRemainsSlot = Children.Find<InventorySlotWidget>("CraftingRemainsSlot");
 			m_recipesButton = Children.Find<ButtonWidget>("RecipesButton");
-
+			
 			int num = 10;
 			for (int i = 0; i < m_inventoryGrid.RowsCount; i++)
 			{
@@ -14585,15 +15774,6 @@ namespace Game
 		public static CraftingRecipe FindMatchingRecipe(SubsystemTerrain terrain, string[] ingredients, float heatLevel, float playerLevel)
 		{
 			CraftingRecipe craftingRecipe = null;
-			if (craftingRecipe != null)
-			{
-				if (heatLevel < craftingRecipe.RequiredHeatLevel)
-				{
-					craftingRecipe = null;
-				}
-
-			}
-			/*
             Block[] blocks = BlocksManager.Blocks;
             for (int i = 0; i < blocks.Length; i++)
             {
@@ -14604,7 +15784,17 @@ namespace Game
                     break;
                 }
             }
-            */
+            if (craftingRecipe != null)
+			{
+				if (heatLevel < craftingRecipe.RequiredHeatLevel)
+				{
+					craftingRecipe = null;
+				}
+
+			}
+			
+           
+            
 			if (craftingRecipe == null)
 			{
 				foreach (CraftingRecipe recipe in Recipes)
@@ -14779,7 +15969,7 @@ namespace Game
 			return false;
 		}
 	}
-	public class XSmeltingRecipeWidget : CanvasWidget
+	public class XSmeltingRecipeWidget : CanvasWidget//显示配方书中的熔炉配方
 	{
 		public LabelWidget m_nameWidget;
 
@@ -14843,7 +16033,7 @@ namespace Game
 				for (int j = 0; j < m_gridWidget.ColumnsCount; j++)
 				{
 					var widget = new CraftingRecipeSlotWidget();
-					widget.Size = new Vector2(50f, 50f);
+					widget.Size = new Vector2(40f, 40f);
 					m_gridWidget.Children.Add(widget);
 					m_gridWidget.SetWidgetCell(widget, new Point2(j, i));
 				}
@@ -15196,11 +16386,11 @@ namespace Game
 		}
 	}
 
-	public class FlameFurnaceWidget : CanvasWidget
+	public class FlameFurnaceWidget : CanvasWidget //熔炉界面
 	{
 		public GridPanelWidget m_inventoryGrid;
 
-		public GridPanelWidget m_flamefurnaceGrid;
+		public GridPanelWidget m_flamefurnaceGrid;//放原料的4x4格子
 
 		public InventorySlotWidget m_fuelSlot;
 
@@ -15226,6 +16416,8 @@ namespace Game
 			m_resultSlot = Children.Find<InventorySlotWidget>("ResultSlot");
 			m_remainsSlot = Children.Find<InventorySlotWidget>("RemainsSlot");
 			m_fuelSlot = Children.Find<InventorySlotWidget>("FuelSlot");
+			
+		
 			int num = 10;
 			for (int i = 0; i < m_inventoryGrid.RowsCount; i++)
 			{
@@ -15242,7 +16434,7 @@ namespace Game
 			{
 				for (int l = 0; l < m_flamefurnaceGrid.ColumnsCount; l++)
 				{
-					var inventorySlotWidget2 = new InventorySlotWidget();
+					var inventorySlotWidget2 = new InventorySlotWidget { Size = new Vector2 (40,40)};
 					inventorySlotWidget2.AssignInventorySlot(componentFlameFurnace, num++);
 					m_flamefurnaceGrid.Children.Add(inventorySlotWidget2);
 					m_flamefurnaceGrid.SetWidgetCell(inventorySlotWidget2, new Point2(l, k));
@@ -15326,7 +16518,7 @@ namespace Game
 		public void Update(float dt)
 		{
 			Point3 coordinates = m_componentBlockEntity.Coordinates;
-			if (m_heatLevel == 11f)
+			if (m_heatLevel >0)//如果热值是11
 			{
 				m_fireTimeRemaining = MathUtils.Max(0f, m_fireTimeRemaining - dt);
 				if (m_fireTimeRemaining == 0f)
@@ -15390,10 +16582,10 @@ namespace Game
 			}
 			if (m_smeltingRecipe != null)
 			{
-				m_smeltingProgress = MathUtils.Min(m_smeltingProgress + 0.25f * dt, 1f);
+				m_smeltingProgress = MathUtils.Min(m_smeltingProgress + 0.15f * dt, 1f);
 				if (m_smeltingProgress >= 1f)
 				{
-					for (int i = 0; i < 8; i++)
+					for (int i = 0; i < 16; i++)
 					{
 						if (m_slots[i].Count > 0)
 						{
@@ -15445,9 +16637,70 @@ namespace Game
 
 		private CraftingRecipe FindSmeltingRecipe(float heatLevel)
 		{
-			if (heatLevel == 11f)
+            if (heatLevel > 0f)
+            {
+                for (int i = 0; i < this.m_furnaceSize; i++)
+                {
+                    int slotValue = this.GetSlotValue(i);
+                    int num = Terrain.ExtractContents(slotValue);
+                    int num2 = Terrain.ExtractData(slotValue);
+                    if (this.GetSlotCount(i) > 0)
+                    {
+                        Block block = BlocksManager.Blocks[num];
+                        this.m_matchedIngredients[i] = block.GetCraftingId(slotValue) + ":" + num2.ToString(CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        this.m_matchedIngredients[i] = null;
+                    }
+                }
+                ComponentPlayer componentPlayer = base.FindInteractingPlayer();
+                float playerLevel = (componentPlayer != null) ? componentPlayer.PlayerData.Level : 1f;
+                CraftingRecipe craftingRecipe = XCraftingRecipesManager.FindMatchingRecipe(this.m_subsystemTerrain, this.m_matchedIngredients, heatLevel, playerLevel);
+                if (craftingRecipe != null && craftingRecipe.ResultValue != 0)
+                {
+                    if (craftingRecipe.RequiredHeatLevel <= 0f)
+                    {
+                        craftingRecipe = null;
+                    }
+                    if (craftingRecipe != null)
+                    {
+                        ComponentInventoryBase.Slot slot = this.m_slots[this.ResultSlotIndex];
+                        int num3 = Terrain.ExtractContents(craftingRecipe.ResultValue);
+                        if (slot.Count != 0 && (craftingRecipe.ResultValue != slot.Value || craftingRecipe.ResultCount + slot.Count > BlocksManager.Blocks[num3].GetMaxStacking(craftingRecipe.ResultValue)))
+                        {
+                            craftingRecipe = null;
+                        }
+                    }
+                    if (craftingRecipe != null && craftingRecipe.RemainsValue != 0 && craftingRecipe.RemainsCount > 0)
+                    {
+                        if (this.m_slots[this.RemainsSlotIndex].Count == 0 || this.m_slots[this.RemainsSlotIndex].Value == craftingRecipe.RemainsValue)
+                        {
+                            if (BlocksManager.Blocks[Terrain.ExtractContents(craftingRecipe.RemainsValue)].GetMaxStacking(craftingRecipe.RemainsValue) - this.m_slots[this.RemainsSlotIndex].Count < craftingRecipe.RemainsCount)
+                            {
+                                craftingRecipe = null;
+                            }
+                        }
+                        else
+                        {
+                            craftingRecipe = null;
+                        }
+                    }
+                }
+                if (craftingRecipe != null && !string.IsNullOrEmpty(craftingRecipe.Message) && componentPlayer != null)
+                {
+                    componentPlayer.ComponentGui.DisplaySmallMessage(craftingRecipe.Message, Color.White, true, true);
+                }
+                return craftingRecipe;
+            }
+            return null;
+            
+        }
+	}//炼制台
+
+    /*if (heatLevel >0f)//如果热值是11
 			{
-				for (int i = 0; i < 8; i++)
+				for (int i = 0; i < 16; i++)
 				{
 					int slotValue = GetSlotValue(i);
 					int num = Terrain.ExtractContents(slotValue);
@@ -15468,7 +16721,7 @@ namespace Game
 				craftingRecipe = XCraftingRecipesManager.FindMatchingRecipe(m_subsystemTerrain, m_matchedIngredients, heatLevel, playerLevel);
 				if (craftingRecipe != null)
 				{
-					if (craftingRecipe.RequiredHeatLevel != 11f)
+					if (craftingRecipe.RequiredHeatLevel >0f)
 					{
 						craftingRecipe = null;
 					}
@@ -15498,11 +16751,9 @@ namespace Game
 				}
 				return craftingRecipe;
 			}
-			return null;
-		}
-	}
+			return null;*/
 
-	public abstract class SixFaceBlock : Block
+    public abstract class SixFaceBlock : Block
 	{
 		public Texture2D m_texture;
 

@@ -122,7 +122,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="LICENSE" />
-    <None Include="modinfo.json" />
+    <None Include="modinfo.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
     <None Include="obj\Debug\Lorejun-Universe.csproj.AssemblyReference.cache" />
     <None Include="README.md" />

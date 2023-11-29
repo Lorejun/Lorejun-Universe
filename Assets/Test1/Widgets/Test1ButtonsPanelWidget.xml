@@ -15,7 +15,7 @@
             <BevelledButtonWidget Name="Button1" Text="1.模组介绍" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <BevelledButtonWidget Name="Button2" Text="2.基础教程" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <BevelledButtonWidget Name="Button3" Text="3.樱花粒子开关" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <BevelledButtonWidget Name="Button4" Text="4.功能4" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <BevelledButtonWidget Name="Button4" Text="4.万象合成表" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <BevelledButtonWidget Name="Button5" Text="5.功能5" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </StackPanelWidget>
           <!--右边栈界面，方向为竖直-->

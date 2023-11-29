@@ -9,9 +9,9 @@
          <LabelWidget Name="SmeltingRecipeWidget.Description" Text="无合成方法" FontScale="0.5" HorizontalAlignment="Center" VerticalAlignment="Near" TextAnchor="HorizontalCenter" WordWrap="true"/>    
       </StackPanelWidget>
       </CanvasWidget>      
-      <GridPanelWidget Name="SmeltingRecipeWidget.Ingredients" CanvasWidget.Position="14, 84" ColumnsCount="4" RowsCount="2" Margin="20, 0"/>
+      <GridPanelWidget Name="SmeltingRecipeWidget.Ingredients" CanvasWidget.Position="14, 34" ColumnsCount="4" RowsCount="4" Margin="20, 0"/>
       <CraftingRecipeSlotWidget Name="SmeltingRecipeWidget.Result" CanvasWidget.Position="260, 104" />
-      <CanvasWidget CanvasWidget.Position="92, 194">
+      <CanvasWidget CanvasWidget.Position="192, 194">
         <FireWidget Name="SmeltingRecipeWidget.Fire" Size="68, 20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <StackPanelWidget Direction="Horizontal">
           <BevelledRectangleWidget Size="24, 24" BevelSize="-2" CenterColor="0, 0, 0, 0" />

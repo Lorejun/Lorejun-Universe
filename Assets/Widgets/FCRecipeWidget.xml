@@ -1,7 +1,7 @@
 <Screen xmlns="runtime-namespace:Game">
 
   <BevelledRectangleWidget Size="614, 382" BevelSize="3" />
-  <LabelWidget CanvasWidget.Position="220, 14" Name="HelpLabel" Text="附魔合成表" Font="{Fonts/Pericles}" Color="255, 255, 255, 192"/>
+  <LabelWidget CanvasWidget.Position="220, 14" Name="HelpLabel" Text="万象合成表" Font="{Fonts/Pericles}" Color="255, 255, 255, 192"/>
   
      <CanvasWidget CanvasWidget.Position="14, 20" Size="200, 300">
        <RectangleWidget FillColor="0, 0, 0, 64" OutlineColor="128, 128, 158, 128" />
