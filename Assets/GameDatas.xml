@@ -1,0 +1,5 @@
+<Datas>
+    <LanguageData Name="TaskType.Main" ChineseText="主线任务" EnglishText="Main line task" />
+    <LanguageData Name="TaskType.Other" ChineseText="支线任务" EnglishText="Side quest" />
+    <LanguageData Name="TaskDisplay" ChineseText="当前任务尚未完成或者已完成，请先完成任务条件！" EnglishText="The current task is not completed, please complete the task conditions first" />
+</Datas>

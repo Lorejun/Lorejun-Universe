@@ -5,7 +5,7 @@ using System.Xml.Linq;
 using Engine;
 using System;
 using Engine.Media;
-using Random = Game.Random;
+
 using Engine.Graphics;
 using GameEntitySystem;
 using System.Collections.Generic;
@@ -21,760 +21,52 @@ using System.Text;
 using System.Threading.Tasks;
 using Engine.Audio;
 using Test1;
-
-
-namespace Game 
-{
-    public  class FCMusicManager :Subsystem,IUpdateable
-    {
-        public SubsystemPlayers m_subsystemPlayer;
-        public ComponentPlayer m_componentPlayer;
-        public ComponentTest1 m_componentTest1;
-		public bool flag_surface = false;
-        public bool flag_cave = false;
-        public bool flag_space = false;
-        public bool flag_defualt = false;
-        public UpdateOrder UpdateOrder
-        {
-            get
-            {
-                return UpdateOrder.Default;
-            }
-        }
-        public override void OnEntityAdded(Entity entity)
-        {
-            m_componentPlayer = m_subsystemPlayer.ComponentPlayers[0];
-            m_componentTest1 = m_componentPlayer.Entity.FindComponent<ComponentTest1>();
-        }
-
-        public static bool IsPlaying
-        {
-            get
-            {
-                return m_sound != null && m_sound.State > SoundState.Stopped;
-            }
-        }
-
-        public static float Volume
-        {
-            get
-            {
-                return SettingsManager.MusicVolume * 0.6f;
-            }
-        }
-
-        public void Update(float dt)
-        {
-            Point3 point = Terrain.ToCell(m_componentPlayer.ComponentBody.Position);//玩家所在方块坐标
-           //用来判断位置变换。
-			if(m_fadeSound != null||m_sound!=null)
-			{
-                if (point.Y <= 54)
-                {
-					if(flag_cave==false)
-					{
-						StopMusic();//如果位置变换但当前音乐不是洞穴音乐，开始变换。
-					}
-                    //洞穴音乐
-                    m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(20f, 30f);//3分半-4分钟                                                       
-
-
-                }
-                else if (point.Y > 54 && point.Y <= 256)
-                {
-                    if (flag_surface == false)
-                    {
-                        StopMusic();//如果位置变换但当前音乐不是洞穴音乐，开始变换。
-                    }
-                    //地表
-                    m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(20f, 30f);//3分半-4分钟      
-                }
-                else if (point.Y > 1000)
-                {
-                    if (flag_space == false)
-                    {
-                        StopMusic();//如果位置变换但当前音乐不是洞穴音乐，开始变换。
-                    }
-                    //宇宙
-                    m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(20f, 30f);//3分半-4分钟      
-                }
-                else
-                {
-                    if (flag_defualt == false)
-                    {
-                        StopMusic();//如果位置变换但当前音乐不是洞穴音乐，开始变换。
-                    }
-                    //默认地表
-                    m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(20f, 30f);//3分半-4分钟      
-                }
-            }
-            // 检查是否有音乐正在淡出
-            if (m_fadeSound != null)
-            {
-                //// 减少淡出音乐的音量
-                m_fadeSound.Volume = MathUtils.Min(m_fadeSound.Volume - 0.1f * Volume * Time.FrameDuration, Volume);
-                // // 如果淡出音乐的音量已降至0或以下，则释放音乐资源并将其置为null
-                if (m_fadeSound.Volume <= 0f)
-                {
-                    m_fadeSound.Dispose();
-                    m_fadeSound = null;
-                }
-            }
-            //// 检查当前是否有音乐正在播放，并且是否到达淡入音乐的时间
-            if (m_sound != null && Time.FrameStartTime >= m_fadeStartTime)
-            {
-                //增加音乐的音量进行淡入,直到音量和设置里的音量相同
-                m_sound.Volume = MathUtils.Min(m_sound.Volume + 0.33f * Volume * Time.FrameDuration, Volume);
-            }
-            //// 检查当前是否没有音乐混合播放或音量为0
-            if ( Volume == 0f)
-            {
-                StopMusic();
-                return;
-            }
-            //// 检查当前音乐混合类型是否为菜单，并且是否到了播放下一首歌的时间并且没有音乐正在播放,这里是设置音乐播放的核心，前面是对音乐淡入淡出的控制
-            if (  Time.FrameStartTime >= m_nextSongTime && IsPlaying==false)
-            {
-				//float startPercentage = IsPlaying ? m_random.Float(0f, 0.75f) : 0f;
-				float startPercentage = 0f;//播放开始的片段锁定在开头，即完整播放。
-
-                string ContentMusicPath = string.Empty;//这里貌似无作用
-                if (!string.IsNullOrEmpty(ContentMusicPath))
-                {
-                    PlayMusic(ContentMusicPath, startPercentage);
-                    m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(40f, 60f);
-                    return;
-                }
-                if (point.Y <= 54)
-                {
-                    PlayMusic("BackgroundMusic/CaveMusic", startPercentage);//洞穴音乐
-					flag_cave = true;
-                     // 洞穴音乐
-                   
-
-                }
-                else if (point.Y > 54 && point.Y <= 256)
-                {
-                    PlayMusic("BackgroundMusic/SurfaceMusic", startPercentage);//地表
-					flag_surface = true;
-                    
-                }
-                else if (point.Y > 1000)
-                {
-                    PlayMusic("BackgroundMusic/SpaceMusic", startPercentage);//宇宙
-                   flag_space = true;
-                }
-                else
-                {
-
-                    PlayMusic("BackgroundMusic/SurfaceMusic", startPercentage);//默认地表
-					flag_defualt = true;
-                }
-                // 如果ContentMusicPath为空，使用随机数选择要播放的音乐
-                /*switch (m_random.Int(0, 5))
-                {
-                    case 0:
-                        PlayMusic("BackgroundMusic/NativeAmericanFluteSpirit", startPercentage);
-                        break;
-                    case 1:
-                        PlayMusic("BackgroundMusic/AloneForever", startPercentage);
-                        break;
-                    case 2:
-                        PlayMusic("BackgroundMusic/NativeAmerican", startPercentage);
-                        break;
-                    case 3:
-                        PlayMusic("BackgroundMusic/NativeAmericanHeart", startPercentage);
-                        break;
-                    case 4:
-                        PlayMusic("BackgroundMusic/NativeAmericanPeaceFlute", startPercentage);
-                        break;
-                    case 5:
-                        PlayMusic("BackgroundMusic/NativeIndianChant", startPercentage);
-                        break;
-                }*/
-                Log.Information(string.Format("音乐已经播放！"));
-                m_nextSongTime = Time.FrameStartTime + (double)m_random.Float(212f, 240f);//3分半-4分钟
-            }
-        }
-
-        public override void Load(ValuesDictionary valuesDictionary)
-        {
-            m_subsystemPlayer = Project.FindSubsystem<SubsystemPlayers>();
-            base.Load(valuesDictionary);
-        }
-
-        public override void Save(ValuesDictionary valuesDictionary)
-        {
-            base.Save(valuesDictionary);
-        }
-
-        public void PlayMusic(string name, float startPercentage)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                StopMusic();
-                return;
-            }
-            try
-            {
-                StopMusic();
-                m_fadeStartTime = Time.FrameStartTime + 2.0;
-                float volume = (m_fadeSound != null) ? 0f : Volume;
-                StreamingSource streamingSource = ContentManager.Get<StreamingSource>(name, ".ogg").Duplicate();
-                streamingSource.Position = (long)(MathUtils.Saturate(startPercentage) * (float)(streamingSource.BytesCount / (long)streamingSource.ChannelsCount / 2L)) / 16L * 16L;
-                m_sound = new StreamingSound(streamingSource, volume, 1f, 0f, false, true, 1f);
-                m_sound.Play();
-            }
-            catch
-            {
-                Log.Warning("Error playing music \"{0}\".", new object[]
-                {
-                    name
-                });
-            }
-        }
-
-        public  void StopMusic()
-        {
-
-            if (m_sound != null)
-            {
-                if (m_fadeSound != null)
-                {
-                    m_fadeSound.Dispose();
-                }
-                m_sound.Stop();
-				if (flag_cave == true)
-				{
-					flag_cave = false;
-				}
-                if (flag_surface == true)
-                {
-                    flag_surface = false;
-                }
-                if (flag_space == true)
-                {
-                    flag_space = false;
-                }
-                if (flag_defualt == true)
-                {
-                    flag_defualt = false;
-                }
-                m_fadeSound = m_sound;
-                m_sound = null;
-            }
-        }
-
-        public const float m_fadeSpeed = 0.33f;
-
-        public const float m_fadeWait = 2f;
-
-        public static StreamingSound m_fadeSound;
-
-        public static StreamingSound m_sound;
-
-        public static double m_fadeStartTime;
-
-        
-
-        public static double m_nextSongTime;
-
-        public static Random m_random = new Random();
-
-        
-    }
-
-    #region 音乐
-
-    /*public class FCSubsystemAudio : SubsystemAudio
-    {
-        public new ReadOnlyList<Vector3> ListenerPositions
-        {
-            //定义了一个 ListenerPositions 属性，它返回监听者的位置列表。这是一个只读列表，确保外部代码不能修改它，但能够获取监听者的当前位置信息。
-            get
-            {
-                return new ReadOnlyList<Vector3>(this.m_listenerPositions);
-            }
-        }
-
-        public new UpdateOrder UpdateOrder
-        {
-            //定义了一个 UpdateOrder 属性，它指定了子系统应该在更新循环的什么阶段被调用。这里使用 UpdateOrder.Default，表示使用默认的更新顺序。
-            get
-            {
-                return UpdateOrder.Default;
-            }
-        }
-
-        public new float CalculateListenerDistanceSquared(Vector3 p)
-        {
-            //定义了一个方法 CalculateListenerDistanceSquared，它计算从给定点 p 到最近的监听者位置的平方距离。这个方法被用于声音的3D空间处理，例如确定声源与监听者之间的距离。
-            float num = float.MaxValue;
-            for (int i = 0; i < m_listenerPositions.Count; i++)
-            {
-                float num2 = Vector3.DistanceSquared(m_listenerPositions[i], p);
-                if (num2 < num)
-                {
-                    num = num2;
-                }
-            }
-            return num;
-        }
-
-        public new float CalculateListenerDistance(Vector3 p)
-        {
-            //CalculateListenerDistance 方法使用 CalculateListenerDistanceSquared 的结果来返回真实的听众距离。
-            return MathUtils.Sqrt(this.CalculateListenerDistanceSquared(p));
-        }
-
-        public new void Mute()
-        {
-            //Mute 方法循环遍历所有 m_sounds 中的 Sound 对象，如果它们正在播放，则将它们暂停并标记为静音。
-            foreach (Sound sound in this.m_sounds)
-            {
-                if (sound.State == SoundState.Playing)
-                {
-                    this.m_mutedSounds[sound] = true;
-                    sound.Pause();
-                }
-            }
-        }
-
-        public new void Unmute()
-        {
-            //Unmute 方法重新开始播放所有被静音的声音，并清除 m_mutedSounds 字典。
-            foreach (Sound sound in this.m_mutedSounds.Keys)
-            {
-                sound.Play();
-            }
-            this.m_mutedSounds.Clear();
-        }
-
-        public new void PlaySound(string name, float volume, float pitch, float pan, float delay)
-        {
-            //这是 PlaySound 方法的重载之一，它将播放指定的声音。这个版本接受声音名称、音量、音调、立体声平衡和延迟作为参数。它计算声音应该播放的时间，
-			//并将这个声音信息添加到 m_queuedSounds 列表中。同时更新 m_nextSoundTime 确保在正确的时间播放声音。
-           
-            double num = this.m_subsystemTime.GameTime + (double)delay;
-            this.m_nextSoundTime = MathUtils.Min(this.m_nextSoundTime, num);
-            this.m_queuedSounds.Add(new FCSubsystemAudio.SoundInfo
-            {
-                Time = num,//延迟
-                Name = name,//声音名称
-                Volume = volume,//音量
-                Pitch = pitch,//音调
-                Pan = pan//立体声平衡
-            });
-        }
-
-        public new void PlaySound(string name, float volume, float pitch, Vector3 position, float minDistance, float delay)
-        {
-            // //这是 PlaySound 方法的另一个重载，它还考虑了声音源的3D空间位置。它使用 CalculateVolume 方法来计算基于距离的音量衰减，并调用第一个重载版本的 PlaySound 方法。
-            float num = this.CalculateVolume(this.CalculateListenerDistance(position), minDistance, 2f);
-            this.PlaySound(name, volume * num, pitch, 0f, delay);
-        }
-
-        public new void PlaySound(string name, float volume, float pitch, Vector3 position, float minDistance, bool autoDelay)
-        {
-           
-            //这是 PlaySound 方法的第三个重载，它接受一个布尔值 autoDelay，用来决定是否自动计算声音到达监听者的延迟。如果 autoDelay 为 true，则使用 CalculateDelay 方法计算延迟。
-            float num = this.CalculateVolume(this.CalculateListenerDistance(position), minDistance, 2f);
-            this.PlaySound(name, volume * num, pitch, 0f, autoDelay ? this.CalculateDelay(position) : 0f);
-        }
-
-        public new void PlayRandomSound(string directory, float volume, float pitch, float pan, float delay)
-        {
-            //这个方法从指定目录随机选择并播放一个声音。首先，它获取目录中的内容列表，并在内容存在的情况下随机选择一个条目进行播放。如果目录为空或不存在，则记录警告。
-            ReadOnlyList<ContentInfo> readOnlyList = ContentManager.List(directory);
-            if (readOnlyList.Count > 0)
-            {
-                int index = this.m_random.Int(0, readOnlyList.Count - 1);
-                this.PlaySound(readOnlyList[index].ContentPath, volume, pitch, pan, delay);
-                return;
-            }
-            Log.Warning("Sounds directory \"{0}\" not found or empty.", new object[]
-            {
-                directory
-            });
-        }
-
-        public new void PlayRandomSound(string directory, float volume, float pitch, Vector3 position, float minDistance, float delay)
-        {
-            //这个重载版本的 PlayRandomSound 方法考虑声音的3D位置。它计算根据距离和最小听距调整后的音量，并传递给先前定义的 PlayRandomSound 方法。
-            float num = this.CalculateVolume(this.CalculateListenerDistance(position), minDistance, 2f);
-            this.PlayRandomSound(directory, volume * num, pitch, 0f, delay);
-        }
-
-        public new void PlayRandomSound(string directory, float volume, float pitch, Vector3 position, float minDistance, bool autoDelay)
-        {
-            //这个方法与上一个类似，但它接受一个布尔值 autoDelay 来决定是否自动计算声音到达监听者的延迟时间。
-            float num = this.CalculateVolume(this.CalculateListenerDistance(position), minDistance, 2f);
-            this.PlayRandomSound(directory, volume * num, pitch, 0f, autoDelay ? this.CalculateDelay(position) : 0f);
-        }
-
-       
-
-        public new float CalculateVolume(float distance, float minDistance, float rolloffFactor = 2f)
-        {
-            //CalculateVolume 方法根据距离计算音量，以实现音量随距离增加而衰减的效果。当声音距离小于最小听距时，音量为完全值。否则，它根据距离和衰减因子计算衰减后的音量。
-            if (distance > minDistance)
-            {
-                return minDistance / (minDistance + MathUtils.Max(rolloffFactor * (distance - minDistance), 0f));
-            }
-            return 1f;
-        }
-
-        public new float CalculateDelay(Vector3 position)
-        {
-            //方法计算声音从来源到监听者的延迟时间。它使用先前的 CalculateListenerDistance 方法来获取距离，然后计算延迟。
-            return this.CalculateDelay(this.CalculateListenerDistance(position));
-        }
-
-        public new float CalculateDelay(float distance)
-        {
-            //这个重载的 CalculateDelay 方法直接接收距离来计算延迟。它按每100单位距离的声音传播速度（可能假设为声速）来计算延迟，并限制最大延迟为5秒。
-            return MathUtils.Min(distance / 100f, 5f);
-        }
-        public  void FCAddSound(string name, float volume, float pitch, float pan, float delay)
-        {
-            //这是 PlaySound 方法的重载之一，它将播放指定的声音。这个版本接受声音名称、音量、音调、立体声平衡和延迟作为参数。它计算声音应该播放的时间，
-            //并将这个声音信息添加到 m_queuedSounds 列表中。同时更新 m_nextSoundTime 确保在正确的时间播放声音。
-
-            double num = this.m_subsystemTime.GameTime + (double)delay;
-            this.m_nextSoundTime = MathUtils.Min(this.m_nextSoundTime, num);
-            this.m_queuedSounds.Add(new FCSubsystemAudio.SoundInfo
-            {
-                Time = num,//延迟
-                Name = name,//声音名称
-                Volume = volume,//音量
-                Pitch = pitch,//音调
-                Pan = pan//立体声平衡
-            });
-        }
-        public new Sound CreateSound(string name)
-        {
-            //CreateSound 方法通过 ContentManager 获取声音资源并创建一个新的 Sound 实例。创建的声音添加到 m_sounds 列表中，并返回给调用者。
-            Sound sound = new Sound(ContentManager.Get<SoundBuffer>(name, null), 1f, 1f, 0f, false, false);
-            this.m_sounds.Add(sound);
-            return sound;
-        }
-        public  struct CurrentSoundInfo
-        {
-            public double Time;
-
-            public string Name;
-
-            public float Volume;
-
-            public float Pitch;
-
-            public float Pan;
-        }
-
-        private Sound currentMusic;
-        private Sound currentMusic2;
-        private float currentVolume = 1.0f;//音量
-        private const float VolumeTransitionSpeed = 0.5f; // 音量过渡速度
-        public new void Update(float dt)
-        {
-            // 获取玩家的位置
-            Point3 position = Terrain.ToCell(m_componentPlayer.ComponentBody.Position);//玩家所在方块坐标
-
-            // 根据玩家的 Y 坐标决定播放哪首背景音乐
-            
-            if (position.Y < 64)
-            {
-                FCAddSound("Audio/BackgroundMusic/CaveMusic", currentVolume, 1f, 0f, 0f); // 洞穴音乐
-                currentMusic = CreateSound("Audio/BackgroundMusic/CaveMusic");
-
-            }
-            else if (position.Y > 64 && position.Y <= 256)
-            {
-                FCAddSound("Audio/BackgroundMusic/SurfaceMusic", currentVolume, 1f, 0f, 0f);  // 地表音乐
-                currentMusic = CreateSound("Audio/BackgroundMusic/CaveMusic");
-            }
-            else if (position.Y > 1000)
-            {
-                FCAddSound("Audio/BackgroundMusic/SpaceMusic", currentVolume, 1f, 0f, 0f);  // 宇宙音乐
-                currentMusic = CreateSound("Audio/BackgroundMusic/CaveMusic");
-            }
-            else
-            {
-                FCAddSound("Audio/BackgroundMusic/SurfaceMusic", currentVolume, 1f, 0f, 0f);  // 默认音乐
-                currentMusic = CreateSound("Audio/BackgroundMusic/CaveMusic");
-            }
-            
-
-			
-
-            // 如果需要播放新的音乐
-            if (currentMusic == null || currentMusic.Name != trackToPlay)
-            {
-                if (currentMusic != null)
-                {
-                    // 渐渐降低当前音乐的音量，准备切换
-                    currentVolume -= dt * VolumeTransitionSpeed;
-                    if (currentVolume <= 0)
-                    {
-                        // 停止当前音乐并开始播放新音乐
-                        currentMusic.Stop();
-                        currentMusic = PlayMusic(trackToPlay, 1.0f);
-                        currentVolume = 0;
-                    }
-                }
-                else
-                {
-                    // 播放新音乐
-                    currentMusic = PlayMusic(trackToPlay, currentVolume);
-                    currentVolume = 1.0f;
-                }
-            }
-
-            // 更新当前音乐的音量
-            if (currentMusic != null)
-            {
-                currentMusic.Volume = MathHelper.Clamp(currentVolume, 0, 1);
-            }
-
-            // 调用基类更新方法来处理其他声音事件
-            
-            if (this.m_subsystemTime.GameTime < this.m_nextSoundTime)
-            {
-                return;
-            }
-            this.m_nextSoundTime = double.MaxValue;
-            int i = 0;
-            while (i < m_queuedSounds.Count)
-            {
-                FCSubsystemAudio.SoundInfo soundInfo = m_queuedSounds[i];
-                if (this.m_subsystemTime.GameTime >= soundInfo.Time)
-                {
-                    if (this.m_subsystemTime.GameTimeFactor == 1f && this.m_subsystemTime.FixedTimeStep == null && soundInfo.Volume * SettingsManager.SoundsVolume > AudioManager.MinAudibleVolume && this.UpdateCongestion(soundInfo.Name, soundInfo.Volume))
-                    {
-                        AudioManager.PlaySound(soundInfo.Name, soundInfo.Volume, soundInfo.Pitch, soundInfo.Pan);
-                    }
-                    this.m_queuedSounds.RemoveAt(i);
-                }
-                else
-                {
-                    this.m_nextSoundTime = MathUtils.Min(this.m_nextSoundTime, soundInfo.Time);
-                    i++;
-                }
-            }
-        }
-
-       
-
-        
-
-        // PlayMusic 等其他方法的实现保持不变
-        /*public new void Update(float dt)
-        {
-            Point3 Position = Terrain.ToCell(m_componentPlayer.ComponentBody.Position);//玩家所在方块坐标
-                                                                                       // 根据玩家的 Y 坐标决定播放哪首背景音乐
-            string trackToPlay = GetTrackBasedOnPlayerPosition(playerPosition);
-
-
-
-
-        }*/
-    /*public ComponentPlayer m_componentPlayer;
-    public override void Load(ValuesDictionary valuesDictionary)
-    {
-        this.m_subsystemTime = base.Project.FindSubsystem<SubsystemTime>(true);
-        this.m_subsystemViews = base.Project.FindSubsystem<SubsystemGameWidgets>(true);
-
-    }
-    public override void OnEntityAdded(Entity entity)
-    {
-        m_componentPlayer = entity.FindComponent<ComponentPlayer>();
-    }
-    public override void Dispose()
-    {
-        foreach (Sound sound in this.m_sounds)
-        {
-            sound.Dispose();
-        }
-    }
-
-    public new bool UpdateCongestion(string name, float volume)
-    {
-        FCSubsystemAudio.Congestion congestion;
-        if (!this.m_congestions.TryGetValue(name, out congestion))
-        {
-            congestion = new FCSubsystemAudio.Congestion();
-            this.m_congestions.Add(name, congestion);
-        }
-        double realTime = Time.RealTime;
-        double lastUpdateTime = congestion.LastUpdateTime;
-        double lastPlayedTime = congestion.LastPlayedTime;
-        float num = (lastUpdateTime > 0.0) ? ((float)(realTime - lastUpdateTime)) : 0f;
-        congestion.Value = MathUtils.Max(congestion.Value - 10f * num, 0f);
-        congestion.LastUpdateTime = realTime;
-        if (congestion.Value <= 6f && (lastPlayedTime == 0.0 || volume > congestion.LastPlayedVolume || realTime - lastPlayedTime >= 0.0))
-        {
-            congestion.LastPlayedTime = realTime;
-            congestion.LastPlayedVolume = volume;
-            congestion.Value += 1f;
-            return true;
-        }
-        return false;
-    }
-
-    public new SubsystemTime m_subsystemTime;
-
-    public new SubsystemGameWidgets m_subsystemViews;
-
-    public new Random m_random = new Random();
-
-    public new List<Vector3> m_listenerPositions = new List<Vector3>();
-
-    public new Dictionary<string, FCSubsystemAudio.Congestion> m_congestions = new Dictionary<string, FCSubsystemAudio.Congestion>();
-
-    public new double m_nextSoundTime;
-
-    public new List<FCSubsystemAudio.SoundInfo> m_queuedSounds = new List<FCSubsystemAudio.SoundInfo>();
-    public new List<FCSubsystemAudio.SoundInfo> m_queuedSoundsName = new List<FCSubsystemAudio.SoundInfo>();
-
-    public new List<Sound> m_sounds = new List<Sound>();
-
-    public new Dictionary<Sound, bool> m_mutedSounds = new Dictionary<Sound, bool>();
-
-    public new class Congestion
-    {
-        public double LastUpdateTime;
-
-        public double LastPlayedTime;
-
-        public float LastPlayedVolume;
-
-        public float Value;
-    }
-
-    public new struct SoundInfo
-    {
-        public double Time;
-
-        public string Name;
-
-        public float Volume;
-
-        public float Pitch;
-
-        public float Pan;
-    }
-}
-/*public class MusicPlayer : SubsystemAudio
-{
-    private string currentMusicName;
-    private Sound currentMusicSound;
-
-    // 播放音乐
-    public void PlayMusic(string musicName, float volume = 1f, bool isLooped = true)
-    {
-        // 如果尝试播放当前已经在播放的音乐，则不执行任何操作
-        if (currentMusicName == musicName && currentMusicSound?.State == SoundState.Playing)
-        {
-            return;
-        }
-
-        // 停止当前音乐（如果有）
-        StopMusic();
-
-        // 创建新的音乐 Sound 对象
-        currentMusicSound = CreateSound(musicName);
-        currentMusicSound.Volume = volume;
-        currentMusicSound.IsLooped = isLooped;
-
-        // 播放音乐
-        currentMusicSound.Play();
-
-        // 更新当前播放音乐的名称
-        currentMusicName = musicName;
-    }
-
-    // 暂停音乐
-    public void PauseMusic()
-    {
-        if (currentMusicSound?.State == SoundState.Playing)
-        {
-            currentMusicSound.Pause();
-        }
-    }
-
-    // 停止音乐
-    public void StopMusic()
-    {
-        if (currentMusicSound != null)
-        {
-            currentMusicSound.Stop();
-            currentMusicSound.Dispose();
-            currentMusicSound = null;
-            currentMusicName = null;
-        }
-    }
-
-    // 设置音乐音量
-    public void SetMusicVolume(float volume)
-    {
-        if (currentMusicSound != null)
-        {
-            currentMusicSound.Volume = volume;
-        }
-    }
-
-    // 处理音乐播放器的更新
-    public new void Update(float dt)
-    {
-        base.Update(dt);
-
-        // 音乐播放器的额外逻辑（如果有的话）可以放在这里
-        // 比如，可以添加逻辑来处理音乐淡入淡出等
-    }
-
-    // 重写 Load 方法来初始化音乐播放器
-    public override void Load(ValuesDictionary valuesDictionary)
-    {
-        base.Load(valuesDictionary); // 调用基类加载方法
-
-        // 初始化音乐播放器的状态和资源
-        // ...
-    }
-
-    // 重写 Dispose 方法来清理音乐播放器资源
-    public override void Dispose()
-    {
-        base.Dispose(); // 调用基类清理方法
-
-        // 清理音乐播放器特有的资源
-        StopMusic();
-    }
-}*/
-    #endregion
-
-}//音乐系统
+using System.Text.RegularExpressions;
+using static OpenTK.Graphics.OpenGL.GL;
+using OpenTK.Input;
+using OpenTK.Platform.Windows;
+using static Game.TerrainContentsGenerator21;
 
 namespace Test1 //界面测试
 {
 	public class Test1ButtonsPanelWidget : CanvasWidget
 	{
+		
 		public bool YHLZ = false;
+		public bool BS = false;//召唤商人标记
 		public ComponentTest1 m_componentTest1;
+		public SubsystemWorldSystem m_subsystemWorldSystem;
+		public ComponentTask m_componentTask;
+		public SubsystemTask1 subsystemTask1;
 		public BevelledButtonWidget m_button1;
 		public BevelledButtonWidget m_button2;
 		public BevelledButtonWidget m_button3;
         public BevelledButtonWidget m_button4;
+        public BevelledButtonWidget m_button5;
+        public BevelledButtonWidget m_button6;
+        public BevelledButtonWidget m_button7;
+        public BevelledButtonWidget m_button8;
+		public BevelledButtonWidget m_button9;
         public BevelledButtonWidget m_button10;
-		public Test1ButtonsPanelWidget(ComponentTest1 componentTest1)
+		public Test1ButtonsPanelWidget(ComponentTest1 componentTest1,SubsystemWorldSystem m_subsystemWorldSystem1)
 		{
-			m_componentTest1 = componentTest1;
+			m_subsystemWorldSystem = m_subsystemWorldSystem1;
+            m_componentTest1 = componentTest1;
+			subsystemTask1 = componentTest1.m_subsystemTask1;
+			m_componentTask = componentTest1.m_componentTask;
 			XElement node = ContentManager.Get<XElement>("Test1/Widgets/Test1ButtonsPanelWidget");
 			LoadContents(this, node);
 			m_button1 = Children.Find<BevelledButtonWidget>("Button1");//通过Name属性获取子界面，若xml中不存在对应的Name则会出错
 			m_button2 = Children.Find<BevelledButtonWidget>("Button2");
 			m_button3 = Children.Find<BevelledButtonWidget>("Button3");
             m_button4 = Children.Find<BevelledButtonWidget>("Button4");
+            m_button5 = Children.Find<BevelledButtonWidget>("Button5");
+            m_button6 = Children.Find<BevelledButtonWidget>("Button6");
+            m_button7 = Children.Find<BevelledButtonWidget>("Button7");
+            m_button8 = Children.Find<BevelledButtonWidget>("Button8");
+            m_button9 = Children.Find<BevelledButtonWidget>("Button9");
             m_button10 = Children.Find<BevelledButtonWidget>("Button10");
+			
 		}
 
 		public override void Update()
@@ -793,12 +85,12 @@ namespace Test1 //界面测试
 				Test1TextDialog dialog = new Test1TextDialog("模组教程", "这是一段教程文字。点击下方确定按钮可跳转到游戏帮助界面", action);//定义对话框，action传入不为null则显示确定按钮
 				DialogsManager.ShowDialog(m_componentTest1.m_componentPlayer.GuiWidget, dialog);//弹出对话框
 			}
-			if(m_button3.IsChecked)
+			if(m_button3.IsClicked)
             {
 				if(YHLZ==false)
                 {
 					YHLZ = true;
-					m_componentTest1.m_componentPlayer.ComponentGui.DisplaySmallMessage("樱花粒子已经开启！", Color.Pink, true, true);//显示通知
+					m_componentTest1.m_componentPlayer.ComponentGui.DisplaySmallMessage("樱花粒子已经开启！（樱花粒子暂时被移除，请期待作者的优化。）", Color.Pink, true, true);//显示通知
 				}
 				else
                 {
@@ -810,7 +102,55 @@ namespace Test1 //界面测试
 			{
 				m_componentTest1.m_componentPlayer.ComponentGui.ModalPanelWidget = new XRecipeWidget();
             }
-			if (m_button10.IsClicked)
+            if (m_button5.IsClicked)//召唤商人
+            {
+				if(m_componentTest1.BS1==false)
+				{
+                    m_componentTest1.BS1 = true;//加入商人
+                    m_componentTest1.m_componentPlayer.ComponentGui.DisplaySmallMessage("成功召唤商人洛德！要好好相处哦", Color.DarkRed, true, true);//显示通知
+                    m_componentTest1.SummonBusinessman(m_componentTest1.BS1);
+                }
+				else
+				{
+                    m_componentTest1.BS1 = false;//加入商人
+                    m_componentTest1.m_componentPlayer.ComponentGui.DisplaySmallMessage("下次再见，孤独的游荡之魂", Color.DarkRed, true, true);//显示通知
+                    m_componentTest1.RemoveBusinessman(m_componentTest1.BS1);
+                }
+				
+				
+                // m_componentTest1.m_componentPlayer.ComponentGui.ModalPanelWidget = new ShopWidget(m_subsystemWorldSystem, m_componentTest1.m_componentPlayer.ComponentGui.Entity.FindComponent<ComponentBody>(true));
+                
+            }
+            if (m_button6.IsClicked)
+            {
+                m_componentTest1.m_componentPlayer.ComponentGui.ModalPanelWidget = new MCCGPurchaseWidget(m_componentTest1.m_componentPlayer.ComponentMiner);//显示购买界面
+            }
+            if (m_button7.IsClicked)
+            {
+                m_componentTest1.m_componentPlayer.ComponentGui.ModalPanelWidget = new MCCGSellWidget(m_componentTest1.m_componentPlayer.ComponentMiner);//显示购买界面
+            }
+			if(m_button8.IsClicked)
+			{
+				if (m_componentTest1.m_componentPlayersystem.showmap == false)
+				{
+					m_componentTest1.m_componentPlayersystem.showmap = true;
+                    m_componentTest1.m_componentPlayersystem.Mapwidget.IsVisible = true;
+                   // m_componentTest1.m_componentPlayersystem.MapViewWidget.IsVisible = true;
+
+                }
+				else
+				{
+                    m_componentTest1.m_componentPlayersystem.showmap = false;
+                    m_componentTest1.m_componentPlayersystem.Mapwidget.IsVisible = false;
+                   // m_componentTest1.m_componentPlayersystem.MapViewWidget.IsVisible = false;
+                }
+               
+            }
+            if (m_button9.IsClicked)
+            {
+                m_componentTest1.m_componentPlayer.ComponentGui.ModalPanelWidget = new TaskWidget(m_componentTask);//将当前界面转至AchievementsWidget
+            }
+            if (m_button10.IsClicked)
 			{
 				m_componentTest1.DeveloperModeOn = !m_componentTest1.DeveloperModeOn;//关闭或打开开发者模式
 				string txt = "食品工艺：开发者模式已" + (m_componentTest1.DeveloperModeOn ? "开启" : "关闭");
@@ -863,17 +203,12 @@ namespace Test1 //界面测试
 			}
 		}
 	}
-	public class ComponentTest1 : Component, IUpdateable
+	public class ComponentTest1 : ComponentInventoryBase, IUpdateable
 	{//此组件用于添加打开界面的按钮，可将该组件全部功能合并至任意一个仅注册在玩家身上的组件
 		bool isbuffing = false;
+
+       
 		
-		
-		public SubsystemTerrain m_systemTerrain;
-		public NewModLoaderShengcheng Shengcheng1;
-		public FCSubsystemTown m_subsystemtown;
-		public FCSubsystemTownChunk m_subsystemtownchunk;
-		public ComponentPlayer m_componentPlayer;
-		public bool ischunkloding = false;//用来保证区块强制加载只执行一次
 		public UpdateOrder UpdateOrder => UpdateOrder.Default;
 		public BitmapButtonWidget m_test1Button = new BitmapButtonWidget()
 		{//定义一个按钮
@@ -903,31 +238,60 @@ namespace Test1 //界面测试
 		};
 
 		public bool DeveloperModeOn;//开发者模式是否开启
-
-
-
-
+        public SubsystemGameInfo m_subsystemGameInfo;
+        public SubsystemTerrain m_systemTerrain;
+        public NewModLoaderShengcheng Shengcheng1;
+        public FCSubsystemTown m_subsystemtown;
+        public FCSubsystemTownChunk m_subsystemtownchunk;
+        public ComponentPlayer m_componentPlayer;
+        Game.Random random = new Game.Random();
+		public SubsystemWorldDemo World;
+		public SubsystemNaturallyBuildings m_subsystemNaturallyBuildings;
         public SubsystemTime m_subsystemTime;
-
-
+		public SubsystemWorldSystem m_subsystemWorldsystem;
+		public SubsystemTask1 m_subsystemTask1;
+		public SubsystemNames m_subsystemNames;
+		public ComponententityLord entitylord;
+		public ComponentTask m_componentTask;
+		public ComponentPlayerSystem m_componentPlayersystem;
+		public SubsystemTask m_subsystemTask;
+        public bool BS1=false;
         public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
 		{
 			base.Load(valuesDictionary, idToEntityMap);
 			m_systemTerrain = Project.FindSubsystem<SubsystemTerrain>(true);
 			m_componentPlayer = Entity.FindComponent<ComponentPlayer>(true);
 			m_subsystemTime = Project.FindSubsystem<SubsystemTime>(true);
+            m_subsystemAudio = Project.FindSubsystem<SubsystemAudio>(true);
+            m_subsystemGameInfo =Project.FindSubsystem<SubsystemGameInfo>(true);
+            m_subsystemTask1=Project.FindSubsystem<SubsystemTask1>(true);
+            m_subsystemNames=Project.FindSubsystem<SubsystemNames>(true);
+			m_subsystemTask=Project.FindSubsystem<SubsystemTask>(true);
 
+            World = Project.FindSubsystem<SubsystemWorldDemo>(true);
+            m_subsystemNaturallyBuildings = Project.FindSubsystem<SubsystemNaturallyBuildings>(true);
+			m_subsystemWorldsystem =Project.FindSubsystem<SubsystemWorldSystem>(true);
+			BS1 = valuesDictionary.GetValue<bool>("BS", false);
+			
 
             componentNightsight = Entity.FindComponent<ComponentNightsight>(true);
 			componentSpeedUP = Entity.FindComponent<ComponentSpeedUP>(true);
 			componentHealBuffA = Entity.FindComponent<ComponentHealBuffA>(true);
 			componentAttackUP = Entity.FindComponent<ComponentAttackUP>(true);
+            componentBlind = Entity.FindComponent<ComponentBlind>(true);
+            componentJump = Entity.FindComponent<ComponentJump>(true);
+            componentDizzy = Entity.FindComponent<ComponentDizzy>(true);
+            m_componentPC = Entity.FindComponent<FCComponentPC>(true);
+            m_componentSlowdown = Entity.FindComponent<ComponentSlowDown>(true);
+            
 
 
-			m_componentPlayer.GuiWidget.Children.Find<StackPanelWidget>("MoreContents", true).Children.Add(m_test1Button);//将按钮添加至玩家右上角省略号内
+            m_componentPlayer.GuiWidget.Children.Find<StackPanelWidget>("MoreContents", true).Children.Add(m_test1Button);//将按钮添加至玩家右上角省略号内
 			m_componentPlayer.GameWidget.Children.Find<CanvasWidget>("Gui", true).Children.Add(m_test1Display);//将文字界面添加至屏幕
 			m_componentPlayer.GameWidget.Children.Find<CanvasWidget>("Gui", true).Children.Add(Buffscreen);//将buff界面添加至屏幕
 			DeveloperModeOn = valuesDictionary.GetValue("DeveloperModeOn", false);//从project.xml中获取储存的值，若获取失败则采用false
+			m_componentTask=Entity.FindComponent<ComponentTask>(true);
+			m_componentPlayersystem = Entity.FindComponent<ComponentPlayerSystem>(true);
 			Shengcheng1 = new NewModLoaderShengcheng();
 
 			//灵能sen值组件
@@ -935,6 +299,12 @@ namespace Test1 //界面测试
             m_sen = valuesDictionary.GetValue<float>("Sen", 100f);
 			isLowSen = valuesDictionary.GetValue<bool>("IsSenLow", false);//默认返回不处于低sen状态
 			m_Maxmp = valuesDictionary.GetValue<float>("MaxMagicPower", 100f);
+            m_mplevel = valuesDictionary.GetValue<float>("MPLevel", 10f);
+            FCMagicLevel = valuesDictionary.GetValue<int>("FCLevel", 0);
+
+			Areaname = valuesDictionary.GetValue<string>("Areaname", "");
+           
+
         }
 		public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
 		{
@@ -944,8 +314,10 @@ namespace Test1 //界面测试
             valuesDictionary.SetValue<float>("Sen", Sen);//将该变量值储存到project.xml，防止重进存档后变回默认值
             valuesDictionary.SetValue<bool>("IsSenLow", IsSenLow);//将该变量值储存到project.xml，防止重进存档后变回默认值
             valuesDictionary.SetValue<float>("MaxMagicPower", MaxMagicPower);//将该变量值储存到project.xml，防止重进存档后变回默认值
-
-
+            valuesDictionary.SetValue<float>("MPLevel", m_mplevel);//将该变量值储存到project.xml，防止重进存档后变回默认值
+            valuesDictionary.SetValue<int>("FCLevel", FCMagicLevel);//将该变量值储存到project.xml，防止重进存档后变回默认值
+			valuesDictionary.SetValue<string>("Areaname", Areaname);
+           // valuesDictionary.SetValue<bool>("BS", BS1);//将该变量值储存到project.xml，防止重进存档后变回默认值
         }
 
 		public override void OnEntityRemoved()
@@ -964,29 +336,211 @@ namespace Test1 //界面测试
                 base.Project.FindSubsystem<SubsystemBlocksTexture>(true).BlocksTexture = ContentManager.Get<Texture2D>("BlocksSen");
             }
         }
+        /*第一级的mplevel进度值需要达到100，然后最大灵能值会对应扩充到1000，这是第一级。
+			以此类推，二级的进度值需要达到5000，同时最大灵能扩充到5000
+			三级的进度需要达到10000，最大灵能为10000
+			四级进度需要到20000，最大灵能为50000
+			五级进度需要达到50000，最大灵能为100000
+			第六级需要达到100000，最大灵能为1098888*/
+		public void SummonBusinessman(bool flag)
+		{
+            Entity entity = DatabaseManager.CreateEntity(Project, "BSLord", throwIfNotFound: true);
+            if (flag==true)
+			{
+				
+                entity.FindComponent<ComponentFrame>(throwOnError: true).Position = new Vector3(m_componentPlayer.ComponentBody.Position.X + 2, m_componentPlayer.ComponentBody.Position.Y, m_componentPlayer.ComponentBody.Position.Z);
+                entity.FindComponent<ComponentFrame>(throwOnError: true).Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, random.Float(0f, (float)Math.PI * 2f));
+                entity.FindComponent<ComponentSpawn>(throwOnError: true).SpawnDuration = 0f;
+                entitylord=entity.FindComponent<ComponententityLord>();
+                Project.AddEntity(entity);
+            }
+			
+            
+        }
+        public void RemoveBusinessman(bool flag)
+        {
+			try
+			{
+                Entity entity = entitylord.LordEntity;
+                if (flag == false)
+                {
+                    if (entity != null)
+                    {
+                        Project.RemoveEntity(entity, true);
+                    }
+
+
+                }
+            }
+			catch
+			{
+                Log.Error("Generation1 failed.");
+            }
+            
+            
+
+
+            
+
+
+        }
+
+        public void UpdateLevel()
+        {
+            m_subsystemAudio.PlaySound("Audio/LevelUp", 1f, 0, 0,0.1f);
+            if ( m_Maxmp < 1000)//10%的免伤
+            {
+                m_Maxmp = 1000;
+				
+				FCMagicLevel = 1;
+            }
+            else if (m_Maxmp < 5000) //20%的免伤
+            {
+                m_Maxmp = 5000;
+                FCMagicLevel = 2;
+
+            }
+            else if (m_Maxmp < 10000)//30%的免伤
+            {
+                m_Maxmp = 10000;
+                FCMagicLevel = 3;
+
+            }
+            else if (m_Maxmp < 50000)//40%的免伤
+            {
+                m_Maxmp = 50000;
+                FCMagicLevel = 4;
+
+            }
+            else if (m_Maxmp < 100000)//50%的免伤
+            {
+                m_Maxmp = 100000;
+                FCMagicLevel = 5;
+
+            }
+            else if (m_Maxmp < 1098888)//70%的免伤
+            {
+                m_Maxmp = 1098888;
+                FCMagicLevel = 6;
+
+            }
+            m_mp = m_Maxmp;
+        }//升级封装方法
+        public float CalculateLevelnum(int level,float levelnum)
+        {
+			float num1=0;
+            if (level== 0)//
+            {
+				num1 = 100-levelnum;
+				MPlevel1 = "灵感者";
+
+            }
+            else if (level ==  1)
+            {
+                num1 = 5000 - levelnum;
+                MPlevel1 = "一级通灵师";
+            }
+            else if (level == 2)
+            {
+                num1 = 10000 - levelnum;
+                MPlevel1 = "二级通灵师";
+            }
+            else if (level == 3)
+            {
+                num1 = 20000 - levelnum;
+                MPlevel1 = "三级通灵师";
+            }
+            else if (level == 4)
+            {
+                num1 = 50000 - levelnum;
+                MPlevel1 = "灵王";
+            }
+            else if (level == 5)//升到6级为封顶
+            {
+                num1 = 100000 - levelnum;
+                MPlevel1 = "灵王";
+            }
+            else if (level == 6)//升到6级为封顶
+            {
+				num1 = 1;
+               
+                MPlevel1 = "通灵之神";
+            }
+
+            return num1;
+
+        }//计算等级差封装方法
+        public string GetLevelname(int level)
+        {
+           ;
+            if (level == 0)//
+            {
+                
+                MPlevel1 = "灵感者";
+
+            }
+            else if (level == 1)
+            {
+                
+                MPlevel1 = "一级通灵师";
+            }
+            else if (level == 2)
+            {
+                
+                MPlevel1 = "二级通灵师";
+            }
+            else if (level == 3)
+            {
+               
+                MPlevel1 = "三级通灵师";
+            }
+            else if (level == 4)
+            {
+                
+                MPlevel1 = "灵王";
+            }
+            else if (level == 5)//升到6级为封顶
+            {
+               
+                MPlevel1 = "灵祖";
+            }
+            else if (level == 6)//升到6级为封顶
+            {
+              
+
+                MPlevel1 = "通灵之神";
+            }
+
+            return MPlevel1;
+
+        }//计算等级名字方法
         public static int GetTemperatureAdjustmentAtHeight(int y)
 		{//该静态方法从原版复制过来，用于计算高度变化带来的温度修正
 			return (int)MathUtils.Round((y > 64) ? (-0.0008f * MathUtils.Sqr(y - 64)) : (0.1f * (64 - y)));
 		}
 		public bool isvillageLoading = false;
 		public int num_village4 = 0;
-		public ComponentHealBuffA componentHealBuffA;
-		public ComponentAttackUP componentAttackUP;
-		public ComponentSpeedUP componentSpeedUP;
-        public ComponentNightsight componentNightsight;
+		
         public bool buffscreenIsVisible = true;
-		
-		
 
 
-		public float m_mp=1f;
+
+        #region Sen灵力数值读取
+        public float m_mp=1f;
 		public float MagicPower
 		{
 			get { return m_mp; }
 		}
 
+		public int FCMagicLevel = 0;//灵能等级
 
-		public float m_Maxmp;//最大灵力值
+		public float m_mplevel;//灵能进度
+        public float MPLevel
+        {
+            get { return m_mplevel; }
+        }
+
+        public float m_Maxmp;//最大灵力值
         public float MaxMagicPower
         {
             get { return m_Maxmp; }
@@ -1005,6 +559,7 @@ namespace Test1 //界面测试
 		{
 			get { return isLowSen; }
 		}
+        #endregion 
         #region  更新区块
         public void UpdateAllChunks(float time, TerrainChunkState chunkState)
         {
@@ -1019,9 +574,78 @@ namespace Test1 //界面测试
             });
         }
         #endregion
-        public async void Update(float dt)
+		public string worldnameN;
+		public string worldgravity;
+		public string MPlevel1;
+		public bool isinCityArea=false;
+        public bool isinBloodArea = false;
+        public string Areaname;
+        public ComponentHealBuffA componentHealBuffA;//引入buff组件
+        public ComponentAttackUP componentAttackUP;
+        public ComponentSpeedUP componentSpeedUP;
+        public ComponentNightsight componentNightsight;
+        public ComponentBlind componentBlind;
+        public ComponentJump componentJump;
+        public ComponentDizzy componentDizzy;
+        public FCComponentPC m_componentPC;
+		public ComponentSlowDown m_componentSlowdown;
+		public SubsystemAudio m_subsystemAudio;
+		public Point3 point1;
+        public  void Update(float dt)
 		{
-			if (m_sen > 100f)
+            WorldType m_worldname = World.worldType;//时刻获取世界信息
+            point1= Terrain.ToCell(m_componentPlayer.ComponentBody.Position);//玩家所在方块坐标
+			Point2 pointcoords = ((int)point1.X/16, (int)point1.Z/16);
+            #region 灵能判断区域
+			if(m_mp<0f) //灵力值不能超过最大灵力
+			{
+				m_mp = 0f;
+			}
+			else if(m_mp>1f)
+			{
+				 m_mp=1f;
+			}
+
+			if(FCMagicLevel<6)
+			{
+                if (m_mplevel >= 100 && FCMagicLevel == 0)//处理升级
+                {
+                    UpdateLevel();
+					
+                }
+                else if (m_mplevel >= 5000 && FCMagicLevel == 1)
+                {
+                    UpdateLevel();
+                }
+                else if (m_mplevel >= 10000 && FCMagicLevel == 2)
+                {
+                    UpdateLevel();
+                }
+                else if (m_mplevel >= 20000 && FCMagicLevel == 3)
+                {
+                    UpdateLevel();
+                }
+                else if (m_mplevel >= 50000 && FCMagicLevel == 4)
+                {
+                    UpdateLevel();
+                }
+                else if (m_mplevel >= 100000 && FCMagicLevel == 5)//升到6级为封顶
+                {
+                    UpdateLevel();
+                }
+            }
+			if(m_mplevel>=120000)
+			{
+				m_mplevel = 120000;
+
+            }
+			
+            
+
+            #endregion
+            #region Sen值判断区域
+            //sen的范围是0-100
+            if (m_sen > 100f)
 			{
 				m_sen = 100f;
 			}
@@ -1029,6 +653,8 @@ namespace Test1 //界面测试
 			{
 				m_sen = 0f;
 			}
+
+
 			if (m_sen <30&& m_sen >= 20)
 			{
                 bool flag = m_subsystemTime.PeriodicGameTimeEvent(3.0, 0.0);
@@ -1065,7 +691,84 @@ namespace Test1 //界面测试
                 }
               
             }
-            
+            #endregion
+            #region 村庄建筑区块提示和判断
+            List<NewModLoaderShengcheng.RoadPoint> listRD = NewModLoaderShengcheng.listRD;
+            List<NewModLoaderShengcheng.BuildPoint> listBD = NewModLoaderShengcheng.listBD;
+            if (m_worldname == WorldType.Default)
+            {
+                if (listRD.Count != 0 && isvillageLoading == false)//村庄代码区块
+                {
+                    isvillageLoading = true;
+                    if (FCSubsystemTown.Village_start.Count != 0)
+                    {
+                        /*if ((FCSubsystemTown.Village_start.Count - num_village4) > 0)//如果村庄生成有变化，实时提醒。
+                        {
+                            num_village4++;
+                            string txt = $"检测到村庄已经生成，玩家可前往探索！坐标为：{FCSubsystemTown.Village_start[num_village4 - 1]}";
+                            m_componentPlayer.ComponentGui.DisplaySmallMessage(txt, Color.White, true, true);//显示通知
+
+                        }*/
+
+
+                    }
+
+                }
+                if (listRD.Count == 0)
+                {
+                    isvillageLoading = false;
+                }
+
+                
+                //副本区域判断
+                foreach (BuildingInfo buildinfo in m_subsystemNaturallyBuildings.BuildingInfos)
+                {
+                    if (buildinfo != null)
+                    {
+                        if (buildinfo.CalculatPlainRange(pointcoords) == true)
+                        {
+							if(buildinfo.Name== "House/Supercity"&& isinCityArea == false)
+							{
+                                string txt = $"你已经进入了[失落城市]区域！";
+                                m_componentPlayer.ComponentGui.DisplayLargeMessage(txt,null,2f,0f);//显示通知
+								Areaname = "失落城市";
+                                isinCityArea = true;
+                            }
+							else if(buildinfo.Name == "House/血泪" && isinBloodArea == false)
+							{
+								m_componentTask.BloodPool = true;//完成任务
+                                string txt = $"你已经进入了[血泪之池]区域！小心游荡的怪物！";
+                                m_componentPlayer.ComponentGui.DisplayLargeMessage(txt, null, 2f, 0f);//显示通知
+                                Areaname = "血泪之池";
+                                isinBloodArea = true;
+                            }
+                                
+                        }
+                        else
+                        {
+                            if (buildinfo.Name == "House/Supercity"&& isinCityArea == true)
+							{
+                                string txt = $"你已经离开了[失落城市]区域！";
+                                m_componentPlayer.ComponentGui.DisplayLargeMessage(txt, null, 2f, 0.1f);//显示通知
+                                Areaname = "";
+                                isinCityArea = false;
+                            }
+                            else if(buildinfo.Name == "House/血泪" && isinBloodArea == true)
+							{
+                                string txt = $"你已经离开了[血泪之池]区域！";
+                                m_componentPlayer.ComponentGui.DisplayLargeMessage(txt, null, 2f, 0.1f);//显示通知
+                                Areaname = "";
+                                isinBloodArea = false;
+                            }
+                        }
+                    }
+
+                }
+
+                
+            }
+
+            #endregion
             #region 开发者模式
             if (DeveloperModeOn)
 			{//开发者模式打开
@@ -1091,25 +794,100 @@ namespace Test1 //界面测试
 			}
 			if (m_test1Button.IsClicked)
 			{//在Update中实时检测按钮是否被按下，若被按下则触发以下代码
-				m_componentPlayer.ComponentGui.ModalPanelWidget = new Test1ButtonsPanelWidget(this);//打开界面
+				m_componentPlayer.ComponentGui.ModalPanelWidget = new Test1ButtonsPanelWidget(this, m_subsystemWorldsystem);//打开界面
 			}
+            
             #endregion
-			if(buffscreenIsVisible == true)//时刻开启
+            if (buffscreenIsVisible == true)//时刻开启
 			{
+				#region 世界判断
+				WorldType worldname = World.worldType;
+                
+                if (worldname == WorldType.Default)
+				{
+                    worldnameN = "主世界";
+					if(point1.Y >1500f)//传送到空间站
+					{
+                        Vector3 v1 = m_componentPlayer.ComponentBody.Position;
+                        m_componentPlayer.ComponentBody.Position = (v1.X, 1300, v1.Z);//重置位置
+                        World.MajorToChildWorld("StationMoon");
+					}
+					worldgravity = "10";
+                }
+                if (worldname == WorldType.Ashes)
+                {
+                    worldnameN = "灰烬世界";
+
+                }
+                if (worldname == WorldType.Desert)
+                {
+                    worldnameN = "沙子世界";
+
+                }
+                if (worldname == WorldType.Exist)
+                {
+                    worldnameN = "现有世界";
+
+                }
+                if (worldname == WorldType.StationMoon)
+                {
+                    worldnameN = "地月空间站";
+					worldgravity = m_componentPC.Gravity.ToString("f2");
+
+                    if (point1.Y > 1500f)//传送到月球
+                    {
+                        Vector3 v1 = m_componentPlayer.ComponentBody.Position;
+                        m_componentPlayer.ComponentBody.Position = (v1.X, 1300, v1.Z);//重置位置
+                        World.ChildToChildWorld("Moon");
+                    }
+                    if (point1.Y < -300f)//传送到地球
+                    {
+                        Vector3 v1 = m_componentPlayer.ComponentBody.Position;
+                        m_componentPlayer.ComponentBody.Position = (v1.X, 600, v1.Z);//重置位置
+                        World.ChildToMajorWorld();
+                    }
+
+                }
+                if (worldname == WorldType.Moon)
+                {
+                    worldnameN = "月球";
+                    worldgravity = m_componentPC.Gravity.ToString("f2");
+                    if (point1.Y > 1500f)//传送到空间站
+                    {
+                        Vector3 v1 = m_componentPlayer.ComponentBody.Position;
+                        m_componentPlayer.ComponentBody.Position = (v1.X, 1300, v1.Z);//重置位置
+                        World.ChildToChildWorld("StationMoon");
+                    }
+
+                }
+                if (worldname == WorldType.Snowfield)
+                {
+                    worldnameN = "冰雪世界";
+
+                }
+                #endregion
                 Buffscreen.IsVisible = true;
                 string buffinfo = "状态栏";
+                string txt7 = string.Format("当前世界:{0} [重力:{1}] [氧气:{2}/{3}]", worldnameN,worldgravity,(int)(m_componentPlayer.ComponentHealth.Air* m_componentPlayer.ComponentHealth.AirCapacity), (int)m_componentPlayer.ComponentHealth.AirCapacity);//传入变量组成第一段文字
+                buffinfo = buffinfo + "\n" + txt7;
+                string txt9 = string.Format("当前区域:{0}", Areaname);//获取区域名字
+                buffinfo = buffinfo + "\n" + txt9;
                 string txt2 = string.Format("当前生命:{0}/{1}", (int)(m_componentPlayer.ComponentHealth.Health* m_componentPlayer.ComponentHealth.AttackResilience), (int)m_componentPlayer.ComponentHealth.AttackResilience);//获取最大生命值和当前生命值
                 buffinfo = buffinfo + "\n" + txt2;
                 string txt3 = string.Format("当前攻击力:{0}", (int)m_componentPlayer.ComponentMiner.AttackPower);//传入变量组成第一段文字
                 buffinfo = buffinfo + "\n" + txt3;
                 string txt4 = string.Format("当前速度:{0}", (int)m_componentPlayer.ComponentLocomotion.WalkSpeed);//传入变量组成第一段文字
                 buffinfo = buffinfo + "\n" + txt4;
-                string txt5 = string.Format("当前灵力:{0}/{1}", (int)(MagicPower*MaxMagicPower),(int)MaxMagicPower);//传入变量组成第一段文字
+                string txt5 = string.Format("灵力值:{0}/{1}[进度：{2}]", (int)(MagicPower*MaxMagicPower),(int)MaxMagicPower,(int)MPLevel);//传入变量组成第一段文字
                 buffinfo = buffinfo + "\n" + txt5;
+                string txt8 = string.Format("灵力等级:{0}||{1}[距离下一等级还差:{2}]", FCMagicLevel, GetLevelname(FCMagicLevel), (int)CalculateLevelnum(FCMagicLevel,m_mplevel));//传入变量组成第一段文字
+                buffinfo = buffinfo + "\n" + txt8;
                 string txt6 = string.Format("当前sen值:{0}", (int)Sen);//传入变量组成第一段文字
                 buffinfo = buffinfo + "\n" + txt6;
-                if (componentHealBuffA.m_HealDuration > 0 || componentAttackUP.m_ATKDuration > 0 || componentSpeedUP.m_SpeedDuration > 0||componentNightsight.m_NightseeDuration>0)//是否处于buff的前置判断
-                {
+
+
+                if (componentHealBuffA.m_HealDuration > 0 || componentAttackUP.m_ATKDuration > 0 || componentSpeedUP.m_SpeedDuration > 0||componentNightsight.m_NightseeDuration>0||componentBlind.m_BlindDuration > 0|| m_componentSlowdown.m_SlowDuration>0||componentJump.m_JumpDuration>0|| componentDizzy.m_DizzyDuration>0)//是否处于buff的前置判断
+                {//这里是buff的前置显示判断很重要
                     isbuffing = true;
 
                 }
@@ -1144,212 +922,183 @@ namespace Test1 //界面测试
                         string txt1 = string.Format("夜视：{0}s", (int)componentNightsight.m_NightseeDuration);//传入变量组成第一段文字
                         buffinfo = buffinfo + "\n" + txt1;
                     }
+                    if (componentBlind.m_BlindDuration > 0)
+                    {
+
+                        string txt1 = string.Format("致盲：{0}s", (int)componentBlind.m_BlindDuration);//传入变量组成第一段文字
+                        buffinfo = buffinfo + "\n" + txt1;
+                    }
+                    if (m_componentSlowdown.m_SlowDuration > 0)
+                    {
+
+                        string txt1 = string.Format("迟缓：{0}s", (int)m_componentSlowdown.m_SlowDuration);//传入变量组成第一段文字
+                        buffinfo = buffinfo + "\n" + txt1;
+                    }
+                    if (componentDizzy.m_DizzyDuration > 0)
+                    {
+
+                        string txt1 = string.Format("眩晕：{0}s", (int)componentDizzy.m_DizzyDuration);//传入变量组成第一段文字
+                        buffinfo = buffinfo + "\n" + txt1;
+                    }
+                    if (componentJump.m_JumpDuration > 0)
+                    {
+
+                        string txt1 = string.Format("跳跃强化：{0}s", (int)componentJump.m_JumpDuration);//传入变量组成第一段文字
+                        buffinfo = buffinfo + "\n" + txt1;
+                    }
 
                 }
                 Buffscreen.Text = buffinfo;
             }//玩家信息状态栏目
+
+
            
-           
 
 
 
-			#region 村庄区块
-			List<NewModLoaderShengcheng.RoadPoint> listRD = NewModLoaderShengcheng.listRD;
-			List<NewModLoaderShengcheng.BuildPoint> listBD = NewModLoaderShengcheng.listBD;
-			
-			if (listRD.Count !=0&&isvillageLoading==false)//村庄代码区块
-			{
-				isvillageLoading = true;
-				if (FCSubsystemTown.Village_start.Count !=0)
-				{
-					if((FCSubsystemTown.Village_start.Count-num_village4)>0)//如果村庄生成有变化，实时提醒。
-                    {
-						num_village4++;
-						string txt = $"检测到村庄已经生成，玩家可前往探索！坐标为：{FCSubsystemTown.Village_start[num_village4-1]}";
-						m_componentPlayer.ComponentGui.DisplaySmallMessage(txt, Color.White, true, true);//显示通知
-					}
-					
-					
-				}
-				if (ischunkloding == false)
-				{
-					for (int i = 0; i < listRD.Count; i++)
-					{
-
-					  Shengcheng1.AddChunks007(listRD[i].chunkCoords.X, listRD[i].chunkCoords.Y);//加载区块
-					  await Task.Delay(100);
-
-					}
-					ischunkloding = true;
-				}
-
-				for (int i = 0; i < 8; i++)
-				{
-					if (listRD.Count == 0)
-					{
-						break;
-					}
-					TerrainChunk chunk_v = m_systemTerrain.Terrain.GetChunkAtCell(listRD[i].Position.X, listRD[i].Position.Z);
-					int visiblerange = SettingsManager.VisibilityRange;
-					
-					if (chunk_v == null)//如果区块为空，则跳过该路径点的生成。
-					{
-						continue;
-					}
-					else 
-                    {
-						Point3 point = Terrain.ToCell(m_componentPlayer.ComponentBody.Position);//玩家所在方块坐标
-						int chunkX = chunk_v.Origin.X;
-						int chunkY = chunk_v.Origin.Y;
-						int chunkX1 = chunk_v.Coords.X;
-						int chunkY1 = chunk_v.Coords.Y;
-						double distance1 = Math.Sqrt(((Math.Abs(listRD[i].Position.X - point.X)) * (Math.Abs(listRD[i].Position.X - point.X))) + ((Math.Abs(listRD[i].Position.Z - point.Z)) * (Math.Abs(listRD[i].Position.Z - point.Z))));
-						int distance_int = (int)distance1;//计算路径点目标位置与玩家真实距离。
-						double distance2 =  Math.Sqrt(((Math.Abs(chunkX - point.X)) * (Math.Abs(chunkX - point.X))) + ((Math.Abs(chunkY - point.Z)) * (Math.Abs(chunkY - point.Z))));
-						int distance_int2 = (int)distance2;//计算目标真实区块与玩家真实距离。
-						
-						Point2 point_t1 = (chunkX1, chunkY1);//如果可以生成，则先获取绝对坐标，比较区块字典，如果发现是已生成区块，则不生成。
-
-						bool ischunkload = FCSubsystemTownChunk.Dic_Chunk_Village.ContainsKey(point_t1);//检测存档保存的坐标
-						bool ischunkload2 =NewModLoaderShengcheng.Dic_Chunk_Village3.ContainsKey(point_t1);//检测游戏进行时候的坐标
-
-						if (ischunkload == false && ischunkload2 == false)
-                        {
-							await Task.Delay(250);
-							await Shengcheng1.FCGenerateVillage(chunk_v, m_systemTerrain);
-						}
-							
-
-						    /*if (distance_int < (visiblerange / 3 * 2) && distance_int2 < (visiblerange / 3 * 2)-3)//如果距离小于三分之
-							{
-
-
-								//Shengcheng1.AddChunks007(chunk_v.Coords.X, chunk_v.Coords.Y);//加载区块
-								
-								//Shengcheng1.RemoveChunks007(chunk_v.Coords.X, chunk_v.Coords.Y);//卸载区块
-
-							}*/
-						
-						
-							/*if (distance_int < visiblerange-32  && distance_int2 < visiblerange -32)//如果距离小于三分之
-							{
-
-
-								//Shengcheng1.AddChunks007(chunk_v.Coords.X, chunk_v.Coords.Y);//加载区块
-								await Shengcheng1.FCGenerateVillage(chunk_v, m_systemTerrain);
-								//Shengcheng1.RemoveChunks007(chunk_v.Coords.X, chunk_v.Coords.Y);//卸载区块
-
-							}
-						
-						
-							if (distance_int < (visiblerange / 3 * 2) && distance_int2 < 128)//如果距离小于三分之
-							{
-
-
-								//Shengcheng1.AddChunks007(chunk_v.Coords.X, chunk_v.Coords.Y);//加载区块
-								await Shengcheng1.FCGenerateVillage(chunk_v, m_systemTerrain);
-								//Shengcheng1.RemoveChunks007(chunk_v.Coords.X, chunk_v.Coords.Y);//卸载区块
-
-							}*/
-						
-						
-					       
-					}
-
-                    
-				}
-				if(listRD.Count != 0)//如果它依然没生成完毕，则重置一次
-                {
-					isvillageLoading = false;
-                }
-				if (listRD.Count == 0)
-				{
-					/*for (int i = 0; i < listRD.Count; i++)
-                    {
-						Shengcheng1.RemoveChunks007(listRD[i].chunkCoords.X, listRD[i].chunkCoords.Y);
-                    }*/
-					for (int i = 0; i < listRD.Count; i++)
-					{
-
-
-					   Shengcheng1.RemoveChunks007(listRD[i].chunkCoords.X, listRD[i].chunkCoords.Y);
-
-
-					}
-					listRD.Clear();
-					listBD.Clear();
-					isvillageLoading = false;
-					ischunkloding = false;
-					
-				}
-			}
-            #endregion
         }
     }
+
+	public class FCComponentPC:Component, IUpdateable
+    {
+        public SubsystemTerrain m_systemTerrain;
+        public SubsystemTime m_subsystemTime;
+        public ComponentPlayer m_componentPlayer;
+		public ComponentCreature m_componentCreature;
+        public SubsystemWorldDemo m_subsystemWorldDemo;
+		public SubsystemFluidBlockBehavior m_fluidBlockBehavior;
+        public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
+		{
+            m_systemTerrain = Project.FindSubsystem<SubsystemTerrain>(true);
+            m_componentCreature = Entity.FindComponent<ComponentCreature>(true);
+			m_fluidBlockBehavior = Project.FindSubsystem<SubsystemFluidBlockBehavior>(true);
+
+            m_subsystemTime = Project.FindSubsystem<SubsystemTime>(true);
+            m_subsystemWorldDemo = Project.FindSubsystem<SubsystemWorldDemo>(true);
+            base.Load(valuesDictionary, idToEntityMap);
+		}
+        public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
+        {
+            base.Save(valuesDictionary, entityToIdMap);
+           
+
+
+        }
+        public UpdateOrder UpdateOrder => UpdateOrder.Default;
+
+		public float Gravity
+		{
+			get
+			{
+				return  10-g;
+			}
+		}
+        public float g;
+        public  void Update(float dt)
+        {
+            
+
+            WorldType worldType = m_subsystemWorldDemo.worldType;//获取当前所在世界
+            
+            if (worldType == WorldType.Default)
+            {
+                //如果为主世界，则怎么样
+            }
+           
+            else if (worldType == WorldType.Moon)
+            {
+                //如果为月球,重力为6分之一
+                /*if (m_componentbody != null)
+                {
+                    m_componentbody.IsGravityEnabled = false;
+                    m_componentbody.m_velocity.Y = m_componentbody.m_velocity.Y - 10f/6f * dt;
+                    if (m_componentbody.ImmersionFactor > 0f)
+                    {
+                        float num = m_componentbody.ImmersionFactor * (1f + 0.03f * MathUtils.Sin((float)MathUtils.Remainder(2.0 * m_componentbody.m_subsystemTime.GameTime, 6.2831854820251465)));
+                        m_componentbody.m_velocity.Y = m_componentbody.m_velocity.Y + 10f * (1f / m_componentbody.Density * num) * dt;
+                    }
+
+                }*/
+                if (m_componentCreature.ComponentLocomotion.m_flying == false && m_componentCreature.ComponentLocomotion.m_climbing == false)//不在飞行
+                {
+					g = 10f * 5f / 6f;
+                    m_componentCreature.ComponentBody.m_velocity.Y = m_componentCreature.ComponentBody.m_velocity.Y +  g * dt;
+                }
+                
+
+
+            }
+            else if (worldType == WorldType.StationMoon)
+            {
+				/*if(m_componentPlayer!=null)
+				{
+					m_componentPlayer.ComponentBody.m_velocity.Y = m_componentPlayer.ComponentBody.m_velocity.Y + 9.8f * dt;
+                }*/
+				//m_fluidBlockBehavior.m_toUpdate.Clear();//禁止水流动
+                Point3 point1 = Terrain.ToCell(m_componentCreature.ComponentBody.Position);//玩家所在方块坐标
+				
+				if(point1.Y<0&&point1.Y>-300)
+				{
+                     g = MathUtils.Lerp(5f,0.1f, MathUtils.Abs(point1.Y/301));//太阳大小
+                }
+				else
+				{
+					 g = 9.8f;
+
+                }
+                if (m_componentCreature.ComponentLocomotion.m_flying == false&& m_componentCreature.ComponentLocomotion.m_climbing == false)//不在飞行
+				{
+					m_componentCreature.ComponentBody.m_velocity.Y = m_componentCreature.ComponentBody.m_velocity.Y + g * dt;
+					//m_componentCreature.ComponentBody.IsGravityEnabled = false;
+                }
+                   
+
+                m_componentPlayer = Entity.FindComponent<ComponentPlayer>();
+				if(m_componentPlayer!=null)
+				{
+                    if (m_componentPlayer.ComponentInput.PlayerInput.Jump && m_componentPlayer.ComponentLocomotion.m_falling)
+                    {
+                        Vector3 velocity = m_componentPlayer.ComponentBody.Velocity;
+                        m_componentPlayer.ComponentBody.Velocity = new Vector3(velocity.X, 3f, velocity.Z);
+                    }
+                    if ((m_componentPlayer.ComponentInput.PlayerInput.ToggleSneak ) && m_componentPlayer.ComponentLocomotion.m_falling)
+                    {
+
+                        Vector3 velocity = m_componentPlayer.ComponentBody.Velocity;
+                        m_componentPlayer.ComponentBody.Velocity = new Vector3(velocity.X, -3f, velocity.Z);
+                    }
+                }
+
+               
+
+
+
+
+
+            }
+        }
+
+    }//玩家和生物共有组件
 
 
 }
 
-namespace Game
-{
-    /*public class FCSubsystemBlocksTexture : Subsystem
-    {
-        public Texture2D BlocksTexture { get; set; }
 
-        public override void Load(ValuesDictionary valuesDictionary)
-        {
-            Display.DeviceReset += Display_DeviceReset;
-            this.LoadBlocksTexture();
-        }
-
-        public override void Dispose()
-        {
-            Display.DeviceReset -= Display_DeviceReset;
-            DisposeBlocksTexture();
-        }
-
-        public void LoadBlocksTexture()
-        {
-            SubsystemGameInfo subsystemGameInfo = Project.FindSubsystem<SubsystemGameInfo>(true);
-            BlocksTexture = BlocksTexturesManager.LoadTexture(subsystemGameInfo.WorldSettings.BlocksTextureName);
-        }
-
-        public void DisposeBlocksTexture()
-        {
-            if (BlocksTexture != null && !ContentManager.IsContent(BlocksTexture))
-            {
-                BlocksTexture.Dispose();
-                BlocksTexture = null;
-            }
-        }
-
-        public void Display_DeviceReset()
-        {
-            LoadBlocksTexture();
-        }
-    }*/
-
-
-}//sen值子系统
 
 namespace Game
 {
     #region 新生命组件
     public class FCComponentHealth : ComponentHealth, IUpdateable
     {
-        /*public float MaxHealth//获取最大生命值
-		{
-			get { return m_maxhealth; }
-
-		}
-
-		public float m_maxhealth;*/
+		public SubsystemWorldDemo m_subsystemWorldDemo;
         public new ComponentPlayer m_componentPlayer;
         public ComponentTest1 m_componentTest1;
+		public ComponentHealth m_componentHealth = new ComponentHealth();
        
         public new void Update(float dt)
         {
-            
+			
+			WorldType worldType = m_subsystemWorldDemo.worldType;
             //抗性值用来决定生物对攻击、跌落和火焰的抗性。这些值可能会因装备或其他游戏效果而变化。
             AttackResilience = m_attackResilience * AttackResilienceFactor;
             FallResilience = m_fallResilience * FallResilienceFactor;
@@ -1391,6 +1140,21 @@ namespace Game
                 }
                    
             }
+			else if(Health==1)
+			{
+                if (m_componentTest1 != null)
+                {
+                    if (m_componentTest1.m_sen <= 70 && m_componentTest1.m_sen >= 25)
+                    {
+                        m_componentTest1.m_sen = m_componentTest1.m_sen + (0.5f * dt);//缓慢恢复san值
+                    }
+					if(m_componentTest1.m_mp<1)
+					{
+                        m_componentTest1.m_mp = m_componentTest1.m_mp + (0.5f * dt)/m_componentTest1.m_Maxmp;//缓慢恢复san值
+                    }
+
+                }
+            }
 
 
             if (BreathingMode == BreathingMode.Air)
@@ -1399,7 +1163,25 @@ namespace Game
 
                 
                 int cellContents = m_subsystemTerrain.Terrain.GetCellContents(Terrain.ToCell(position.X), Terrain.ToCell(m_componentCreature.ComponentCreatureModel.EyePosition.Y), Terrain.ToCell(position.Z));
-                Air = ((BlocksManager.Blocks[cellContents] is FluidBlock || position.Y > 259f) ? MathUtils.Saturate(Air - dt / AirCapacity) : 1f);
+                
+                if (worldType == WorldType.StationMoon)//如果是主世界（地球）
+				{
+					Air = Air - dt / AirCapacity;
+
+                }
+				else if(worldType == WorldType.Moon)
+				{
+                    Air = Air - dt / AirCapacity;
+                }
+				else
+				{
+                    Air = ((BlocksManager.Blocks[cellContents] is FluidBlock || position.Y > 600f || position.Y < 0f) ? MathUtils.Saturate(Air - dt / AirCapacity) : 1f);
+                }
+				if(Air<0f)
+				{
+					Air = 0f;
+				}
+
             }
             else if (BreathingMode == BreathingMode.Water)
             {
@@ -1410,7 +1192,7 @@ namespace Game
             //当生物的身体一定程度上浸没在岩浆中时，将会受到伤害，并且屏幕会有红色效果表示痛苦。
             if (m_componentCreature.ComponentBody.ImmersionFactor > 0f && m_componentCreature.ComponentBody.ImmersionFluidBlock is MagmaBlock)
             {
-                Injure(2f * m_componentCreature.ComponentBody.ImmersionFactor * dt, null, false, LanguageControl.Get(base.GetType().Name, 1));
+                Injure(2f * m_componentCreature.ComponentBody.ImmersionFactor * dt, null, false, LanguageControl.Get(m_componentHealth.GetType().Name, 1));
 				
                 float num2 = 1.1f + 0.1f * (float)MathUtils.Sin(12.0 * m_subsystemTime.GameTime);
                 m_redScreenFactor = MathUtils.Max(m_redScreenFactor, num2 * 1.5f * m_componentCreature.ComponentBody.ImmersionFactor);
@@ -1426,7 +1208,7 @@ namespace Game
                     num4 /= m_componentPlayer.ComponentLevel.ResilienceFactor;
                     //m_componentTest1.m_sen = m_componentTest1.m_sen - 1 * dt;//受伤减少sen值
                 }
-                Injure(num4, null, false, LanguageControl.Get(base.GetType().Name, 2));
+                Injure(num4, null, false, LanguageControl.Get(m_componentHealth.GetType().Name, 2));
 
             }
             m_wasStanding = (m_componentCreature.ComponentBody.StandingOnValue != null || m_componentCreature.ComponentBody.StandingOnBody != null);
@@ -1441,7 +1223,7 @@ namespace Game
                 {
                     num5 /= m_componentPlayer.ComponentLevel.ResilienceFactor;
                 }
-                Injure(num5, null, false, LanguageControl.Get(base.GetType().Name, 7));
+                Injure(num5, null, false, LanguageControl.Get(m_componentHealth.GetType().Name, 7));
                 //m_componentTest1.m_sen = m_componentTest1.m_sen - 1 * dt;//受伤减少sen值
             }
             if (flag && (m_componentOnFire.IsOnFire || m_componentOnFire.TouchesFire))
@@ -1451,7 +1233,7 @@ namespace Game
                 {
                     num6 /= m_componentPlayer.ComponentLevel.ResilienceFactor;
                 }
-                Injure(num6, m_componentOnFire.Attacker, false, LanguageControl.Get(base.GetType().Name, 5));
+                Injure(num6, m_componentOnFire.Attacker, false, LanguageControl.Get(m_componentHealth.GetType().Name, 5));
                 //m_componentTest1.m_sen = m_componentTest1.m_sen - 1 * dt;//受伤减少sen值
             }
             if (flag && CanStrand && m_componentCreature.ComponentBody.ImmersionFactor < 0.25f)
@@ -1461,7 +1243,7 @@ namespace Game
                 int num7 = 0;
                 if (!(standingOnValue.GetValueOrDefault() == num7 & standingOnValue != null) || m_componentCreature.ComponentBody.StandingOnBody != null)
                 {
-                    Injure(0.05f, null, false, LanguageControl.Get(base.GetType().Name, 6));
+                    Injure(0.05f, null, false, LanguageControl.Get(m_componentHealth.GetType().Name, 6));
                 }
             }
 
@@ -1570,6 +1352,7 @@ namespace Game
             m_componentCreature = base.Entity.FindComponent<ComponentCreature>(true);
             m_componentPlayer = base.Entity.FindComponent<ComponentPlayer>();
             m_componentOnFire = base.Entity.FindComponent<ComponentOnFire>(true);
+           
             AttackResilience = valuesDictionary.GetValue<float>("AttackResilience");
             FallResilience = valuesDictionary.GetValue<float>("FallResilience");
             FireResilience = valuesDictionary.GetValue<float>("FireResilience");
@@ -1593,7 +1376,10 @@ namespace Game
             {
                 IsInvulnerable = true;
             }
+
+            
             m_componentTest1 = m_componentPlayer?.Entity.FindComponent<ComponentTest1>();
+            m_subsystemWorldDemo = Project.FindSubsystem<SubsystemWorldDemo>(true);
 
         }
         
@@ -1651,9 +1437,59 @@ namespace Game
 			return 0;
 		}
 	}
-	#endregion
-	#region 2D方块外置材质
-	public abstract class FCTwoDBlock : Block
+    public abstract class FConeFaceBlock : CubeBlock
+    {
+        public override void Initialize()
+        {
+            m_texture = ContentManager.Get<Texture2D>("Textures/FCBlock", null);
+        }
+
+		public int index1;
+        public FConeFaceBlock(int index)
+        {
+			index1 = index;//获取贴图位置
+        }
+
+        public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
+        {
+            generator.GenerateCubeVertices(this, value, x, y, z, Color.White, geometry.GetGeometry(this.m_texture).OpaqueSubsetsByFace);
+        }
+
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
+            BlocksManager.DrawCubeBlock(primitivesRenderer, value, new Vector3(size), ref matrix, color, color, environmentData, this.m_texture);
+        }
+        public override BlockDebrisParticleSystem CreateDebrisParticleSystem(SubsystemTerrain subsystemTerrain, Vector3 position, int value, float strength)
+        {
+            return new BlockDebrisParticleSystem(subsystemTerrain, position, strength, DestructionDebrisScale, Color.White, GetFaceTextureSlot(0, value), m_texture);
+        }
+
+        public override int GetTextureSlotCount(int value)
+        {
+            return 16;
+        }
+
+        public override int GetFaceTextureSlot(int face, int value)
+        {
+            switch (face)
+            {
+                case 0: return index1;//  右				
+                case 1: return index1; //后
+                case 2: return index1; //左
+                case 3: return index1;//前
+                case 4: return index1;//上
+                case 5: return index1;//下
+            }
+            return 0;
+        }
+
+
+
+        public Texture2D m_texture;
+    }
+    #endregion
+    #region 2D方块外置材质
+    public abstract class FCTwoDBlock : Block
 	{
 		public Texture2D m_texture;
 
@@ -1680,10 +1516,11 @@ namespace Game
 		}
 	}
 
-	#endregion
+    #endregion
+   
 
-	#region 交叉植物方块
-	public abstract class FCCrossBlocks : CrossBlock
+    #region 交叉植物方块
+    public abstract class FCCrossBlocks : CrossBlock
 	{
 		public Texture2D m_texture;
 		public string m_textureRoute;
@@ -1723,972 +1560,160 @@ namespace Game
 
     #region 物品不动区1.01版本
 
-    #region 1.0版本物品
-    public class Dangao : FlatBlock
-	{
-
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-
-
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/dangao", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 962;
-
-		private Texture2D m_texture;
-	}
-
-	public class Beer : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/beer", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 901;
-
-		private Texture2D m_texture;
-	}
-
-	public class Boliping : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/boliping", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 902;
-
-		private Texture2D m_texture;
-	}
-
-	public class Cong : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/cong", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 903;
-
-		private Texture2D m_texture;
-	}
-
-	public class Guazi : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/guazi", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 904;
-
-		private Texture2D m_texture;
-	}
-
-	public class Hamburger : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/hamburger", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 905;
-
-		private Texture2D m_texture;
-	}
-
-	public class Huangmengji : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/huangmengji", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 906;
-
-		private Texture2D m_texture;
-	}
-
-	public class Jiangyou : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/jiangyou", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 907;
-
-		private Texture2D m_texture;
-	}
-
-	public class Jiangyoutong : BucketBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			Model model = ContentManager.Get<Model>("Models/FullBucket", null);
-			Matrix boneAbsoluteTransform = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Bucket", true).ParentBone);
-			Matrix boneAbsoluteTransform2 = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Contents", true).ParentBone);
-			this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Contents", true).MeshParts[0], boneAbsoluteTransform2 * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, new Color(79, 56, 32, 255));
-			this.m_standaloneBlockMesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.8125f, 0.6875f, 0f), -1);
-			this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Bucket", true).MeshParts[0], boneAbsoluteTransform * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, Color.White);
-			base.Initialize();
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawMeshBlock(primitivesRenderer, this.m_standaloneBlockMesh, color, 2f * size, ref matrix, environmentData);
-		}
-
-		public override int GetDamageDestructionValue(int value)
-		{
-			return 245;
-		}
-
-		public const int Index = 908;
-
-		public BlockMesh m_standaloneBlockMesh = new BlockMesh();
-	}
-
-	
-
-	public class Jiutong : BucketBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			Model model = ContentManager.Get<Model>("Models/FullBucket", null);
-			Matrix boneAbsoluteTransform = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Bucket", true).ParentBone);
-			Matrix boneAbsoluteTransform2 = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Contents", true).ParentBone);
-			this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Contents", true).MeshParts[0], boneAbsoluteTransform2 * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, new Color(255, 204, 0, 255));
-			this.m_standaloneBlockMesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.8125f, 0.6875f, 0f), -1);
-			this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Bucket", true).MeshParts[0], boneAbsoluteTransform * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, Color.White);
-			base.Initialize();
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawMeshBlock(primitivesRenderer, this.m_standaloneBlockMesh, color, 2f * size, ref matrix, environmentData);
-		}
-
-		public override int GetDamageDestructionValue(int value)
-		{
-			return 245;
-		}
-
-		public const int Index = 910;
-
-		public BlockMesh m_standaloneBlockMesh = new BlockMesh();
-	}
-
-	public class Rotjiutong : BucketBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			Model model = ContentManager.Get<Model>("Models/FullBucket", null);
-			Matrix boneAbsoluteTransform = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Bucket", true).ParentBone);
-			Matrix boneAbsoluteTransform2 = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Contents", true).ParentBone);
-			this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Contents", true).MeshParts[0], boneAbsoluteTransform2 * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, new Color(135, 206, 235, 255));
-			this.m_standaloneBlockMesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.8125f, 0.6875f, 0f), -1);
-			this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Bucket", true).MeshParts[0], boneAbsoluteTransform * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, Color.White);
-			base.Initialize();
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawMeshBlock(primitivesRenderer, this.m_standaloneBlockMesh, color, 2f * size, ref matrix, environmentData);
-		}
-
-		public override int GetDamageDestructionValue(int value)
-		{
-			return 245;
-		}
-
-		public const int Index = 911;
-
-		public BlockMesh m_standaloneBlockMesh = new BlockMesh();
-	}
-
-	public class Mianbaopian : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/mianbaopian", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 912;
-
-		private Texture2D m_texture;
-	}
-
-	public class Qingtuan : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/qingtuan", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 913;
-
-		private Texture2D m_texture;
-	}
-
-	public class Qingzhengyu : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/qingzhengyu", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 914;
-
-		private Texture2D m_texture;
-	}
-
-	public class Rawguazi : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/rawguazi", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 915;
-
-		private Texture2D m_texture;
-	}
-
-	public class Rawjikuai : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/rawjikuai", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 916;
-
-		private Texture2D m_texture;
-	}
-
-	public class Rawxiandan : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/rawxiandan", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 917;
-
-		private Texture2D m_texture;
-	}
-
-	public class Readymeat : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/readymeat", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 918;
-
-		private Texture2D m_texture;
-	}
-
-	public class Salt : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/salt", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 919;
-
-		private Texture2D m_texture;
-	}
-
-	public class Shousi : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/shousi", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 920;
-
-		private Texture2D m_texture;
-	}
-
-	public class Shuxiandan : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/shuxiandan", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 921;
-
-		private Texture2D m_texture;
-	}
-
-	public class Xianbing : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/xianbing", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 922;
-
-		private Texture2D m_texture;
-	}
-
-	public class Xiaosurou : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/xiaosurou", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 923;
-
-		private Texture2D m_texture;
-	}
-
-	public class Yanchicken : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/yanchicken", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 924;
-
-		private Texture2D m_texture;
-	}
-
-	public class Yanfish : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/yanfish", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 925;
-
-		private Texture2D m_texture;
-	}
-
-
-	public class Yanrou : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/yanrou", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 926;
-
-		private Texture2D m_texture;
-	}
-
-
-	public class Youping : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/youping", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 927;
-
-		private Texture2D m_texture;
-	}
-
-	public class Youtong : BucketBlock  //亮黄色
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			Model model = ContentManager.Get<Model>("Models/FullBucket", null);
-			Matrix boneAbsoluteTransform = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Bucket", true).ParentBone);
-			Matrix boneAbsoluteTransform2 = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Contents", true).ParentBone);
-			this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Contents", true).MeshParts[0], boneAbsoluteTransform2 * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, new Color(255, 255, 204, 255));
-			this.m_standaloneBlockMesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.8125f, 0.6875f, 0f), -1);
-			this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Bucket", true).MeshParts[0], boneAbsoluteTransform * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, Color.White);
-			base.Initialize();
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawMeshBlock(primitivesRenderer, this.m_standaloneBlockMesh, color, 2f * size, ref matrix, environmentData);
-		}
-
-		public override int GetDamageDestructionValue(int value)
-		{
-			return 245;
-		}
-
-		public const int Index = 928;
-
-		public BlockMesh m_standaloneBlockMesh = new BlockMesh();
-	}
-
-	public class Zhaji : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/zhaji", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 929;
-
-		private Texture2D m_texture;
-
-	}
-
-	public class Xiguapian : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/xiguapian", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 930;
-
-		private Texture2D m_texture;
-
-	}
-    #endregion 
+   
 
     #region  1.06以后的食物，西瓜汁-橘子
+    public class Jiangyoutong : BucketBlock
+    {
+        public override int GetTextureSlotCount(int value)
+        {
+            return 1;
+        }
+        public override int GetFaceTextureSlot(int face, int value)
+        {
+            if (face == -1) return 0;
+            return DefaultTextureSlot;
+        }
+        public override void Initialize()
+        {
+            Model model = ContentManager.Get<Model>("Models/FullBucket", null);
+            Matrix boneAbsoluteTransform = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Bucket", true).ParentBone);
+            Matrix boneAbsoluteTransform2 = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Contents", true).ParentBone);
+            this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Contents", true).MeshParts[0], boneAbsoluteTransform2 * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, new Color(79, 56, 32, 255));
+            this.m_standaloneBlockMesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.8125f, 0.6875f, 0f), -1);
+            this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Bucket", true).MeshParts[0], boneAbsoluteTransform * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, Color.White);
+            base.Initialize();
+        }
+
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
+            BlocksManager.DrawMeshBlock(primitivesRenderer, this.m_standaloneBlockMesh, color, 2f * size, ref matrix, environmentData);
+        }
+
+        public override int GetDamageDestructionValue(int value)
+        {
+            return 245;
+        }
+
+        public const int Index = 928;
+
+        public BlockMesh m_standaloneBlockMesh = new BlockMesh();
+    }//1
+
+
+
+    public class Jiutong : BucketBlock
+    {
+        public override int GetTextureSlotCount(int value)
+        {
+            return 1;
+        }
+        public override int GetFaceTextureSlot(int face, int value)
+        {
+            if (face == -1) return 0;
+            return DefaultTextureSlot;
+        }
+        public override void Initialize()
+        {
+            Model model = ContentManager.Get<Model>("Models/FullBucket", null);
+            Matrix boneAbsoluteTransform = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Bucket", true).ParentBone);
+            Matrix boneAbsoluteTransform2 = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Contents", true).ParentBone);
+            this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Contents", true).MeshParts[0], boneAbsoluteTransform2 * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, new Color(255, 204, 0, 255));
+            this.m_standaloneBlockMesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.8125f, 0.6875f, 0f), -1);
+            this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Bucket", true).MeshParts[0], boneAbsoluteTransform * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, Color.White);
+            base.Initialize();
+        }
+
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
+            BlocksManager.DrawMeshBlock(primitivesRenderer, this.m_standaloneBlockMesh, color, 2f * size, ref matrix, environmentData);
+        }
+
+        public override int GetDamageDestructionValue(int value)
+        {
+            return 245;
+        }
+
+        public const int Index = 929;
+
+        public BlockMesh m_standaloneBlockMesh = new BlockMesh();
+    }//1
+
+    public class Rotjiutong : BucketBlock
+    {
+        public override int GetTextureSlotCount(int value)
+        {
+            return 1;
+        }
+        public override int GetFaceTextureSlot(int face, int value)
+        {
+            if (face == -1) return 0;
+            return DefaultTextureSlot;
+        }
+        public override void Initialize()
+        {
+            Model model = ContentManager.Get<Model>("Models/FullBucket", null);
+            Matrix boneAbsoluteTransform = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Bucket", true).ParentBone);
+            Matrix boneAbsoluteTransform2 = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Contents", true).ParentBone);
+            this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Contents", true).MeshParts[0], boneAbsoluteTransform2 * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, new Color(135, 206, 235, 255));
+            this.m_standaloneBlockMesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.8125f, 0.6875f, 0f), -1);
+            this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Bucket", true).MeshParts[0], boneAbsoluteTransform * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, Color.White);
+            base.Initialize();
+        }
+
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
+            BlocksManager.DrawMeshBlock(primitivesRenderer, this.m_standaloneBlockMesh, color, 2f * size, ref matrix, environmentData);
+        }
+
+        public override int GetDamageDestructionValue(int value)
+        {
+            return 245;
+        }
+
+        public const int Index = 930;
+
+        public BlockMesh m_standaloneBlockMesh = new BlockMesh();
+    }//1
+
+
+
+    public class Youtong : BucketBlock  //亮黄色
+    {
+        public override int GetTextureSlotCount(int value)
+        {
+            return 1;
+        }
+        public override int GetFaceTextureSlot(int face, int value)
+        {
+            if (face == -1) return 0;
+            return DefaultTextureSlot;
+        }
+        public override void Initialize()
+        {
+            Model model = ContentManager.Get<Model>("Models/FullBucket", null);
+            Matrix boneAbsoluteTransform = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Bucket", true).ParentBone);
+            Matrix boneAbsoluteTransform2 = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Contents", true).ParentBone);
+            this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Contents", true).MeshParts[0], boneAbsoluteTransform2 * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, new Color(255, 255, 204, 255));
+            this.m_standaloneBlockMesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.8125f, 0.6875f, 0f), -1);
+            this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Bucket", true).MeshParts[0], boneAbsoluteTransform * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, Color.White);
+            base.Initialize();
+        }
+
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
+            BlocksManager.DrawMeshBlock(primitivesRenderer, this.m_standaloneBlockMesh, color, 2f * size, ref matrix, environmentData);
+        }
+
+        public override int GetDamageDestructionValue(int value)
+        {
+            return 245;
+        }
+
+        public const int Index = 931;
+
+        public BlockMesh m_standaloneBlockMesh = new BlockMesh();
+    }//1
     public class Xiguazhi : BucketBlock
 	{
 		public override int GetTextureSlotCount(int value)
@@ -2726,7 +1751,7 @@ namespace Game
 
 		public BlockMesh m_standaloneBlockMesh = new BlockMesh();
 
-	}
+	}//1
 
 	public class Pingguozhi : BucketBlock
 	{
@@ -2765,7 +1790,7 @@ namespace Game
 
 		public BlockMesh m_standaloneBlockMesh = new BlockMesh();
 
-	}
+	}//1
 
 	public class Juzizhi : BucketBlock
 	{
@@ -2804,7 +1829,7 @@ namespace Game
 
 		public BlockMesh m_standaloneBlockMesh = new BlockMesh();
 
-	}
+	}//1
 
 	public class Cafe : BucketBlock
 	{
@@ -2921,8 +1946,8 @@ namespace Game
 
 
 
-	public class Juzi : FlatBlock
-	{
+	public class Juzi : FCPlatBlock
+    {
 
 		public override int GetTextureSlotCount(int value)
 		{
@@ -2944,19 +1969,20 @@ namespace Game
 		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
 		{
 		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
+           
+            BlocksManager.DrawMeshBlock(primitivesRenderer, m_standaloneBlockMesh, m_texture, color, size*2f , ref matrix, environmentData);
+        }
+        
 
 		public const int Index = 950;
 
 		private Texture2D m_texture;
 	}
 
-	public class Pingguo : FlatBlock
-	{
+	public class Pingguo : FCPlatBlock
+    {
 
 		public override int GetTextureSlotCount(int value)
 		{
@@ -2979,18 +2005,19 @@ namespace Game
 		{
 		}
 
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
 
-		public const int Index = 951;
+            BlocksManager.DrawMeshBlock(primitivesRenderer, m_standaloneBlockMesh, m_texture, color, size * 2f, ref matrix, environmentData);
+        }
+
+        public const int Index = 951;
 
 		private Texture2D m_texture;
 	}
 
-	public class Cocobean : FlatBlock
-	{
+	public class Cocobean : FCPlatBlock
+    {
 
 		public override int GetTextureSlotCount(int value)
 		{
@@ -3013,18 +2040,19 @@ namespace Game
 		{
 		}
 
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
 
-		public const int Index = 952;
+            BlocksManager.DrawMeshBlock(primitivesRenderer, m_standaloneBlockMesh, m_texture, color, size * 2f, ref matrix, environmentData);
+        }
+
+        public const int Index = 952;
 
 		private Texture2D m_texture;
 	}
 
-	public class Cocofeng : FlatBlock
-	{
+	public class Cocofeng : FCPlatBlock
+    {
 		public override int GetTextureSlotCount(int value)
 		{
 			return 1;
@@ -3044,18 +2072,19 @@ namespace Game
 		{
 		}
 
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
 
-		public const int Index = 957;
+            BlocksManager.DrawMeshBlock(primitivesRenderer, m_standaloneBlockMesh, m_texture, color, size * 2f, ref matrix, environmentData);
+        }
+
+        public const int Index = 957;
 
 		private Texture2D m_texture;
 	}
 
-	public class Chocolate : FlatBlock
-	{
+	public class Chocolate : FCPlatBlock
+    {
 		public override int GetTextureSlotCount(int value)
 		{
 			return 1;
@@ -3075,50 +2104,22 @@ namespace Game
 		{
 		}
 
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
 
-		public const int Index = 959;
+            BlocksManager.DrawMeshBlock(primitivesRenderer, m_standaloneBlockMesh, m_texture, color, size * 2f, ref matrix, environmentData);
+        }
 
-		private Texture2D m_texture;
-	}
-
-	public class RawChocolate : FlatBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return DefaultTextureSlot;
-		}
-		public override void Initialize()
-		{
-			base.Initialize();
-			this.m_texture = ContentManager.Get<Texture2D>("Textures/amod/rawqiaokeli", null);
-		}
-
-		public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
-		{
-		}
-
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
-
-		public const int Index = 960;
+        public const int Index = 959;
 
 		private Texture2D m_texture;
-	}
+	}//1
+
+	
 
 
-	public class YHBeer : FlatBlock
-	{
+	public class YHBeer : FCPlatBlock
+    {
 		public override int GetTextureSlotCount(int value)
 		{
 			return 1;
@@ -3138,15 +2139,16 @@ namespace Game
 		{
 		}
 
-		public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
-		{
-			BlocksManager.DrawFlatBlock(primitivesRenderer, value, size * 1f, ref matrix, this.m_texture, Color.White, true, environmentData);
-		}
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
 
-		public const int Index = 968;
+            BlocksManager.DrawMeshBlock(primitivesRenderer, m_standaloneBlockMesh, m_texture, color, size * 2f, ref matrix, environmentData);
+        }
+
+        public const int Index = 968;
 
 		private Texture2D m_texture;
-	}
+	}//1
 
 	public class YHjiutong : BucketBlock //粉色
 	{
@@ -3183,9 +2185,44 @@ namespace Game
 		public const int Index = 966;
 
 		public BlockMesh m_standaloneBlockMesh = new BlockMesh();
-	}
+	}//1
+    public class BloodBucket : BucketBlock //粉色
+    {
+        public override int GetTextureSlotCount(int value)
+        {
+            return 1;
+        }
+        public override int GetFaceTextureSlot(int face, int value)
+        {
+            if (face == -1) return 0;
+            return DefaultTextureSlot;
+        }
+        public override void Initialize()
+        {
+            Model model = ContentManager.Get<Model>("Models/FullBucket", null);
+            Matrix boneAbsoluteTransform = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Bucket", true).ParentBone);
+            Matrix boneAbsoluteTransform2 = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Contents", true).ParentBone);
+            this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Contents", true).MeshParts[0], boneAbsoluteTransform2 * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, Color.DarkRed);
+            this.m_standaloneBlockMesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.8125f, 0.6875f, 0f), -1);
+            this.m_standaloneBlockMesh.AppendModelMeshPart(model.FindMesh("Bucket", true).MeshParts[0], boneAbsoluteTransform * Matrix.CreateRotationY(MathUtils.DegToRad(180f)) * Matrix.CreateTranslation(0f, -0.3f, 0f), false, false, false, false, Color.White);
+            base.Initialize();
+        }
 
-	public class RotYHjiutong : BucketBlock //淡黄色
+        public override void DrawBlock(PrimitivesRenderer3D primitivesRenderer, int value, Color color, float size, ref Matrix matrix, DrawBlockEnvironmentData environmentData)
+        {
+            BlocksManager.DrawMeshBlock(primitivesRenderer, this.m_standaloneBlockMesh, color, 2f * size, ref matrix, environmentData);
+        }
+
+        public override int GetDamageDestructionValue(int value)
+        {
+            return 245;
+        }
+
+        public const int Index = 962;
+
+        public BlockMesh m_standaloneBlockMesh = new BlockMesh();
+    }//1
+    public class RotYHjiutong : BucketBlock //淡黄色
 	{
 		public override int GetTextureSlotCount(int value)
 		{
@@ -3220,7 +2257,7 @@ namespace Game
 		public const int Index = 967;
 
 		public BlockMesh m_standaloneBlockMesh = new BlockMesh();
-	}
+	}//1
     #endregion
 
 
@@ -3339,6 +2376,43 @@ namespace Game
 
 		public const int Index = 938;
 	}
+    public class MoonStoneBlock : FConeFaceBlock//月岩
+    {
+		public MoonStoneBlock():base(0)//0号位置
+		{
+
+		}
+
+        public override BlockDebrisParticleSystem CreateDebrisParticleSystem(SubsystemTerrain subsystemTerrain, Vector3 position, int value, float strength)
+        {
+            return new BlockDebrisParticleSystem(subsystemTerrain, position, strength, DestructionDebrisScale, Color.White, GetFaceTextureSlot(0, value), m_texture);
+        }
+       /* public override int GetFaceTextureSlot(int face, int value)
+        {
+            switch (face)
+            {
+                case 0:
+                    return 0;
+                case 1:
+                    return 0;
+                case 2:
+                    return 0;
+                case 3:
+                    return 0;
+                case 4:
+                    return 0;
+                case 5:
+                    return 0;
+                default:
+                    return 0;
+            }
+        }*/
+        
+            
+        
+
+        public const int Index = 960;
+    }
 
     #region 树木区
     public class CocoWoodBlock : FCSixFaceBlock
@@ -3594,25 +2668,7 @@ namespace Game
 
     #endregion 
 
-    public class ShuipingBlock : FCTwoDBlock
-	{
-		public override int GetTextureSlotCount(int value)
-		{
-			return 1;
-		}
-		public override int GetFaceTextureSlot(int face, int value)
-		{
-			if (face == -1) return 0;
-			return 2;
-		}
-
-		public ShuipingBlock()
-		   : base("Textures/amod/shuiping")
-		{
-		}
-
-		public const int Index = 965;
-	}
+   
 
 	public class FCZLSBlock : CubeBlock//已解决3d方块外置贴图掉落碎片外置问题。
 	{
@@ -3654,7 +2710,7 @@ namespace Game
 		public const int Index = 980;
 
 
-		public class FCYHGrassBlock : Block
+		/*public class FCYHGrassBlock : Block
 		{
 			public override int GetFaceTextureSlot(int face, int value)
 			{
@@ -3694,9 +2750,9 @@ namespace Game
 			}
 
 			public  const int Index = 984;
-		}
+		}*/
 
-		public class FCRDGrassBlock : Block
+		/*public class FCRDGrassBlock : Block
 		{
 			public override int GetFaceTextureSlot(int face, int value)
 			{
@@ -3736,7 +2792,7 @@ namespace Game
 			}
 
 			public const int Index = 985;
-		}
+		}*/
 	}
 
 
@@ -3744,11 +2800,11 @@ namespace Game
 	#endregion
 	#endregion
 
-	#region 物品子系统
+	#region 物品子系统BUFF
 	public class ChocolateSystem : SubsystemBlockBehavior
 	{
-		
-		public override int[] HandledBlocks
+        public SubsystemAudio m_subsystemAudio;
+        public override int[] HandledBlocks
 		{
 			get
 			{
@@ -3780,7 +2836,7 @@ namespace Game
 					componentPlayer.ComponentVitalStats.Food = 1f;
 					componentPlayer.ComponentVitalStats.Stamina +=0.7f;//耐力
 					
-					componentPlayer.ComponentGui.DisplaySmallMessage("吃了巧克力,你不再感到饥饿。你感觉浑身充满了力量！（耐力和饱食度大量恢复！）", Color.White, true, true);
+					componentPlayer.ComponentGui.DisplaySmallMessage("吃了蛋仔牌巧克力,你不再感到饥饿。你感觉浑身充满了力量！（耐力和饱食度大量恢复！）", Color.White, true, true);
                     if (m_componentTest1 != null)
 					{
                         m_componentTest1.m_sen += 20f;//提升sen值！
@@ -3806,7 +2862,7 @@ namespace Game
 				{
 					
 					
-					buffManager.AddBuff(1, 2f, 1.5f);
+					buffManager.AddBuff(1, 2f, 1f);
 					//componentHealBuffA.StartHealBuff(2f, 1.5f);//否则，设置一个两秒，速率0.5的恢复效果
 					
 					if (componentPlayer.ComponentSickness.IsSick==true)
@@ -3875,14 +2931,117 @@ namespace Game
                 }//樱花酒
 				else if(F987ID == 987)
 				{
-					if(Terrain.ExtractData(componentMiner.ActiveBlockValue) ==6)
+					int ID = Terrain.ExtractData(componentMiner.ActiveBlockValue);
+					if(ID==0)//实体灵能
+					{
+						//m_componentTest1.m_mp += 10*1/ m_componentTest1.MaxMagicPower;
+                        //m_componentTest1.m_Maxmp += 10;
+                        m_componentTest1.m_mplevel += 0.01f;
+						m_componentTest1.m_mp += 0.5f;
+                        componentPlayer.ComponentGui.DisplaySmallMessage("I need More POWER!", Color.LightYellow, true, true);
+                        //m_subsystemAudio.PlaySound("Audio/MagicPowerGet", 1f, 0f, 0f,0.1f);
+                    }
+                    else if (ID ==6)//夜视
 					{
 						buffManager.AddBuff(9, 20f);
                         componentPlayer.ComponentGui.DisplaySmallMessage("喝下夜视药水，你终于摆脱了无尽的黑夜！", Color.Purple, true, true);
-                        AudioManager.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f,0.1f);
                         componentMiner.RemoveActiveTool(1);
                     }
-				}
+                    else if (ID == 7)//治疗
+                    {
+                        buffManager.AddBuff(1, 60f,3);
+                        componentPlayer.ComponentGui.DisplaySmallMessage("痛苦很快就会消失……", Color.LightRed ,true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f,0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 8)//攻击力加成
+                    {
+                        buffManager.AddBuff(2, 20f,10f);
+                        componentPlayer.ComponentGui.DisplaySmallMessage("勇敢战斗吧！", Color.DarkRed, true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f,0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 9)//速度加成
+                    {
+                        buffManager.AddBuff(3, 20f);
+                        componentPlayer.ComponentGui.DisplaySmallMessage("迅疾如风！", Color.Green, true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 10)//跳跃加成
+                    {
+                        buffManager.AddBuff(10, 60f);
+                        componentPlayer.ComponentGui.DisplaySmallMessage("喝下这个你会跳的和兔蛋仔一样高", Color.LightGreen, true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 11)//经验加成
+                    {
+						componentPlayer.ComponentLevel.AddExperience(10, false);
+                        componentPlayer.ComponentGui.DisplaySmallMessage("一瓶经验药水提供10点经验", Color.LightYellow, true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 12)//灵能药水
+                    {
+						m_componentTest1.m_mp += 0.2f;
+                        componentPlayer.ComponentGui.DisplaySmallMessage("快速恢复枯竭的灵能（不同等级灵能药水恢复不同）", Color.LightYellow , true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 13)//剧毒
+                    {
+						componentPlayer.ComponentHealth.Health = 0.5f * componentPlayer.ComponentHealth.Health;
+                        componentPlayer.ComponentGui.DisplaySmallMessage("最毒不过妇人心。", Color.Purple, true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 14)//致盲
+                    {
+                        buffManager.AddBuff(4, 5f);
+                        componentPlayer.ComponentGui.DisplaySmallMessage("你感觉眼前好像蒙了一层黑障……", Color.Gray, true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 15)//瘟疫
+                    {
+                        
+                        componentPlayer.ComponentGui.DisplaySmallMessage("这个药水会让你立刻生病！", Color.DarkGreen, true, true);
+						componentPlayer.ComponentSickness.StartSickness();
+						componentPlayer.ComponentFlu.StartFlu();
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 16)//迟缓
+                    {
+                        buffManager.AddBuff(6, 10f);
+                        componentPlayer.ComponentGui.DisplaySmallMessage("你感觉你的双脚如同灌了铅一样……", new Color(60,60,60), true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 17)//眩晕
+                    {
+                        buffManager.AddBuff(11, 3f);
+                        componentPlayer.ComponentGui.DisplaySmallMessage("脑袋晕乎乎的……", Color.White, true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 18)//降sen药水
+                    {
+                        m_componentTest1.m_sen -= 100f;
+                        componentPlayer.ComponentGui.DisplaySmallMessage("为什么要想不开喝这个？或者说……你准备好了……", Color.DarkRed, true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                    else if (ID == 19)//升sen
+                    {
+						m_componentTest1.m_sen += 100f;
+                        componentPlayer.ComponentGui.DisplaySmallMessage("永远幸福……", Color.DarkRed, true, true);
+                        m_subsystemAudio.PlaySound("Audio/Creatures/Drink/drink1", 1f, 0f, 0f, 0.1f);
+                        componentMiner.RemoveActiveTool(1);
+                    }
+                }
 
 
             }
@@ -3894,9 +3053,10 @@ namespace Game
 		{
 			base.Load(valuesDictionary);
 			m_subsystemTerrain = base.Project.FindSubsystem<SubsystemTerrain>(true);
+            m_subsystemAudio = base.Project.FindSubsystem<SubsystemAudio>(true);
 
-			
-		}
+
+        }
 
 		public ComponentTest1 m_componentTest1;
 		public ComponentHealth componentHealth;
@@ -4000,7 +3160,7 @@ namespace Game
 
 		private int[] m_maxStick = new int[]
 		{
-			1024,
+			100000,
 			1024,
 			1024,
 			1024,
@@ -4034,26 +3194,26 @@ namespace Game
 
 		private static string[] m_displayNames = new string[]
 		{
-            "实体灵能",
-            "基础的闪烁西瓜",
-            "基础的闪烁苹果",
-            "基础的闪烁橘子",
-            "基础的闪烁可可豆",
-            "基础的闪烁可可粉",
-            "夜视药水I",
-            "治疗药水I",
-            "攻击力药水I",
-            "速度药水I",
-            "跳跃药水I",
-            "经验药水I",
-            "灵能药水I",
-            "剧毒药水I",
-            "致盲药水I",
-            "瘟疫药水I",
-            "迟缓药水I",
-            "眩晕药水I",
-            "降sen药水I",
-            "升sen药水I",
+            "实体灵能",//0
+            "基础的闪烁西瓜",//1
+            "基础的闪烁苹果",//2
+            "基础的闪烁橘子",//3
+            "基础的闪烁可可豆",//4
+            "基础的闪烁可可粉",//5
+            "夜视药水I",//6
+            "治疗药水I",//7
+            "攻击力药水I",//8
+            "速度药水I",//9
+            "跳跃药水I",//10
+            "经验药水I",//11
+            "灵能药水I",//12
+            "剧毒药水I",//13
+            "致盲药水I",//14
+            "瘟疫药水I",//15
+            "迟缓药水I",//16
+            "眩晕药水I",//17
+            "降sen药水I",//18
+            "升sen药水I",//19
 
 
 		};
@@ -4159,6 +3319,8 @@ namespace Game
         };
 	}
 
+    
+
     #endregion
     #endregion
     #region buff体系
@@ -4170,6 +3332,28 @@ namespace Game
         {
             componentPlayer = player;
         }
+		//public ComponentHealBuffA componentHealBuffA;
+        public void StopBuffs()
+		{
+            var componentHealBuffA = componentPlayer.Entity.FindComponent<ComponentHealBuffA>();
+            var componentAttackUP = componentPlayer.Entity.FindComponent<ComponentAttackUP>();
+            var componentSpeedUP = componentPlayer.Entity.FindComponent<ComponentSpeedUP>();
+            var componentNightsight = componentPlayer.Entity.FindComponent<ComponentNightsight>();
+            var componentBlind = componentPlayer.Entity.FindComponent<ComponentBlind>();
+            var componentSlow = componentPlayer.Entity.FindComponent<ComponentSlowDown>();
+            var componentJump = componentPlayer.Entity.FindComponent<ComponentJump>();
+            var componentDizzy = componentPlayer.Entity.FindComponent<ComponentDizzy>();
+
+			componentHealBuffA.StopBuff();
+            componentAttackUP.StopBuff();
+            componentSpeedUP.StopBuff();
+            componentNightsight.StopBuff();
+            componentBlind.StopBuff();
+            componentSlow.StopBuff();
+            componentJump.StopBuff();
+            componentDizzy.StopBuff();
+
+        }//解除所有buff。
         public void AddBuffOnUse(int buffType, int activeBlockValue, float duration, float rate)
         {
             switch (activeBlockValue)
@@ -4194,8 +3378,8 @@ namespace Game
             switch (buffType)
             {
                 case BuffTypes.Heal://如果是治疗 一级治疗基础回复是每秒一血。不算被倍率。
-                    float MaxDuration = 20f;//提供统一接口参数
-					float MaxRate = 3f;
+                    float MaxDuration = 120f;//提供统一接口参数
+					float MaxRate = 10f;
                     var componentHealBuffA = componentPlayer.Entity.FindComponent<ComponentHealBuffA>();
                     if (componentHealBuffA != null)
                     {
@@ -4218,13 +3402,13 @@ namespace Game
                                 }
 							}
 
-							if(componentHealBuffA.m_HealRate> MaxRate)//倍率至多为3
+							if(componentHealBuffA.m_HealRate> MaxRate)//倍率至多为10，每秒恢复10
 							{
 								componentHealBuffA.m_HealRate = MaxRate;
 							}
 							else if (componentHealBuffA.HealingRate< MaxRate)
 							{
-                                componentHealBuffA.m_HealRate = 1.1f * componentHealBuffA.m_HealRate;
+                                componentHealBuffA.m_HealRate = 1.01f * componentHealBuffA.m_HealRate;
 								if(componentHealBuffA.m_HealRate > MaxRate)
 								{
 									componentHealBuffA.m_HealRate = MaxRate;
@@ -4237,8 +3421,8 @@ namespace Game
                     break;
                 case BuffTypes.AttackUp://如果是攻击加成 ，攻击加成第一次生效的时候，公式是 原始攻击力 x（1+攻击力加成倍率/100）+2
                     var componentAttackUP = componentPlayer.Entity.FindComponent<ComponentAttackUP>();
-					float MaxDurationATK= 20f;    
-					float MaxATK= 15f;
+					float MaxDurationATK= 60f;    
+					float MaxATK= 50f;
 					float MaxATKRate = 1.02f;//延续攻击buff时候的最大的攻击力加成
                     if (componentAttackUP != null)
                     {
@@ -4282,8 +3466,8 @@ namespace Game
                     break;
                 case BuffTypes.SpeedUp://如果是速度加成,公式是 原始速度 x（1+速度加成倍率/100）+2
                     var componentSpeedUP = componentPlayer.Entity.FindComponent<ComponentSpeedUP>();
-                    float MaxDurationSpeed = 20f;
-                    float MaxSpeed = 3f;
+                    float MaxDurationSpeed = 60f;
+                    float MaxSpeed = 7f;
                     float MaxSpeedRate = 1.01f;//延续速度buff时候的最大的速度加成 目前百分之一
                     if (componentSpeedUP != null)
                     {
@@ -4327,7 +3511,7 @@ namespace Game
                     break;
                 case BuffTypes.Nightsight://如果是速度加成,公式是 原始速度 x（1+速度加成倍率/100）+2
                     var componentNightsight = componentPlayer.Entity.FindComponent<ComponentNightsight>();
-                    float MaxDurationNightsee = 20f;
+                    float MaxDurationNightsee = 120f;
                    
                     if (componentNightsight  != null)
                     {
@@ -4344,7 +3528,7 @@ namespace Game
                             }
                             else if (componentNightsight .m_NightseeDuration < MaxDurationNightsee)//20秒封顶
                             {
-                                componentNightsight .m_NightseeDuration += 10f;//加10秒
+                                componentNightsight .m_NightseeDuration += 60f;//加10秒
                                 if (componentNightsight .m_NightseeDuration > MaxDurationNightsee)
                                 {
                                     componentNightsight.m_NightseeDuration = MaxDurationNightsee;
@@ -4352,6 +3536,130 @@ namespace Game
                             }
 
                            
+                        }
+
+                    }
+                    break;
+                case BuffTypes.Blind://如果是速度加成,公式是 原始速度 x（1+速度加成倍率/100）+2
+                    var componentBlind = componentPlayer.Entity.FindComponent<ComponentBlind>();
+                    float MaxDurationBlind = 5f;
+
+                    if (componentBlind != null)
+                    {
+                        if (componentBlind.IsActive == false)
+                        {
+                            componentBlind.StartBlindBuff(duration,rate);
+                        }
+                        else
+                        {
+
+                            if (componentBlind.m_BlindDuration > MaxDurationBlind)
+                            {
+                                componentBlind.m_BlindDuration = MaxDurationBlind;
+                            }
+                            else if (componentBlind.m_BlindDuration < MaxDurationBlind)//20秒封顶
+                            {
+                                componentBlind.m_BlindDuration += 5f;//加10秒
+                                if (componentBlind.m_BlindDuration > MaxDurationBlind)
+                                {
+                                    componentBlind.m_BlindDuration = MaxDurationBlind;
+                                }
+                            }
+
+
+                        }
+
+                    }
+                    break;
+                case BuffTypes.SlowDown://如果是
+                    var componentSlow = componentPlayer.Entity.FindComponent<ComponentSlowDown>();
+                    float MaxDurationSlow = 5f;
+
+                    if (componentSlow != null)
+                    {
+                        if (componentSlow.IsActive == false)
+                        {
+                            componentSlow.StartBuff(duration, rate);
+                        }
+                        else
+                        {
+
+                            if (componentSlow.m_SlowDuration > MaxDurationSlow)
+                            {
+                                componentSlow.m_SlowDuration = MaxDurationSlow;
+                            }
+                            else if (componentSlow.m_SlowDuration < MaxDurationSlow)//20秒封顶
+                            {
+                                componentSlow.m_SlowDuration += 5f;//加10秒
+                                if (componentSlow.m_SlowDuration > MaxDurationSlow)
+                                {
+                                    componentSlow.m_SlowDuration = MaxDurationSlow;
+                                }
+                            }
+
+
+                        }
+
+                    }
+                    break;
+                case BuffTypes.Jump://如果是跳跃加成
+                    var componentJump = componentPlayer.Entity.FindComponent<ComponentJump>();
+                    float MaxDurationJump = 30f;
+
+                    if (componentJump != null)
+                    {
+                        if (componentJump.IsActive == false)
+                        {
+                            componentJump.StartJumpBuff(duration, rate);
+                        }
+                        else
+                        {
+
+                            if (componentJump.m_JumpDuration > MaxDurationJump)
+                            {
+                                componentJump.m_JumpDuration = MaxDurationJump;
+                            }
+                            else if (componentJump.m_JumpDuration < MaxDurationJump)//30秒封顶
+                            {
+                                componentJump.m_JumpDuration += 5f;//加5秒
+                                if (componentJump.m_JumpDuration > MaxDurationJump)
+                                {
+                                    componentJump.m_JumpDuration = MaxDurationJump;
+                                }
+                            }
+
+
+                        }
+
+                    }
+                    break;
+                case BuffTypes.Dizzy://如果是跳跃加成
+                    var componentDizzy = componentPlayer.Entity.FindComponent<ComponentDizzy>();
+                    float MaxDurationDizzy = 5f;
+
+                    if (componentDizzy != null)
+                    {
+                        if (componentDizzy.IsActive == false)
+                        {
+                            componentDizzy.StartDizzyBuff(duration, rate);
+                        }
+                        else
+                        {
+
+                            if (componentDizzy.m_DizzyDuration > MaxDurationDizzy)
+                            {
+                                componentDizzy.m_DizzyDuration = MaxDurationDizzy;
+                            }
+                            else if (componentDizzy.m_DizzyDuration < MaxDurationDizzy)//30秒封顶
+                            {
+                                componentDizzy.m_DizzyDuration += 3f;//加5秒
+                                if (componentDizzy.m_DizzyDuration > MaxDurationDizzy)
+                                {
+                                    componentDizzy.m_DizzyDuration = MaxDurationDizzy;
+                                }
+                            }
+
+
                         }
 
                     }
@@ -4367,12 +3675,15 @@ namespace Game
         public const int Heal = 1;
         public const int AttackUp = 2;
         public const int SpeedUp = 3;
-		public const int blind = 4;
+		public const int Blind = 4;
 		public const int AttackDown = 5;
-		public const int SpeedDown = 6;
+		public const int SlowDown = 6;
 		public const int Nofire = 7;
-		public const int onfire = 8;
+		public const int Onfire = 8;
         public const int Nightsight = 9;
+        public const int Jump = 10;
+        public const int Dizzy= 11;
+
 
 
     }
@@ -4380,7 +3691,8 @@ namespace Game
 
 	public class ComponentHealBuffA : Component, IUpdateable
 	{
-		public float HealingRate
+        public BuffParticleSystem onBuffParticleSystem;
+        public float HealingRate
 		{
 			get
 			{
@@ -4424,7 +3736,8 @@ namespace Game
 			
 			if (m_componentPlayer != null)
             {
-				m_HealDuration = 0f;
+                
+                m_HealDuration = 0f;
 				m_componentPlayer.ComponentGui.DisplaySmallMessage("生命恢复效果已停止！", Color.Red, true, false);
 				
 			}
@@ -4433,15 +3746,37 @@ namespace Game
 
 		public  void Update(float dt)
 		{
-			if(IsActive == true)
+           
+            if (IsActive == true)
             {
 				if (m_HealDuration > 0 && HealingRate > 0)//如果持续时间大于0，说明处于生命恢复状态
 				{
-					
-					m_componentPlayer.ComponentHealth.Heal((1f / m_componentPlayer.ComponentHealth.AttackResilience) * HealingRate*dt);//生命恢复=1x恢复速率
+					if(onBuffParticleSystem==null)
+					{
+                        onBuffParticleSystem = new BuffParticleSystem(10)
+                        {
+                            Texture = ContentManager.Get<Texture2D>("Textures/Star", null)
+                        };
+                        m_subsystemParticles.AddParticleSystem(onBuffParticleSystem);
+                    }
+                    
+                    BoundingBox boundingBox2 = m_componentCreature.ComponentBody.BoundingBox;
+                    onBuffParticleSystem.Position = 0.5f * (boundingBox2.Min + boundingBox2.Max);
+                    onBuffParticleSystem.Radius = 0.5f * MathUtils.Min(boundingBox2.Max.X - boundingBox2.Min.X, boundingBox2.Max.Z - boundingBox2.Min.Z);
+                    onBuffParticleSystem.Color = Color.Lerp(Color.LightGreen, Color.Green, MathUtils.Saturate((m_HealDuration - m_componentCreature.ComponentHealth.AirCapacity) / m_HealDuration));
+                    onBuffParticleSystem.Size = m_componentCreature.ComponentBody.BoxSize.XZ * 0.1f;
+
+                    m_componentPlayer.ComponentHealth.Heal((1f / m_componentPlayer.ComponentHealth.AttackResilience) * HealingRate*dt);//生命恢复=1x恢复速率
 					m_HealDuration = m_HealDuration - dt;
 					if (m_HealDuration <= 0)
 					{
+						if(onBuffParticleSystem!= null)
+						{
+                            onBuffParticleSystem.IsStopped = true;
+							onBuffParticleSystem = null;
+
+                            
+                        }
 						StopBuff();
 					}
 				}
@@ -4452,22 +3787,35 @@ namespace Game
 				}*/
 			}
 
-
+			
 
 
 			
 		}
-
-		public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
+        public override void OnEntityRemoved()
+        {
+            
+                bool flag = onBuffParticleSystem != null;
+                if (flag)
+                {
+                    onBuffParticleSystem.IsStopped = true;
+                    onBuffParticleSystem = null;
+                    
+                  
+                }
+            
+        }
+        public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
 		{
 			m_subsystemGameInfo = base.Project.FindSubsystem<SubsystemGameInfo>(true);
 			m_subsystemTerrain = base.Project.FindSubsystem<SubsystemTerrain>(true);
 			m_subsystemTime = base.Project.FindSubsystem<SubsystemTime>(true);
 			m_subsystemAudio = base.Project.FindSubsystem<SubsystemAudio>(true);
 			m_subsystemParticles = base.Project.FindSubsystem<SubsystemParticles>(true);
-			m_componentPlayer = base.Entity.FindComponent<ComponentPlayer>(true);
-			
-			m_HealDuration = valuesDictionary.GetValue<float>("HealDuration",0f);
+            
+            m_componentCreature = Entity.FindComponent<ComponentCreature>(true);
+            m_componentPlayer = m_componentCreature.Entity.FindComponent<ComponentPlayer>();
+            m_HealDuration = valuesDictionary.GetValue<float>("HealDuration",0f);
 			m_HealRate = valuesDictionary.GetValue<float>("HealRate",1f);
 		}
 		public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
@@ -4478,10 +3826,10 @@ namespace Game
 		public SubsystemGameInfo m_subsystemGameInfo;
 
 		public SubsystemTerrain m_subsystemTerrain;
-
-		public SubsystemTime m_subsystemTime;
-
-		public SubsystemAudio m_subsystemAudio;
+        public ComponentCreature m_componentCreature;
+        public SubsystemTime m_subsystemTime;
+        
+        public SubsystemAudio m_subsystemAudio;
 
 		public SubsystemParticles m_subsystemParticles;
 	    public ComponentPlayer m_componentPlayer;
@@ -4494,7 +3842,8 @@ namespace Game
 	}
 	public class ComponentAttackUP : Component, IUpdateable
 	{
-		public bool Isadded1 
+        public BuffParticleSystem onBuffParticleSystem;
+        public bool Isadded1 
 		{
             get
             {
@@ -4568,18 +3917,41 @@ namespace Game
 						{
                             ATK_first = m_componentPlayer.ComponentMiner.AttackPower;
                             m_componentPlayer.ComponentMiner.AttackPower = m_componentPlayer.ComponentMiner.AttackPower * (1f + ATKRate / 100) + 2;
+                           
                         }
 						
 						
 						isadded = true;
 					}
-					
-					m_ATKDuration = m_ATKDuration - dt;
+                    if (onBuffParticleSystem == null)
+                    {
+                        onBuffParticleSystem = new BuffParticleSystem(10)
+                        {
+                            Texture = ContentManager.Get<Texture2D>("Textures/Star", null)
+                        };
+                        m_subsystemParticles.AddParticleSystem(onBuffParticleSystem);
+                    }
+
+                    BoundingBox boundingBox2 = m_componentCreature.ComponentBody.BoundingBox;
+                    onBuffParticleSystem.Position = 0.5f * (boundingBox2.Min + boundingBox2.Max);
+                    onBuffParticleSystem.Radius = 0.5f * MathUtils.Min(boundingBox2.Max.X - boundingBox2.Min.X, boundingBox2.Max.Z - boundingBox2.Min.Z);
+                    onBuffParticleSystem.Color = Color.Lerp(Color.LightRed, Color.DarkRed, MathUtils.Saturate(m_ATKDuration /20f));
+                    onBuffParticleSystem.Size = m_componentCreature.ComponentBody.BoxSize.XZ * 0.1f;
+
+                    m_ATKDuration = m_ATKDuration - dt;
 					if (m_ATKDuration <= 0)
 					{
-						StopBuff();
+                        if (onBuffParticleSystem != null)
+                        {
+                            onBuffParticleSystem.IsStopped = true;
+                            onBuffParticleSystem = null;
+
+
+                        }
+                        StopBuff();
 					}
 				}
+
 				/*else if(m_HealRate<=0)
 				{
 					m_componentPlayer.ComponentGui.DisplaySmallMessage("生命恢复速率数值不应该小于等于0！该操作将强行打断恢复！", Color.Red, true, false);
@@ -4593,17 +3965,30 @@ namespace Game
 
 
 		}
+        public override void OnEntityRemoved()
+        {
 
-		public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
+            bool flag = onBuffParticleSystem != null;
+            if (flag)
+            {
+                onBuffParticleSystem.IsStopped = true;
+                onBuffParticleSystem = null;
+
+
+            }
+
+        }
+        public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
 		{
 			m_subsystemGameInfo = base.Project.FindSubsystem<SubsystemGameInfo>(true);
 			m_subsystemTerrain = base.Project.FindSubsystem<SubsystemTerrain>(true);
 			m_subsystemTime = base.Project.FindSubsystem<SubsystemTime>(true);
 			m_subsystemAudio = base.Project.FindSubsystem<SubsystemAudio>(true);
 			m_subsystemParticles = base.Project.FindSubsystem<SubsystemParticles>(true);
-			m_componentPlayer = base.Entity.FindComponent<ComponentPlayer>(true);
-
-			m_ATKDuration = valuesDictionary.GetValue<float>("ATKDuration", 0f);
+		
+            m_componentCreature= Entity.FindComponent<ComponentCreature>(true);
+            m_componentPlayer = m_componentCreature.Entity.FindComponent<ComponentPlayer>();
+            m_ATKDuration = valuesDictionary.GetValue<float>("ATKDuration", 0f);
 			m_AttackRate = valuesDictionary.GetValue<float>("ATKRate", 1f);
 			ATK_first = valuesDictionary.GetValue<float>("ATKFirst", 0f);
         }
@@ -4624,13 +4009,15 @@ namespace Game
 
 		public SubsystemParticles m_subsystemParticles;
 		public ComponentPlayer m_componentPlayer;
+        public ComponentCreature m_componentCreature;
 
-		public float m_AttackRate;//保存攻击加成速率
+        public float m_AttackRate;//保存攻击加成速率
 		public float m_ATKDuration;//buff持续时间，需要在存档读取。
 		public Random m_random = new Random();
 
 
 	}
+
 	public class ComponentSpeedUP : Component, IUpdateable
 	{
 		
@@ -4682,7 +4069,10 @@ namespace Game
 			{
 				m_SpeedDuration = 0f;
 				m_componentPlayer.ComponentGui.DisplaySmallMessage("速度强化结束！", Color.LightGreen, true, false);
-				
+				if(Speed_first<3)
+				{
+					Speed_first = 3.9f;
+				}
 				m_componentPlayer.ComponentLocomotion.WalkSpeed= Speed_first;
 				Speed_first = 0f;
 				Speed_Now = 0f;
@@ -4701,6 +4091,7 @@ namespace Game
 						Speed_first = m_componentPlayer.ComponentLocomotion.WalkSpeed;//记录初始速度保证回档
 						m_componentPlayer.ComponentLocomotion.WalkSpeed = m_componentPlayer.ComponentLocomotion.WalkSpeed * (1f + SpeedRate / 100) + 1;
 						Speed_Now = m_componentPlayer.ComponentLocomotion.WalkSpeed;//时刻记录速度
+						
 
 
                     }
@@ -4739,12 +4130,12 @@ namespace Game
 			m_subsystemTime = base.Project.FindSubsystem<SubsystemTime>(true);
 			m_subsystemAudio = base.Project.FindSubsystem<SubsystemAudio>(true);
 			m_subsystemParticles = base.Project.FindSubsystem<SubsystemParticles>(true);
-			m_componentPlayer = base.Entity.FindComponent<ComponentPlayer>(true);
-
-			m_SpeedDuration = valuesDictionary.GetValue<float>("SpeedDuration", 0f);
+			
+			m_componentCreature = Entity.FindComponent<ComponentCreature>(true);
+            m_SpeedDuration = valuesDictionary.GetValue<float>("SpeedDuration", 0f);
 			m_SpeedRate = valuesDictionary.GetValue<float>("SpeedRate", 1f);
-
-			Speed_first = valuesDictionary.GetValue<float>("SpeedFirst", 0f);
+            m_componentPlayer = m_componentCreature.Entity.FindComponent<ComponentPlayer>();
+            Speed_first = valuesDictionary.GetValue<float>("SpeedFirst", 0f);
 			Speed_Now = valuesDictionary.GetValue<float>("SpeedNow", 3f);
 
         }
@@ -4758,8 +4149,8 @@ namespace Game
 		public SubsystemGameInfo m_subsystemGameInfo;
 
 		public SubsystemTerrain m_subsystemTerrain;
-
-		public SubsystemTime m_subsystemTime;
+        public ComponentCreature m_componentCreature;
+        public SubsystemTime m_subsystemTime;
 
 		public SubsystemAudio m_subsystemAudio;
 
@@ -4772,15 +4163,16 @@ namespace Game
 
 
 	}
-    public class ComponentBlind : Component, IUpdateable
+    public class ComponentSlowDown : Component, IUpdateable
     {
-        public bool isadded = false;
-        public float Speed_first;
-        public float SpeedRate
+        public BuffParticleSystem onBuffParticleSystem;
+       
+        public float Slown_first;
+        public float SlowRate
         {
             get
             {
-                return m_SpeedRate;
+                return m_SlowRate;
             }
         }//恢复速率
          //public bool flag_1 =false;//控制消息提示
@@ -4790,7 +4182,7 @@ namespace Game
         {
             get
             {
-                return this.m_SpeedDuration > 0f;
+                return m_SlowDuration > 0f;
             }
         }//标记buff是否已经激活
 
@@ -4803,10 +4195,192 @@ namespace Game
         }
 
 
-        public void StartSpeedBuff(float healtime, float healrate)
+        public void StartBuff(float time, float rate)
         {
-            m_SpeedRate = healrate;
-            m_SpeedDuration = healtime;
+            m_SlowRate = rate;
+            m_SlowDuration = time;
+            /*if(componentPlayer != null)
+            {
+				componentPlayer.ComponentGui.DisplaySmallMessage("生命恢复效果已经激活！", Color.Red, true, false);
+				
+			}*/
+
+        }
+
+        public void StopBuff()
+        {
+			if(m_componentCreature!=null)
+			{
+                m_SlowDuration = 0f;
+                if(Slown_first>3.7)
+				{
+					Slown_first = 3.9f;
+				}
+                m_componentCreature.ComponentLocomotion.WalkSpeed = Slown_first;
+                Slown_first = 0f;
+                if (m_componentPlayer != null)
+                {
+
+                    m_componentPlayer.ComponentGui.DisplaySmallMessage("迟缓效果结束！", Color.White, true, false);
+
+
+                }
+            }
+           
+           
+
+        }
+
+        public void Update(float dt)
+        {
+            if (IsActive == true)
+            {
+                if (m_SlowDuration > 0 && m_SlowRate > 0)//如果持续时间大于0，说明处于xx状态
+                {
+                    
+                    if (Slown_first == 0)
+                    {
+						Slown_first=m_componentCreature.ComponentLocomotion.WalkSpeed;
+
+                        
+                    }
+                    m_componentCreature.ComponentLocomotion.WalkSpeed = 1f;
+
+
+
+
+
+                    if (onBuffParticleSystem == null)
+                    {
+                        onBuffParticleSystem = new BuffParticleSystem(10)
+                        {
+                            Texture = ContentManager.Get<Texture2D>("Textures/Star", null)
+                        };
+                        m_subsystemParticles.AddParticleSystem(onBuffParticleSystem);
+                    }
+                    BoundingBox boundingBox2 = m_componentCreature.ComponentBody.BoundingBox;
+                    onBuffParticleSystem.Position = 0.5f * (boundingBox2.Min + boundingBox2.Max);
+                    onBuffParticleSystem.Radius = 0.5f * MathUtils.Min(boundingBox2.Max.X - boundingBox2.Min.X, boundingBox2.Max.Z - boundingBox2.Min.Z);
+                    //onBuffParticleSystem.Color = Color.Lerp(Color.LightRed, Color.DarkRed, MathUtils.Saturate(m_SlowDuration / 20f));
+                    onBuffParticleSystem.Color = new Color(60f,60f,60f);
+                    onBuffParticleSystem.Size = m_componentCreature.ComponentBody.BoxSize.XZ * 0.1f;
+
+                    m_SlowDuration = m_SlowDuration - dt;
+                    if (m_SlowDuration <= 0)
+                    {
+                        if (onBuffParticleSystem != null)
+                        {
+                            onBuffParticleSystem.IsStopped = true;
+                            onBuffParticleSystem = null;
+
+
+                        }
+                        StopBuff();
+                    }
+                }
+
+                /*else if(m_HealRate<=0)
+				{
+					m_componentPlayer.ComponentGui.DisplaySmallMessage("生命恢复速率数值不应该小于等于0！该操作将强行打断恢复！", Color.Red, true, false);
+					m_HealDuration = 0f;
+				}*/
+            }
+
+
+
+
+
+
+        }
+        public override void OnEntityRemoved()
+        {
+
+            bool flag = onBuffParticleSystem != null;
+            if (flag)
+            {
+                onBuffParticleSystem.IsStopped = true;
+                onBuffParticleSystem = null;
+
+
+            }
+
+        }
+        public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
+        {
+            m_subsystemGameInfo = base.Project.FindSubsystem<SubsystemGameInfo>(true);
+            m_subsystemTerrain = base.Project.FindSubsystem<SubsystemTerrain>(true);
+            m_subsystemTime = base.Project.FindSubsystem<SubsystemTime>(true);
+            m_subsystemAudio = base.Project.FindSubsystem<SubsystemAudio>(true);
+            m_subsystemParticles = base.Project.FindSubsystem<SubsystemParticles>(true);
+
+            m_componentCreature = Entity.FindComponent<ComponentCreature>(true);
+            m_componentPlayer = m_componentCreature.Entity.FindComponent<ComponentPlayer>();
+            m_SlowDuration = valuesDictionary.GetValue<float>("SlowDuration", 0f);
+            m_SlowRate = valuesDictionary.GetValue<float>("SlowRate", 1f);
+            Slown_first = valuesDictionary.GetValue<float>("SlowFirst", 0f);
+        }
+        public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
+        {
+            valuesDictionary.SetValue<float>("SlowDuration", m_SlowDuration);
+            valuesDictionary.SetValue<float>("SlowRate", m_SlowRate);
+            valuesDictionary.SetValue<float>("SlowFirst", Slown_first);
+
+        }
+        public SubsystemGameInfo m_subsystemGameInfo;
+
+        public SubsystemTerrain m_subsystemTerrain;
+
+        public SubsystemTime m_subsystemTime;
+
+        public SubsystemAudio m_subsystemAudio;
+
+        public SubsystemParticles m_subsystemParticles;
+        public ComponentPlayer m_componentPlayer;
+        public ComponentCreature m_componentCreature;
+
+        public float m_SlowRate;//保存攻击加成速率
+        public float m_SlowDuration;//buff持续时间，需要在存档读取。
+        public Random m_random = new Random();
+
+
+    }
+    public class ComponentBlind : Component, IUpdateable
+    {
+        public float m_BlackoutDuration;//黑屏时间
+        public float m_BlackoutFactor;//黑屏因素
+
+        public float Blind_first;
+        public float BlindRate
+        {
+            get
+            {
+                return m_BlindRate;
+            }
+        }//恢复速率
+         //public bool flag_1 =false;//控制消息提示
+         //public bool flag_2 =false;
+
+        public bool IsActive
+        {
+            get
+            {
+                return this.m_BlindDuration > 0f;
+            }
+        }//标记buff是否已经激活
+
+        public UpdateOrder UpdateOrder
+        {
+            get
+            {
+                return UpdateOrder.Default;
+            }
+        }
+
+
+        public void StartBlindBuff(float time, float rate)
+        {
+            m_BlindRate = rate;
+            m_BlindDuration = time;
             /*if(componentPlayer != null)
             {
 				componentPlayer.ComponentGui.DisplaySmallMessage("生命恢复效果已经激活！", Color.Red, true, false);
@@ -4820,30 +4394,41 @@ namespace Game
 
             if (m_componentPlayer != null)
             {
-                m_SpeedDuration = 0f;
-                m_componentPlayer.ComponentGui.DisplaySmallMessage("速度强化结束！", Color.LightGreen, true, false);
-                isadded = false;
-                m_componentPlayer.ComponentLocomotion.WalkSpeed = Speed_first;
-                Speed_first = 4f;
+                m_BlindDuration = 0f;
+                m_componentPlayer.ComponentGui.DisplaySmallMessage("致盲结束！", Color.Black, false, false);
+
+				m_BlindRate = 0f;
+
+                Blind_first = 0f;
             }
 
         }
 
         public void Update(float dt)
         {
-            if (IsActive == true)
-            {
-                if (m_SpeedDuration > 0 && SpeedRate > 0)//如果持续时间大于0，说明处于生命恢复状态
+            
+                if (m_BlindDuration > 0 || BlindRate > 0)//如果持续时间大于0，说明处于致盲状态
                 {
-                    if (isadded == false)
-                    {
-                        Speed_first = m_componentPlayer.ComponentLocomotion.WalkSpeed;
-                        m_componentPlayer.ComponentLocomotion.WalkSpeed = m_componentPlayer.ComponentLocomotion.WalkSpeed * (1f + SpeedRate / 100) + 1;
-                        isadded = true;
+					if(Blind_first==0)
+					{
+                        Blind_first = 1f;
+                        
                     }
+                    
+                    if (m_BlindDuration > 0f)
+                    {
+                        m_BlindDuration = MathUtils.Max(m_BlindDuration - dt, 0f);
+                        m_BlindRate = MathUtils.Min(m_BlindRate + 0.5f * dt, 0.95f);
+                    }
+                    else if (m_BlindRate > 0f)
+                    {
+                        m_BlindRate = MathUtils.Max(BlindRate - 0.5f * dt, 0f);
+                    }
+                    m_componentPlayer.ComponentScreenOverlays.BlackoutFactor = MathUtils.Max(m_BlindRate, m_componentPlayer.ComponentScreenOverlays.BlackoutFactor);
 
-                    m_SpeedDuration = m_SpeedDuration - dt;
-                    if (m_SpeedDuration <= 0)
+
+                   // m_BlindDuration = m_BlindDuration - dt;
+                    if (m_BlindDuration <= 0&& m_BlindRate<=0)
                     {
                         StopBuff();
                     }
@@ -4853,7 +4438,7 @@ namespace Game
 					m_componentPlayer.ComponentGui.DisplaySmallMessage("生命恢复速率数值不应该小于等于0！该操作将强行打断恢复！", Color.Red, true, false);
 					m_HealDuration = 0f;
 				}*/
-            }
+            
 
 
 
@@ -4869,15 +4454,16 @@ namespace Game
             m_subsystemAudio = base.Project.FindSubsystem<SubsystemAudio>(true);
             m_subsystemParticles = base.Project.FindSubsystem<SubsystemParticles>(true);
             m_componentPlayer = base.Entity.FindComponent<ComponentPlayer>(true);
-
-            m_SpeedDuration = valuesDictionary.GetValue<float>("SpeedDuration", 0f);
-            m_SpeedRate = valuesDictionary.GetValue<float>("SpeedRate", 1f);
+            Blind_first = valuesDictionary.GetValue<float>("BlindFirst", 0f);
+            m_BlindDuration = valuesDictionary.GetValue<float>("BlindDuration", 0f);
+            m_BlindRate = valuesDictionary.GetValue<float>("BlindRate", 0f);
 
         }
         public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
         {
-            valuesDictionary.SetValue<float>("SpeedDuration", m_SpeedDuration);
-            valuesDictionary.SetValue<float>("SpeedRate", m_SpeedRate);
+            valuesDictionary.SetValue<float>("BlindFirst", Blind_first);
+            valuesDictionary.SetValue<float>("BlindDuration", m_BlindDuration);
+            valuesDictionary.SetValue<float>("BlindRate", m_BlindRate);
         }
         public SubsystemGameInfo m_subsystemGameInfo;
 
@@ -4890,8 +4476,312 @@ namespace Game
         public SubsystemParticles m_subsystemParticles;
         public ComponentPlayer m_componentPlayer;
 
-        public float m_SpeedRate;//保存速率加成
-        public float m_SpeedDuration;//buff持续时间，需要在存档读取。
+        public float m_BlindRate;//保存致盲强度
+        public float m_BlindDuration;//buff持续时间，需要在存档读取。
+        public Random m_random = new Random();
+
+
+    }
+    public class ComponentJump : Component, IUpdateable
+    {
+        public float m_BlackoutDuration;//黑屏时间
+        public float m_BlackoutFactor;//黑屏因素
+
+        public float Jump_first;
+        public float JumpRate
+        {
+            get
+            {
+                return m_JumpRate;
+            }
+        }//恢复速率
+         //public bool flag_1 =false;//控制消息提示
+         //public bool flag_2 =false;
+
+        public bool IsActive
+        {
+            get
+            {
+                return this.m_JumpDuration > 0f;
+            }
+        }//标记buff是否已经激活
+
+        public UpdateOrder UpdateOrder
+        {
+            get
+            {
+                return UpdateOrder.Default;
+            }
+        }
+
+
+        public void StartJumpBuff(float time, float rate)
+        {
+            m_JumpRate = rate;
+            m_JumpDuration = time;
+            /*if(componentPlayer != null)
+            {
+				componentPlayer.ComponentGui.DisplaySmallMessage("生命恢复效果已经激活！", Color.Red, true, false);
+				
+			}*/
+
+        }
+
+        public void StopBuff()
+        {
+
+            if (m_componentPlayer != null)
+            {
+                m_JumpDuration = 0f;
+                m_componentPlayer.ComponentGui.DisplaySmallMessage("跳跃强化结束！", Color.Black, false, false);
+				m_componentPlayer.ComponentHealth.FallResilience = Jump_first;
+				m_componentPlayer.ComponentLocomotion.JumpSpeed = Jump_firstR;
+
+                m_JumpRate = 0f;
+
+                Jump_first = 0f;
+                Jump_firstR = 0f;
+            }
+
+        }
+
+        public void Update(float dt)
+        {
+
+            if (m_JumpDuration > 0 && JumpRate > 0)//如果持续时间大于0，说明处于致盲状态
+            {
+                if (Jump_first == 0)
+                {
+					Jump_firstR = m_componentPlayer.ComponentLocomotion.JumpSpeed;
+                    Jump_first = m_componentPlayer.ComponentHealth.FallResilience;//无法摔死
+                    m_componentPlayer.ComponentHealth.FallResilience = 100000f;
+
+                }
+				
+				m_componentPlayer.ComponentLocomotion.JumpSpeed = 15;
+
+				m_JumpDuration-= dt;
+                // m_JumpDuration = m_JumpDuration - dt;
+                if (m_JumpDuration <= 0 )
+                {
+                    StopBuff();
+                }
+            }
+            /*else if(m_HealRate<=0)
+            {
+                m_componentPlayer.ComponentGui.DisplaySmallMessage("生命恢复速率数值不应该小于等于0！该操作将强行打断恢复！", Color.Red, true, false);
+                m_HealDuration = 0f;
+            }*/
+
+
+
+
+
+
+        }
+
+        public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
+        {
+            m_subsystemGameInfo = base.Project.FindSubsystem<SubsystemGameInfo>(true);
+            m_subsystemTerrain = base.Project.FindSubsystem<SubsystemTerrain>(true);
+            m_subsystemTime = base.Project.FindSubsystem<SubsystemTime>(true);
+            m_subsystemAudio = base.Project.FindSubsystem<SubsystemAudio>(true);
+            m_subsystemParticles = base.Project.FindSubsystem<SubsystemParticles>(true);
+            m_componentPlayer = base.Entity.FindComponent<ComponentPlayer>(true);
+            Jump_first = valuesDictionary.GetValue<float>("JumpFirst", 0f);
+
+            m_JumpDuration = valuesDictionary.GetValue<float>("JumpDuration", 0f);
+            m_JumpRate = valuesDictionary.GetValue<float>("JumpRate", 0f);
+            Jump_firstR = valuesDictionary.GetValue<float>("JumpR", 0f);
+        }
+        public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
+        {
+            valuesDictionary.SetValue<float>("JumpFirst", Jump_first);
+            valuesDictionary.SetValue<float>("JumpDuration", m_JumpDuration);
+            valuesDictionary.SetValue<float>("JumpRate", m_JumpRate);
+            valuesDictionary.SetValue<float>("JumpR", Jump_firstR);
+        }
+        public SubsystemGameInfo m_subsystemGameInfo;
+
+        public SubsystemTerrain m_subsystemTerrain;
+
+        public SubsystemTime m_subsystemTime;
+
+        public SubsystemAudio m_subsystemAudio;
+
+        public SubsystemParticles m_subsystemParticles;
+        public ComponentPlayer m_componentPlayer;
+		public float Jump_firstR;
+        public float m_JumpRate;//保存致盲强度
+        public float m_JumpDuration;//buff持续时间，需要在存档读取。
+        public Random m_random = new Random();
+
+
+    }
+    public class ComponentDizzy : Component, IUpdateable
+    {
+        public float m_BlackoutDuration;//黑屏时间
+        public float m_BlackoutFactor;//黑屏因素
+
+       
+        public float DizzyRate
+        {
+            get
+            {
+                return m_DizzyRate;
+            }
+        }//恢复速率
+         //public bool flag_1 =false;//控制消息提示
+         //public bool flag_2 =false;
+
+        public bool IsActive
+        {
+            get
+            {
+                return this.m_DizzyDuration > 0f;
+            }
+        }//标记buff是否已经激活
+
+        public UpdateOrder UpdateOrder
+        {
+            get
+            {
+                return UpdateOrder.Default;
+            }
+        }
+
+
+        public void StartDizzyBuff(float time, float rate)
+        {
+            m_DizzyRate = rate;
+            m_DizzyDuration = time;
+            /*if(componentPlayer != null)
+            {
+				componentPlayer.ComponentGui.DisplaySmallMessage("生命恢复效果已经激活！", Color.Red, true, false);
+				
+			}*/
+
+        }
+
+        public void StopBuff()
+        {
+
+            if (m_componentPlayer != null)
+            {
+                m_DizzyDuration = 0f;
+                m_componentPlayer.ComponentGui.DisplaySmallMessage("眩晕结束！", Color.White, false, false);
+				if(Dizzy_firstR>3.7||Dizzy_firstR<3)
+				{
+					Dizzy_firstR = 3.9f;
+				}
+                if (Dizzy_firstJ>4.7f || Dizzy_firstJ < 3)
+                {
+                    Dizzy_firstR = 4.5f;
+                }
+                m_componentPlayer.ComponentLocomotion.WalkSpeed = Dizzy_firstR;
+				m_componentPlayer.ComponentLocomotion.FlySpeed = Dizzy_first ;
+				m_componentPlayer.ComponentLocomotion.JumpSpeed= Dizzy_firstJ ;
+				m_componentPlayer.ComponentLocomotion.TurnSpeed= Dizzy_firstT ;
+                m_componentPlayer.ComponentLocomotion.SwimSpeed= Dizzy_firstS ;
+
+
+                m_DizzyRate = 0f;
+                Dizzy_first = 0f;
+                Dizzy_firstR = 0f;
+                Dizzy_firstJ = 0f;
+                Dizzy_firstT = 0f;
+                Dizzy_firstS = 0f;
+            }
+
+        }
+
+        public void Update(float dt)
+        {
+
+            if (m_DizzyDuration > 0 && DizzyRate > 0)//如果持续时间大于0，说明处于致盲状态
+            {
+                if (Dizzy_firstR == 0)
+                {
+					Dizzy_firstR = m_componentPlayer.ComponentLocomotion.WalkSpeed;
+					Dizzy_first = m_componentPlayer.ComponentLocomotion.FlySpeed;
+					Dizzy_firstJ = m_componentPlayer.ComponentLocomotion.JumpSpeed;
+					Dizzy_firstT = m_componentPlayer.ComponentLocomotion.TurnSpeed;
+					Dizzy_firstS = m_componentPlayer.ComponentLocomotion.SwimSpeed;
+
+
+                }
+                m_componentPlayer.ComponentLocomotion.WalkSpeed = 0f;
+                m_componentPlayer.ComponentLocomotion.TurnSpeed = 0f;
+                m_componentPlayer.ComponentLocomotion.FlySpeed = 0f;
+                m_componentPlayer.ComponentLocomotion.SwimSpeed = 0f;
+                m_componentPlayer.ComponentLocomotion.JumpSpeed = 0f;
+
+
+                m_DizzyDuration -= dt;
+
+                // m_DizzyDuration = m_DizzyDuration - dt;
+                if (m_DizzyDuration <= 0 )
+                {
+                    StopBuff();
+                }
+            }
+            /*else if(m_HealRate<=0)
+            {
+                m_componentPlayer.ComponentGui.DisplaySmallMessage("生命恢复速率数值不应该小于等于0！该操作将强行打断恢复！", Color.Red, true, false);
+                m_HealDuration = 0f;
+            }*/
+
+
+
+
+
+
+        }
+
+        public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
+        {
+            m_subsystemGameInfo = base.Project.FindSubsystem<SubsystemGameInfo>(true);
+            m_subsystemTerrain = base.Project.FindSubsystem<SubsystemTerrain>(true);
+            m_subsystemTime = base.Project.FindSubsystem<SubsystemTime>(true);
+            m_subsystemAudio = base.Project.FindSubsystem<SubsystemAudio>(true);
+            m_subsystemParticles = base.Project.FindSubsystem<SubsystemParticles>(true);
+            m_componentPlayer = base.Entity.FindComponent<ComponentPlayer>(true);
+            Dizzy_first = valuesDictionary.GetValue<float>("DizzyFirst", 0f);
+
+            m_DizzyDuration = valuesDictionary.GetValue<float>("DizzyDuration", 0f);
+            m_DizzyRate = valuesDictionary.GetValue<float>("DizzyRate", 0f);
+            Dizzy_firstR = valuesDictionary.GetValue<float>("DizzyR", 0f);
+            Dizzy_firstJ = valuesDictionary.GetValue<float>("DizzyJ", 0f);
+            Dizzy_firstT = valuesDictionary.GetValue<float>("DizzyT", 0f);
+            Dizzy_firstS = valuesDictionary.GetValue<float>("DizzyS", 0f);
+        }
+        public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
+        {
+            valuesDictionary.SetValue<float>("DizzyFirst", Dizzy_first);
+            valuesDictionary.SetValue<float>("DizzyDuration", m_DizzyDuration);
+            valuesDictionary.SetValue<float>("DizzyRate", m_DizzyRate);
+            valuesDictionary.SetValue<float>("DizzyR", Dizzy_firstR);//走路速度
+            valuesDictionary.SetValue<float>("DizzyJ", Dizzy_firstJ);//储存原先的速度
+            valuesDictionary.SetValue<float>("DizzyT", Dizzy_firstT);//储存原先的速度
+            valuesDictionary.SetValue<float>("DizzyS", Dizzy_firstS);//储存原先的速度
+        }
+        public SubsystemGameInfo m_subsystemGameInfo;
+
+        public SubsystemTerrain m_subsystemTerrain;
+
+        public SubsystemTime m_subsystemTime;
+
+        public SubsystemAudio m_subsystemAudio;
+
+        public SubsystemParticles m_subsystemParticles;
+        public ComponentPlayer m_componentPlayer;
+        public float Dizzy_first;//飞行速度
+        public float Dizzy_firstJ;//跳跃速度
+        public float Dizzy_firstT;//转身速度
+        public float Dizzy_firstR;//走路速度
+        public float Dizzy_firstS;//游泳速度
+        public float m_DizzyRate;
+        public float m_DizzyDuration;//buff持续时间，需要在存档读取。
         public Random m_random = new Random();
 
 
@@ -5029,3683 +4919,645 @@ namespace Game
 
 
     }
-    #endregion
-    #endregion
-    #endregion
-
-    #region 村庄坐标储存子系统
-    public class FCSubsystemTown : Subsystem //村庄坐标子系统
-	{
-
-		private static Vector3 initialSpawnPosition = new Vector3(100, 65, 100);
-		private static bool hasRecordedSpawnPoint = false;
-		private static Vector3 spawnPosition;
-		
-		public static List<Point3> Village_start = new List<Point3>(); //记录村庄起点。
-		public Vector3 GetPlayerPosition()
-		{
-			if (!hasRecordedSpawnPoint)
-			{
-				SubsystemPlayers m_subsystemplayers = new SubsystemPlayers();
-				ReadOnlyList<PlayerData> player_data = m_subsystemplayers.PlayersData;
-				Vector3 position1 = m_subsystemplayers.GlobalSpawnPosition;
-				foreach (PlayerData playerData in m_subsystemplayers.PlayersData)
-				{
-					spawnPosition = playerData.SpawnPosition;
-					hasRecordedSpawnPoint = true;
-					break;
-				}
-			}
-
-			return hasRecordedSpawnPoint ? spawnPosition : initialSpawnPosition;
-		}
-
-		public override void Load(ValuesDictionary valuesDictionary)
-		{
-			Village_start.Clear();
-			
-			ValuesDictionary value = valuesDictionary.GetValue<ValuesDictionary>("Towns");
-			for (int i = 0; i < valuesDictionary.GetValue<int>("Count", 0); i++)
-			{
-				ValuesDictionary value2 = value.GetValue<ValuesDictionary>("Town" + i.ToString(CultureInfo.InvariantCulture), null);
-				if (value2 != null)
-				{
-					Village_start.Add(value2.GetValue<Point3>("Point"));
-				}
-			}
-		}
-
-		public override void Save(ValuesDictionary valuesDictionary)
-		{
-			valuesDictionary.SetValue<int>("Count", Village_start.Count);
-			ValuesDictionary valuesDictionary2 = new ValuesDictionary();
-			valuesDictionary.SetValue<ValuesDictionary>("Towns", valuesDictionary2);
-			int num = 0;
-			foreach (Point3 value in Village_start)
-			{
-				ValuesDictionary valuesDictionary3 = new ValuesDictionary();
-				valuesDictionary2.SetValue<ValuesDictionary>("Town" + num.ToString(CultureInfo.InvariantCulture), valuesDictionary3);
-				valuesDictionary3.SetValue<Point3>("Point", value);
-				num++;
-			}
-		}
-
-		
-	}
 	#endregion
-	#region 村庄区块储存子系统
-	public class FCSubsystemTownChunk : Subsystem //村庄坐标子系统
-	{
-		public static Dictionary<Point2, int> Dic_Chunk_Village = new Dictionary<Point2, int>();  //村庄区块
-		NewModLoaderShengcheng m_modloader = new NewModLoaderShengcheng();
-	
-	
-		
-		public override void Load(ValuesDictionary valuesDictionary)
-		{
-			m_modloader.tg_num = 0;//强行中止
-			m_modloader.Bg_num = 0;
-			NewModLoaderShengcheng.listRD.Clear();
-			NewModLoaderShengcheng.listBD.Clear();
-			ValuesDictionary dicChunkVillage = valuesDictionary.GetValue<ValuesDictionary>("Dic_Chunk_Village",null);
-			if (dicChunkVillage != null)
-            {
-				Dic_Chunk_Village.Clear();
-				NewModLoaderShengcheng.Dic_Chunk_Village3.Clear();
-				foreach (KeyValuePair<string, object> kvp in dicChunkVillage)
-				{
-					string[] key = kvp.Key.Split(new char[] { ',' }, StringSplitOptions.None);
-					bool flag = int.TryParse(key[0], out int num);
-					bool flag2 = int.TryParse(key[1], out int num2);
-					if (flag && flag2)
-					{
-						Dic_Chunk_Village.Add(new Point2(num, num2), (int)kvp.Value);
-					}
-
-				}
-			}
-			else
-            {
-				Dic_Chunk_Village.Clear();
-				Dic_Chunk_Village.Add((0,0),0);
-			}
-			
-		}
-
-		public override void Save(ValuesDictionary valuesDictionary)
-		{
-			if(m_modloader.tg_num == 0)
-            {
-				Dictionary<Point2, int> Dic_Chunk_Village2 = NewModLoaderShengcheng.Dic_Chunk_Village3;  //获取modlaoder的字典
-				ValuesDictionary dicChunkVillage = new ValuesDictionary();//创建一个根元素，从属于子系统主根元素
-				foreach (KeyValuePair<Point2, int> kvp in Dic_Chunk_Village2)
-				{
-					string key = kvp.Key.ToString();
-					int value = kvp.Value;
-					dicChunkVillage.SetValue<int>(key, value);
-				}
-				valuesDictionary.SetValue<ValuesDictionary>("Dic_Chunk_Village", dicChunkVillage);
-			}
-			
-			
-		}
-
-
-	}
 	#endregion
-	#region Modloader生成区
-	public class NewModLoaderShengcheng : ModLoader
-	{
-		public Test1.ComponentTest1 m_component;
+	#endregion
+    #region 超巨型建筑生成
+	public class BuildingInfo
+    {
+        /// <summary>
+        /// 建筑名称
+        /// </summary>
+        public string Name;//这是用来存储建筑名称的字符串。
+        /// <summary>
+        /// 平原起始区块起始坐标
+        /// </summary>
+        public Point2 PlainAreaMinCoord;//这两个是用来定义生成建筑的平原范围的坐标。PlainAreaMinCoord定义了平原的最小坐标，PlainAreaMaxCoord定义了平原的最大坐标。
+        /// <summary>
+        /// 平原起始区块结束坐标
+        /// </summary>
+        public Point2 PlainAreaMaxCoord;
+        /// <summary>
+        /// 平原中心位置
+        /// </summary>
+        public Point2 AreaCenterPoint;//这个是用来存储平原中心位置的坐标。
+        /// <summary>
+        /// 平原半径
+        /// </summary>
+        public float Radius;//这个是用来存储平原半径的浮点数。
+        /// <summary>
+        /// 建筑生成起始坐标
+        /// </summary>
+        public Point3? OriginatePoint;//这个可空类型是用来存储建筑生成的起始坐标。如果这个值为null，那么说明还没有为这个建筑分配起始位置。
+        /// <summary>
+        /// 建筑生成拟定区块坐标
+        /// </summary>
+        public Point2 OriginateCoord;//这个是用来存储建筑生成拟定区块的坐标。
+        /// <summary>
+        /// 区块偏移数
+        /// </summary>
+        public int ChunkShiftCount;//这两个是用来存储区块偏移数和建筑高度偏移数的整数。它们是用来调整建筑的位置和高度的。
 
-		public List<Point3> Village_start = FCSubsystemTown.Village_start;
-		//public List<Point3> Village_start => m_subsystemTerrain.Project.FindSubsystem<FCSubsystemTown>().Village_start; //记录村庄起点。
-		public SubsystemGameInfo m_subsystemGameInfo;
-		public bool TGExtras;
-		public int m_seed;
-		public SubsystemTerrain m_subsystemTerrain;
-		public Vector2 m_temperatureOffset;
-		public Vector2 m_humidityOffset;
-		public float TGBiomeScaling;
-		public WorldSettings m_worldSettings;
-		public SubsystemParticles m_subsystemParticles;
-		public bool TGCavesAndPockets;
-		public TerrainSerializer23 m_terrainSerializer23;
-		public FCSubsystemTown m_subsystemtown;
-		public FCSubsystemTownChunk m_subsystemtownchunk ;
-		public SubsystemSky m_subsystemSky;
-        public bool IsNightVisionActive { get; set; } 
-        public SubsystemPlayers m_subsystemPlayers;
-        //public  Dictionary<Point2, int> Dic_Chunk_Village ;  //村庄区块
+		public int Long;
+		public int Wide;
+        /// <summary>
+        /// 建筑高度偏移数
+        /// </summary>
+        public int HightShiftCount;
 
-
-        public override void __ModInitialize()
-		{
-			ModsManager.RegisterHook("OnTerrainContentsGenerated", this);
-			ModsManager.RegisterHook("OnProjectLoaded", this);
-			ModsManager.RegisterHook("AttackBody", this);
-			ModsManager.RegisterHook("InitializeCreatureTypes", this);
-			ModsManager.RegisterHook("ToFreeChunks", this);
-			ModsManager.RegisterHook("ToAllocateChunks", this);
-			ModsManager.RegisterHook("CalculateLighting", this);
-		}
-		public override void OnProjectLoaded(Project project)
-		{
-
-			m_subsystemGameInfo = project.FindSubsystem<SubsystemGameInfo>();
-			m_seed = m_subsystemGameInfo.WorldSeed;
-			m_subsystemTerrain = project.FindSubsystem<SubsystemTerrain>();
-			m_worldSettings = m_subsystemGameInfo.WorldSettings;
-			m_subsystemParticles = project.FindSubsystem<SubsystemParticles>();
-			m_subsystemtown = project.FindSubsystem<FCSubsystemTown>();
-			m_subsystemtownchunk = project.FindSubsystem<FCSubsystemTownChunk>();
-			m_subsystemPlayers = project.FindSubsystem<SubsystemPlayers>();
-			
-			TGExtras = true;
-			TGCavesAndPockets = true;
-		}
-		public override void OnTerrainContentsGenerated(TerrainChunk chunk)
-		{
-			生成西瓜(chunk);//生成西瓜测试
-			生成向日葵(chunk);
-			generateMineralLikeCoal(chunk, 934, 3, 0, 200);
-			//GenerateFCTrees(chunk);
-			//GenerateFCCaves(chunk);//洞穴
-			GenerateFCPockets(chunk);//空腔地形生成，岩浆空腔
-			FCGenerateSurface(chunk);
-			//FCGenerateVillage(chunk);
-			
-
-		}
-		/// <summary>
-		/// </summary>
-		/// 
-
-		#region 区块强制加载
-		public List<Point2> m_terrainChunks007 = new List<Point2>();
-		public override void ToFreeChunks(TerrainUpdater terrainUpdater, TerrainChunk chunk, out bool KeepWorking)
-		{
-			KeepWorking = (m_terrainChunks007.Contains(chunk.Coords));
-		}
-
-        public override void CalculateLighting(ref float brightness)
+        public BuildingInfo(string name, Point2 originateCoord, int hightShiftCount, Point3 originatePoint, int longnum ,int widenum)
         {
+            //这个是BuildingInfo类的构造函数，它根据提供的参数初始化类的实例。
+            Name = name;
+			Long= longnum;
+			Wide= widenum;
+			OriginatePoint = originatePoint;
+            OriginateCoord = originateCoord;
+            HightShiftCount = hightShiftCount;
+            ChunkShiftCount = 1;
+			int num2 = (int)MathUtils.Sqrt(Long*Long+Wide*Wide);//计算建筑区域的平原直径
+            PlainAreaMinCoord = OriginateCoord - new Point2(ChunkShiftCount);
+            PlainAreaMaxCoord = OriginateCoord + new Point2(ChunkShiftCount) + new Point2((int)Long/16, (int)Long/16);
+            int px = (PlainAreaMaxCoord.X * 16 + PlainAreaMinCoord.X * 16 + 15) / 2;//中心点的x坐标
+            int pz = (PlainAreaMaxCoord.Y * 16 + PlainAreaMinCoord.Y * 16 + 15) / 2;//
 
-			/*if(IsNightVisionActive ==false)
-			{
+            Radius = MathUtils.Min(px - PlainAreaMinCoord.X * 16, pz - PlainAreaMinCoord.Y * 16);
+            AreaCenterPoint = new Point2(originatePoint.X+(int)Long/2, originatePoint.Z+(int)Wide/2);
+        }
 
-				
-            }
-			else
-			{
-                brightness = 5f;
-            }
-            /*ComponentPlayer componentPlayer;
-            if (m_subsystemPlayers.ComponentPlayers.Count > 0)
+        /// <summary>
+        /// 平原范围
+        /// </summary>
+        public bool CalculatPlainRange(Point2 coord)//这个函数用来判断给定的坐标是否在定义的平原范围内。如果在范围内，返回true；否则返回false。
+        {
+            if (coord.X >= PlainAreaMinCoord.X && coord.Y >= PlainAreaMinCoord.Y)
             {
-				foreach(ComponentPlayer player in m_subsystemPlayers.ComponentPlayers)
-				{
-                    componentPlayer = player;
-                    var componentNightsight = componentPlayer.Entity.FindComponent<ComponentNightsight>();
-					if(componentNightsight.m_NightseeDuration>0)
-					{
-						brightness = 5f;
-					}
-					else
-					{
-						brightness = SettingsManager.Brightness;
-					}
-
+                if (coord.X <= PlainAreaMaxCoord.X && coord.Y <= PlainAreaMaxCoord.Y)
+                {
+                    return true;
                 }
-               
+            }
+            return false;
+        }
+    }
+    public class AreaInfo//特殊区域生成专用
+    {
+        /// <summary>
+        /// 建筑名称
+        /// </summary>
+        public string Name;//这是用来存储建筑名称的字符串。
+        /// <summary>
+        /// 平原起始区块起始坐标
+        /// </summary>
+        public Point2 PlainAreaMinCoord;//这两个是用来定义生成建筑的平原范围的坐标。PlainAreaMinCoord定义了平原的最小坐标，PlainAreaMaxCoord定义了平原的最大坐标。
+        /// <summary>
+        /// 平原起始区块结束坐标
+        /// </summary>
+        public Point2 PlainAreaMaxCoord;
+        /// <summary>
+        /// 平原中心位置
+        /// </summary>
+        public Point2 AreaCenterPoint;//这个是用来存储平原中心位置的坐标。
+        /// <summary>
+        /// 平原半径
+        /// </summary>
+        public float Radius;//这个是用来存储平原半径的浮点数。
+        /// <summary>
+        /// 建筑生成起始坐标
+        /// </summary>
+        public Point3? OriginatePoint;//这个可空类型是用来存储建筑生成的起始坐标。如果这个值为null，那么说明还没有为这个建筑分配起始位置。
+        /// <summary>
+        /// 建筑生成拟定区块坐标
+        /// </summary>
+        public Point2 OriginateCoord;//这个是用来存储建筑生成拟定区块的坐标。
+        /// <summary>
+        /// 区块偏移数
+        /// </summary>
+        public int ChunkShiftCount;//这两个是用来存储区块偏移数和建筑高度偏移数的整数。它们是用来调整建筑的位置和高度的。
+
+        public int Long;
+        public int Wide;
+        /// <summary>
+        /// 建筑高度偏移数
+        /// </summary>
+        public int HightShiftCount;
+
+        public AreaInfo(string name, Point2 originateCoord, int hightShiftCount, Point3 originatePoint, int longnum, int widenum)
+        {
+            //这个是BuildingInfo类的构造函数，它根据提供的参数初始化类的实例。
+            Name = name;
+            Long = longnum;
+            Wide = widenum;
+            OriginatePoint = originatePoint;
+            OriginateCoord = originateCoord;
+            HightShiftCount = hightShiftCount;
+            ChunkShiftCount = 1;
+            int num2 = (int)MathUtils.Sqrt(Long * Long + Wide * Wide);//计算建筑区域的平原直径
+            PlainAreaMinCoord = OriginateCoord - new Point2(ChunkShiftCount);
+            PlainAreaMaxCoord = OriginateCoord + new Point2(ChunkShiftCount) + new Point2((int)Long / 16, (int)Long / 16);
+            int px = (PlainAreaMaxCoord.X * 16 + PlainAreaMinCoord.X * 16 + 15) / 2;//中心点的x坐标
+            int pz = (PlainAreaMaxCoord.Y * 16 + PlainAreaMinCoord.Y * 16 + 15) / 2;//
+
+            Radius = MathUtils.Min(px - PlainAreaMinCoord.X * 16, pz - PlainAreaMinCoord.Y * 16);
+            AreaCenterPoint = new Point2(originatePoint.X + (int)Long / 2, originatePoint.Z + (int)Wide / 2);
+        }
+
+        /// <summary>
+        /// 平原范围
+        /// </summary>
+        public bool CalculatPlainRange(Point2 coord)//这个函数用来判断给定的坐标是否在定义的平原范围内。如果在范围内，返回true；否则返回false。
+        {
+            if (coord.X >= PlainAreaMinCoord.X && coord.Y >= PlainAreaMinCoord.Y)
+            {
+                if (coord.X <= PlainAreaMaxCoord.X && coord.Y <= PlainAreaMaxCoord.Y)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    public class SubsystemNaturallyBuildings : Subsystem
+    {
+        public static Dictionary<string, Dictionary<Point2, Dictionary<Point3, int>>> Buildings = new Dictionary<string, Dictionary<Point2, Dictionary<Point3, int>>>();
+
+        public SubsystemTerrain SubsystemTerrain;
+
+        public List<BuildingInfo> BuildingInfos = new List<BuildingInfo>();//建筑信息列表
+        public List<AreaInfo> AreaInfos = new List<AreaInfo>();//特殊区域列表
+        public SubsystemWorldDemo m_subsystemWorldDemo;
+        
+        public override void Load(ValuesDictionary valuesDictionary)
+        {
+            SubsystemTerrain = Project.FindSubsystem<SubsystemTerrain>();
+            m_subsystemWorldDemo = Project.FindSubsystem<SubsystemWorldDemo>();
+            BuildingInfos.Add(new BuildingInfo("House/Supercity",(192,192) , 0, (3072,66,3072), 550, 550));
+            BuildingInfos.Add(new BuildingInfo("House/血泪", (64, 64), 0, (1024, 66, 1024), 550, 550));
+            //创建一个新的建筑信息实例，该实例表示“悦灵城”，并将其添加到BuildingInfos列表中。该建筑物的生成点是由GetRandomPoint方法获取的随机点，高度偏移数为9。
+            //BuildingInfos.Add(new BuildingInfo("建筑物/天空城", GetRandomPoint(SubsystemTerrain.SubsystemGameInfo.WorldSeed, BuildingInfos), -70));
+            //BuildingInfos.Add(new BuildingInfo("建筑物/小镇", GetRandomPoint(SubsystemTerrain.SubsystemGameInfo.WorldSeed, BuildingInfos), 2));
+            try
+            {
+                string line = valuesDictionary.GetValue<string>("OriginatePoints");//字典中获取键为"OriginatePoints"的值，并将其存储在line字符串中。
+                  //对line进行分割，使用分号’;’作为分隔符，得到多个字符串，每个字符串表示一个建筑的起始点信息，然后遍历这些字符串。
+                foreach (string str in line.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    //对每一个字符串用’@’进行分割，取出第一部分作为建筑信息在BuildingInfos列表中的索引。
+                    int i = int.Parse(str.Split(new char[] { '@' })[0]);
+                    //string[] points = (str.Split(new char[] { '@' })[1]).Split(new char[] { ',' }); 取出字符串的第二部分，
+					//表示建筑的起始点坐标，然后用逗号’,’进行分割，得到坐标的x、y、z三个部分。
+                    string[] points = (str.Split(new char[] { '@' })[1]).Split(new char[] { ',' });
+                    
+					//将坐标的x、y、z部分转化为整数，然后创建一个新的Point3实例，将其设为对应的建筑信息的起始点。
+                    BuildingInfos[i].OriginatePoint = new Point3(int.Parse(points[0]), int.Parse(points[1]), int.Parse(points[2]));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Warning("SubsystemNaturallyBuildings-Load:" + e.Message);
+            }
+            try
+            {
+                string line = valuesDictionary.GetValue<string>("AreaOriginatePoints");//字典中获取键为"OriginatePoints"的值，并将其存储在line字符串中。
+                                                                                   //对line进行分割，使用分号’;’作为分隔符，得到多个字符串，每个字符串表示一个建筑的起始点信息，然后遍历这些字符串。
+                foreach (string str in line.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    //对每一个字符串用’@’进行分割，取出第一部分作为建筑信息在BuildingInfos列表中的索引。
+                    int i = int.Parse(str.Split(new char[] { '@' })[0]);
+                    //string[] points = (str.Split(new char[] { '@' })[1]).Split(new char[] { ',' }); 取出字符串的第二部分，
+                    //表示建筑的起始点坐标，然后用逗号’,’进行分割，得到坐标的x、y、z三个部分。
+                    string[] points = (str.Split(new char[] { '@' })[1]).Split(new char[] { ',' });
+
+                    //将坐标的x、y、z部分转化为整数，然后创建一个新的Point3实例，将其设为对应的建筑信息的起始点。
+                    AreaInfos[i].OriginatePoint = new Point3(int.Parse(points[0]), int.Parse(points[1]), int.Parse(points[2]));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Warning("SubsystemNaturallyBuildings-Load:" + e.Message);
+            }
+
+        }
+
+        public override void Save(ValuesDictionary valuesDictionary)
+        {
+            int i = 0;//用于在遍历BuildingInfos列表时记录当前的索引。
+            string line = "";//初始化一个空字符串line，用于存储所有建筑的起始点信息。
+            string line1 = "";//初始化一个空字符串line，用于存储所有区域的起始点信息。
+            foreach (BuildingInfo buildingInfo in BuildingInfos)//遍历BuildingInfos列表中的每一个建筑信息。
+            {
+                //判断当前的建筑信息的起始点是否已经被设置。如果已经被设置（HasValue为true），则执行括号中的代码。
+                if (buildingInfo.OriginatePoint.HasValue)
+                {
+                    //将当前的索引i、’@’符号、当前的建筑信息的起始点转化为字符串、分号’;’连接起来，然后添加到line字符串的末尾。
+                    line += i + "@" + buildingInfo.OriginatePoint.Value.ToString() + ";";
+                }
+                i++;
+            }
+            valuesDictionary.SetValue("OriginatePoints", line);
+            foreach (AreaInfo areaInfo in AreaInfos)//遍历BuildingInfos列表中的每一个建筑信息。
+            {
+                //判断当前的建筑信息的起始点是否已经被设置。如果已经被设置（HasValue为true），则执行括号中的代码。
+                if (areaInfo.OriginatePoint.HasValue)
+                {
+                    //将当前的索引i、’@’符号、当前的建筑信息的起始点转化为字符串、分号’;’连接起来，然后添加到line字符串的末尾。
+                    line1 += i + "@" + areaInfo.OriginatePoint.Value.ToString() + ";";
+                }
+                i++;
+            }
+            
+            valuesDictionary.SetValue("AreaOriginatePoints", line1);
+            //这个方法的结果是，valuesDictionary字典中将含有一个键为"OriginatePoints"的项，其值是一个字符串，包含了所有已设置起始点的建筑信息的索引和起始点坐标。
+        }
+
+        /// <summary>
+        /// 建筑文件在进入游戏时加载
+        /// </summary>
+        public static void Initialize()
+        {
+			
+            LoadBuilding("House/Supercity");
+            LoadBuilding("House/血泪");
+            //LoadBuilding("建筑物/天空城");
+            //LoadBuilding("建筑物/小镇");
+        }
+
+        /// <summary>
+        /// 初始化家具包，在第一次进入存档时加载
+        /// </summary>
+        public static void InitFurnitureDesign(SubsystemFurnitureBlockBehavior furnitureBlockBehavior)
+        {
+            try
+            {
+                var overridesNode = ContentManager.Get<XElement>("建筑物/完美世界家具");
+                var valuesDictionary = new ValuesDictionary();
+                valuesDictionary.ApplyOverrides(overridesNode);
+                List<FurnitureDesign> designs = SubsystemFurnitureBlockBehavior.LoadFurnitureDesigns(furnitureBlockBehavior.SubsystemTerrain, valuesDictionary);
+                foreach (FurnitureDesign design in designs)
+                {
+                    furnitureBlockBehavior.m_furnitureDesigns[design.Index] = design;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Warning("SubsystemNaturallyBuildings--InitFurnitureDesign:" + e.Message);
+            }
+        }
+        /// <summary>
+        /// 更改山脉系数
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="z"></param>
+        /// <returns></returns>
+        public static float ChangeMountainRangeFactor(float x, float z, float factor, SubsystemNaturallyBuildings SNBuildings)
+        {
+            //遍历SubsystemNaturallyBuildings实例中的每一个BuildingInfo对象，即每一个建筑。
+            foreach (BuildingInfo buildingInfo in SNBuildings.BuildingInfos)
+            {
+                //使用CalculatPlainRange方法判断当前坐标(x, z)是否在当前建筑的平原范围内。如果不在范围内，遍历下一个建筑。
+                if (buildingInfo.CalculatPlainRange(new Point2((int)(x / 16), (int)(z / 16))))
+                {
+                    //如果当前坐标在平原范围内，计算当前坐标与平原中心点的距离，并除以平原半径，得到一个比例值k。这个比例值表示当前坐标距离平原中心的相对位置。
+                    float dis = Vector2.Distance(new Vector2(x, z), new Vector2(buildingInfo.AreaCenterPoint));
+                    float k = dis / buildingInfo.Radius;
+                    //使用MathUtils.Clamp方法确保比例值k在0和1之间。这是因为如果k小于0，那么它将被设置为0；如果k大于1，那么它将被设置为1。
+                    //将初始山脉因子乘以这个比例值k，得到新的山脉因子。
+                    factor = factor * MathUtils.Clamp(k, 0, 1f);
+                    return factor;
+                }
+                //如果遍历所有建筑后都没有找到在平原范围内的坐标，那么方法将直接返回初始的山脉因子。
+            }
+            return factor;
+            //这个方法将山脉因子与当前坐标距离平原中心的距离关联起来，距离中心越近，
+			//返回的山脉因子越小；距离中心越远，返回的山脉因子越接近初始值。
+			//这样可以在平原中心附近生成平坦的地形，而在远离中心的地方生成山脉。
+        }
+        /// <summary>
+        /// 生成建筑准备
+        /// </summary>       
+        public static void GenerateBuildingPrepare(TerrainChunk chunk, SubsystemNaturallyBuildings SNBuildings)
+        {
+			if(SNBuildings!=null)
+			{
+                foreach (BuildingInfo buildingInfo in SNBuildings.BuildingInfos)
+                {
+                    //它首先遍历所有的建筑信息（BuildingInfo）。
+                    if (buildingInfo.CalculatPlainRange(chunk.Coords))
+                    {
+                        //对于每个建筑信息，它检查当前处理的地形块坐标是否在此建筑的平原范围内。
+                        for (int i = 0; i < 16; i++)
+                        //如果在平原范围内，它开始遍历这个地形块的每一个单元格。
+                        {
+                            for (int j = 0; j < 16; j++)
+                            {
+                                //对于每个单元格，它计算单元格的x和y坐标与建筑平原中心的距离，然后检查这个距离是否小于平原的半径。
+                                int dx = chunk.Origin.X + i - buildingInfo.AreaCenterPoint.X;
+                                int dz = chunk.Origin.Y + j - buildingInfo.AreaCenterPoint.Y;
+                                int r = (int)buildingInfo.Radius  ;
+                                //如果距离小于半径，
+                                if (dx * dx + dz * dz < r * r)
+                                {
+                                    //那么它检查这个建筑是否已经有一个起始点。
+                                    if (!buildingInfo.OriginatePoint.HasValue)
+                                    {
+                                        //如果没有，那么它就遍历这个地形块的所有高度，找到第一个不为空的单元格，然后把它的高度设置为这个建筑的起始点高度。
+                                        for (int t = 254; t > 0; t--)
+                                        {
+                                            int id = chunk.GetCellContentsFast(3, t, 3);
+                                            if (id != 0)
+                                            {
+                                                buildingInfo.OriginatePoint = new Point3(buildingInfo.OriginateCoord.X * 16, t, buildingInfo.OriginateCoord.Y * 16);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    //它接着找到当前处理的单元格的高度，然后比较这个高度和建筑的起始点高度。
+                                    int h = buildingInfo.OriginatePoint.Value.Y;
+                                    int id2 = 0;
+                                    for (int k = 254; k > 0; k--)
+                                    {
+
+                                        id2 = chunk.GetCellContentsFast(i, k, j);
+                                        if (id2 != 0)
+                                        {
+                                            h = k;
+                                            break;
+                                        }
+                                    }
+                                    if (h > buildingInfo.OriginatePoint.Value.Y)
+                                    {
+                                        // //如果单元格的高度大于起始点的高度，那么它就把这个单元格以及它上面的所有单元格都设为空。
+                                        for (int k = h; k > buildingInfo.OriginatePoint.Value.Y; k--)
+                                        {
+                                            chunk.SetCellValueFast(i, k, j, 0);
+                                        }
+                                    }
+                                    else if (h < buildingInfo.OriginatePoint.Value.Y)
+                                    {
+										if(id2==3|| id2 == 4 || id2 == 2 || id2 == 8 || id2 == 6 || id2 == 7 )
+										{
+                                            //如果单元格的高度小于起始点的高度，那么它就把这个单元格以及它下面到起始点高度的所有单元格都设为当前单元格的类型。
+                                            for (int k = h; k <= buildingInfo.OriginatePoint.Value.Y; k++)
+                                            {
+                                                chunk.SetCellValueFast(i, k, j, id2);
+                                            }
+                                        }
+										else
+										{
+                                            for (int k = h; k <= buildingInfo.OriginatePoint.Value.Y; k++)
+                                            {
+                                                chunk.SetCellValueFast(i, k, j, 8);
+                                            }
+                                        }
+                                        
+                                        
+                                    }
+                                }
+                            }
+                            //这个过程会在所有在平原范围内的地形块上进行，为接下来在这些地形块上生成建筑做好准备。
+
+                            //总的来说，这个方法的作用是为建筑的生成做地形处理，确保建筑的底部是平坦的，并且它的高度是正确的。
+                        }
+                    }
+                }
+            }
+           
+        }
+        /// <summary>
+        /// 生成建筑
+        /// </summary>       
+        public static void GenerateBuilding(TerrainChunk chunk, SubsystemNaturallyBuildings FCBuildings)
+        {
+			if(FCBuildings!=null)
+			{
+                foreach (BuildingInfo buildingInfo in FCBuildings.BuildingInfos)
+                {
+                    //对于每个建筑信息，它检查建筑是否有一个已经设定的起始点，这是通过判断BuildingInfo中的OriginatePoint属性是否有值来完成的。
+                    if (buildingInfo.OriginatePoint.HasValue)
+                    {
+                        //如果起始点存在，它首先计算新的起始点。新的起始点是原始起始点的高度减去建筑信息中的高度偏移数（HightShiftCount）。
+                        Point3 point = buildingInfo.OriginatePoint.Value - new Point3(0, buildingInfo.HightShiftCount, 0);
+                        //最后，它通过调用SubsystemNaturallyBuildings.GenerateBuildings方法来在计算出的新起始点上生成建筑。这个方法需要三个参数：建筑信息，新的起始点和地形块。
+                        //总的来说，这个方法对所有的建筑进行遍历，在每个建筑的起始点生成建筑。如果某个建筑的起始点没有被设定，那么这个建筑就不会被生成。
+                        SubsystemNaturallyBuildings.GenerateBuildings(buildingInfo, point, chunk);
+                    }
+                }
+            }
+            
+        }
+        /// <summary>
+        /// 生成特殊区域
+        /// </summary>       
+        public static void GenerateArea(TerrainChunk chunk, SubsystemNaturallyBuildings FCBuildings)
+        {
+            if (FCBuildings != null)
+            {
+                foreach (AreaInfo areaInfo in FCBuildings.AreaInfos)
+                {
+                    //对于每个建筑信息，它检查建筑是否有一个已经设定的起始点，这是通过判断BuildingInfo中的OriginatePoint属性是否有值来完成的。
+                    if (areaInfo.OriginatePoint.HasValue)
+                    {
+                        //如果起始点存在，它首先计算新的起始点。新的起始点是原始起始点的高度减去建筑信息中的高度偏移数（HightShiftCount）。
+                        Point3 point = areaInfo.OriginatePoint.Value - new Point3(0, areaInfo.HightShiftCount, 0);
+                        //最后，它通过调用SubsystemNaturallyBuildings.GenerateBuildings方法来在计算出的新起始点上生成建筑。这个方法需要三个参数：建筑信息，新的起始点和地形块。
+                        //总的来说，这个方法对所有的建筑进行遍历，在每个建筑的起始点生成建筑。如果某个建筑的起始点没有被设定，那么这个建筑就不会被生成。
+                        SubsystemNaturallyBuildings.GenerateAreas(areaInfo, point, chunk);
+                    }
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// 生成建筑
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="originatePoint"></param>
+        /// <param name="chunk"></param>
+        public static void GenerateAreas(AreaInfo areaInfo, Point3 originatePoint, TerrainChunk chunk)
+        {
+            int dchunkX = chunk.Coords.X - (int)(originatePoint.X / 16);
+            int dchunkY = chunk.Coords.Y - (int)(originatePoint.Z / 16);
+            //计算地形块的坐标和建筑起始点的距离，分别在x轴和z轴上。
+            
+            
+                //判断建筑信息中是否有对应于当前地形块的建筑单元格信息，如果有，则获取这些单元格信息。
+                for (int i = 0; i < 16; i++)
+                {
+                    for (int j = 0; j < 16; j++)
+                    {
+                        //对于地形块内的每一个单元格，如果该单元格的高度大于建筑起始点的高度，那么就将这个单元格设为空。这是为了清除可能存在的原始地形。
+                        for (int k = originatePoint.Y + areaInfo.HightShiftCount + 1; k < 254; k++)
+                        {
+                            chunk.SetCellValueFast(i, k, j, 0);
+                        }
+                    }
+                }
+                //接着遍历所有的建筑单元格，对于每一个单元格，首先获取它的值。
+                
+            
+        }
+        /// <summary>
+        /// 获取随机生成点
+        /// </summary>
+		/// 
+        public  Point2 GetRandomPoint(int seed, List<BuildingInfo> buildingInfos)
+        {
+            
+            int id = buildingInfos.Count;
+            Point2 point = new Point2(-1000, -1000);
+            Random random = new Random(seed + id * 3);
+            if (id == 0)//第一个建筑
+            {
+                point = new Point2(random.Int(0, 50), random.Int(0, 50));
             }
             else
             {
-                componentPlayer = null;
-            }*/
-            
-        }
-        
-        public override bool ToAllocateChunks(TerrainUpdater terrainUpdater, TerrainUpdater.UpdateLocation[] locations)
-		{
-			bool result = false;
-			foreach (Point2 coord in m_terrainChunks007)
-			{
-				TerrainChunk chunkAtCoords = terrainUpdater.m_terrain.GetChunkAtCoords(coord.X, coord.Y);
-				if (chunkAtCoords == null)
-				{
-					result = true;
-					chunkAtCoords = terrainUpdater.m_terrain.AllocateChunk(coord.X, coord.Y);
-					do
-					{
-						terrainUpdater.UpdateChunkSingleStep(chunkAtCoords, terrainUpdater.m_subsystemSky.SkyLightValue);
-					}
-					while (chunkAtCoords.ThreadState < TerrainChunkState.InvalidVertices1);
-				}
-			}
-			return result;
-		}
-
-		public bool AddChunks007(int x, int y)
-		{
-			Point2 item = new Point2(x, y);
-			bool flag = !this.m_terrainChunks007.Contains(item);
-			bool result;
-			if (flag)
-			{
-				this.m_terrainChunks007.Add(item);
-				result = true;
-			}
-			else
-			{
-				result = false;
-			}
-			return result;
-		}
-
-		public bool RemoveChunks007(int x, int y)
-		{
-			Point2 item = new Point2(x, y);
-			bool flag = this.m_terrainChunks007.Contains(item);
-			bool result;
-			if (flag)
-			{
-				this.m_terrainChunks007.Remove(item);
-				result = true;
-			}
-			else
-			{
-				result = false;
-			}
-			return result;
-		}
-		#endregion
-		#region 生物生成区域
-		public override void InitializeCreatureTypes(SubsystemCreatureSpawn spawn, List<SubsystemCreatureSpawn.CreatureType> creatureTypes)
-        {
-			creatureTypes.Add(new SubsystemCreatureSpawn.CreatureType("Cave Spider", SpawnLocationType.Cave, true, true)
-			{
-				SpawnSuitabilityFunction = delegate (SubsystemCreatureSpawn.CreatureType creatureType, Point3 point)
-				{
-					int temperature = m_subsystemTerrain.Terrain.GetTemperature(point.X, point.Z);
-					int humidity = m_subsystemTerrain.Terrain.GetHumidity(point.X, point.Z);
-					int num = Terrain.ExtractContents(m_subsystemTerrain.Terrain.GetCellValueFast(point.X, point.Y - 1, point.Z));
-					if ((num != 3 && num != 67 && num != 4 && num != 66 && num != 2 && num != 7) || temperature <= 2 || humidity <2)
-					{
-						return 0f;
-					}
-					return 0.85f;
-				},
-				SpawnFunction = ((SubsystemCreatureSpawn.CreatureType creatureType, Point3 point) => spawn.SpawnCreatures(creatureType, "Cave_Spider", point, 1).Count)//3是生成数量
-			});
-		}
-		#endregion
-
-		#region 西瓜生成
-		public void 生成西瓜(TerrainChunk chunk)
-		{
-
-			/// 生成钻石块测试
-			int x = chunk.Coords.X;
-			int y = chunk.Coords.Y;
-			Random random = new Random(m_seed + x + 1495 * y);
-			if (random.Bool(0.2f))//80%生成
-			{
-				return;
-			}
-			int num = random.Int(0, MathUtils.Max(1, 1));
-			for (int i = 0; i < num; i++)
-			{
-				int num2 = random.Int(1, 14);
-				int num3 = random.Int(1, 14);
-				int humidityFast = chunk.GetHumidityFast(num2, num3);
-				int temperatureFast = chunk.GetTemperatureFast(num2, num3);
-				if (humidityFast < 10 || temperatureFast <= 6)
-				{
-					continue;
-				}
-				for (int j = 0; j < 5; j++)
-				{
-					int x2 = num2 + random.Int(-1, 1);
-					int z = num3 + random.Int(-1, 1);
-					for (int num4 = 254; num4 >= 0; num4--)
-					{
-						switch (Terrain.ExtractContents(chunk.GetCellValueFast(x2, num4, z)))
-						{
-							case 8:
-								chunk.SetCellValueFast(x2, num4 + 1, z, random.Bool(0.25f) ? Terrain.MakeBlockValue(936) : Terrain.MakeBlockValue(938));
-								break;
-							case 0:
-								continue;
-						}
-						break;
-					}
-				}
-			}
-		}
-		#endregion
-
-		#region 向日葵生成
-		public void 生成向日葵(TerrainChunk chunk)
-		{
-			if (!this.TGExtras)
-			{
-				return;
-			}
-			Random random = new Random(this.m_seed + chunk.Coords.X + 3943 * chunk.Coords.Y);
-			for (int i = 0; i < 16; i++)
-			{
-				for (int j = 0; j < 16; j++)
-				{
-					int k = 254;
-					while (k >= 0)
-					{
-						int cellValueFast = chunk.GetCellValueFast(i, k, j);
-						int num = Terrain.ExtractContents(cellValueFast);
-						if (num != 0)
-						{
-							if (BlocksManager.Blocks[num] is FluidBlock)
-							{
-								break;
-							}
-							int temperatureFast = chunk.GetTemperatureFast(i, j);
-							int humidityFast = chunk.GetHumidityFast(i, j);
-							int num2 = FCPlantManager.GenerateRandomPlantValue(random, cellValueFast, temperatureFast, humidityFast, k + 1);
-							if (num2 != 0)
-							{
-								chunk.SetCellValueFast(i, k + 1, j, num2);
-							}
-							if (num == 2)
-							{
-								chunk.SetCellValueFast(i, k, j, Terrain.MakeBlockValue(8, 0, 0));
-								break;
-							}
-							break;
-						}
-						else
-						{
-							k--;
-						}
-					}
-				}
-			}
-
-		}
-		#endregion
-
-		#region 萤石生成
-		public void generateMineralLikeCoal(TerrainChunk chunk, int value, int replacevalue, int minHeight, int maxHeight)
-		{ //生成矿物算法-类似煤的生成概率                                             
-			int cx = chunk.Coords.X;
-			int cy = chunk.Coords.Y;
-			List<TerrainBrush> terrainBrushes = new List<TerrainBrush>();
-
-			Game.Random random = new Game.Random(17);
-			for (int i = 0; i < 16; i++)
-			{
-				TerrainBrush terrainBrush = new TerrainBrush();
-				int num = random.Int(3, 15);//矿物数量的生成概率
-				for (int j = 0; j < num; j++)
-				{
-					Vector3 vector = 0.5f * Vector3.Normalize(new Vector3(random.Float(-1f, 1f), random.Float(-1f, 1f), random.Float(-1f, 1f)));//
-					int num2 = random.Int(3, 10);//矿物数量的生成概率2
-					Vector3 zero = Vector3.Zero;
-					for (int k = 0; k < num2; k++)
-					{
-						terrainBrush.AddBox((int)MathUtils.Floor(zero.X), (int)MathUtils.Floor(zero.Y), (int)MathUtils.Floor(zero.Z), 1, 1, 1, value);
-						zero += vector;
-					}
-				}
-				if (i == 0)
-					terrainBrush.AddCell(0, 0, 0, 934);//方块id 这里的000是方块位置，以该方块为中心生成矿物簇
-				terrainBrush.Compile();
-				terrainBrushes.Add(terrainBrush);
-			}
-			for (int i = cx - 1; i <= cx + 1; i++)
-			{
-				for (int j = cy - 1; j <= cy + 1; j++)
-				{
-					float num2 = CalculateMountainRangeFactor(i * 16, j * 16);
-					int num3 = (int)(5f + 2f * num2 * SimplexNoise.OctavedNoise(i, j, 0.33f, 1, 1f, 1f));
-					for (int l = 0; l < num3; l++)
-					{
-						int x2 = i * 16 + random.Int(0, 15);
-						int y2 = random.Int(minHeight, maxHeight);
-						int cz = j * 16 + random.Int(0, 15);
-						terrainBrushes[random.Int(0, terrainBrushes.Count - 1)].PaintFastSelective(chunk, x2, y2, cz, replacevalue);
-					}
-				}
-			}
-		}
-
-		public float CalculateMountainRangeFactor(float x, float z)
-		{
-			return 1f - MathUtils.Abs(2f * SimplexNoise.OctavedNoise(x, z, 0.0014f, 3, 1.91f, 0.75f) - 1f);
-		}
-		#endregion
-		#region 树木生成
-		public void GenerateFCTrees(TerrainChunk chunk)
-		{
-
-			Terrain terrain = m_subsystemTerrain.Terrain;
-			Point2 origin = chunk.Origin;
-			Point2 origin2 = chunk.Origin;
-			int x = chunk.Coords.X;
-			int y = chunk.Coords.Y;
-			for (int i = x; i <= x; i++)
-			{
-				for (int j = y; j <= y; j++)
-				{
-					Random random = new Random(m_seed + i + 3943 * j);
-					int humidity = CalculateHumidity(i * 16, j * 16); //计算湿度
-					int num = CalculateTemperature(i * 16, j * 16);  //计算温度
-					float num2 = MathUtils.Saturate((SimplexNoise.OctavedNoise(i, j, 0.1f, 2, 2f, 0.5f) - 0.25f) / 0.2f + (random.Bool(0.25f) ? 0.5f : 0f));
-					int num3 = (int)(5f * num2);
-					int num4 = 0;
-					for (int k = 0; k < 32; k++) //生成k 32棵树
-					{
-						if (num4 >= num3) //如果已生成的树木大于num3，则停止
-						{
-							break;
-						}//噪声算法
-
-						int num5 = i * 16 + random.Int(2, 13); //num5 num6用来计算树生成的位置
-						int num6 = j * 16 + random.Int(2, 13);
-						int num7 = terrain.CalculateTopmostCellHeight(num5, num6);//获取预生成位置的最大高度块
-						if (num7 < 66)//高度大于66，不然跳过，继续循环
-						{
-							continue;
-						}
-
-						int cellContentsFast = terrain.GetCellContentsFast(num5, num7, num6); //获取这个预生成方块的值
-
-						if (cellContentsFast != 2 && cellContentsFast != 8)//如果不是泥土或者草地
-						{
-							continue;
-						}//选择方块
-
-						num7++; //高度加一，继续生成
-								//这个if是检查树周围的方块是否可碰撞。
-						if (!BlocksManager.Blocks[terrain.GetCellContentsFast(num5 + 1, num7, num6)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(num5 - 1, num7, num6)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(num5, num7, num6 + 1)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(num5, num7, num6 - 1)].IsCollidable)
-						{
-							FCTreeType? treeType = FCPlantManager.GenerateRandomTreeType(random, num + SubsystemWeather.GetTemperatureAdjustmentAtHeight(num7), humidity, num7);
-							if (treeType.HasValue)
-							{
-								if(treeType == FCTreeType.Yinghua)
-                                {
-									
-										// 获取樱花树的地形刷子
-										ReadOnlyList<TerrainBrush> cherryBlossomBrushes = FCPlantManager.GetTreeBrushes(treeType.Value);
-										TerrainBrush terrainBrush = cherryBlossomBrushes[random.Int(cherryBlossomBrushes.Count)];
-
-										// 应用樱花树的地形刷子到地形上
-										terrainBrush.PaintFast(chunk, num5, num7, num6);
-										chunk.AddBrushPaint(num5, num7, num6, terrainBrush);
-
-										// 生成落樱 
-										for (int dx = -3; dx <= 3; dx++)
-										{
-											for (int dz = -3; dz <= 3; dz++)
-											{
-
-
-
-												int lx = num5 + dx;
-												int ly = num7; // 落樱的高度为树根加1，即num7
-												int lz = num6 + dz;
-												if (Terrain.ExtractContents(terrain.GetCellValueFast(lx, ly, lz)) == 0) // 如果该位置为空，则生成落樱
-												{
-													if (dx == 0 && dz == 0)
-													{
-														continue; // 跳过中心点的位置
-													}
-													else
-													{
-														chunk.SetCellValueFast(lx, ly, lz, 963);
-													}
-
-												}
-
-											}
-										}
-									
-                               
-								}
-								else
-								{
-									ReadOnlyList<TerrainBrush> treeBrushes = FCPlantManager.GetTreeBrushes(treeType.Value);
-									TerrainBrush terrainBrush = treeBrushes[random.Int(treeBrushes.Count)];
-									terrainBrush.PaintFast(chunk, num5, num7, num6);
-									chunk.AddBrushPaint(num5, num7, num6, terrainBrush);
-								}
-								
-							}
-							num4++; //成功生成一个树木，num4加1
-						}
-					}
-				}
-			}
-		}
-		
-
-		public int CalculateTemperature(float x, float z)
-		{
-			return MathUtils.Clamp((int)(MathUtils.Saturate(3f * SimplexNoise.OctavedNoise(x + this.m_temperatureOffset.X, z + this.m_temperatureOffset.Y, 0.0015f / this.TGBiomeScaling, 5, 2f, 0.6f, false) - 1.1f + this.m_worldSettings.TemperatureOffset / 16f) * 16f), 0, 15);
-		}
-
-		public int CalculateHumidity(float x, float z)
-		{
-			return MathUtils.Clamp((int)(MathUtils.Saturate(3f * SimplexNoise.OctavedNoise(x + this.m_humidityOffset.X, z + this.m_humidityOffset.Y, 0.0012f / this.TGBiomeScaling, 5, 2f, 0.6f, false) - 0.9f + this.m_worldSettings.HumidityOffset / 16f) * 16f), 0, 15);
-		}
-		#endregion
-
-		#region 洞穴
-
-		static NewModLoaderShengcheng()
-		{
-			NewModLoaderShengcheng.FCCreateBrushes();
-		}
-
-		public class CavePoint
-		{
-			public Vector3 Position;
-
-			public Vector3 Direction;
-
-			public int BrushType;
-
-			public int Length;
-
-			public int StepsTaken;
-		}
-		public void GenerateFCCaves(TerrainChunk chunk)
-		{
-			if (!this.TGCavesAndPockets)
-			{
-				return;
-			}
-			List<NewModLoaderShengcheng.CavePoint> list = new List<NewModLoaderShengcheng.CavePoint>();//创建一个名为list的空列表，用于存储洞穴点的信息。
-			int x = chunk.Coords.X;//获取chunk对象的Coords属性的X成员，并将其赋值给整型变量x。
-			int y = chunk.Coords.Y;//获取chunk对象的Coords属性的Y成员，并将其赋值给整型变量y。
-			for (int i = x - 2; i <= x + 2; i++)//执行一个循环，循环变量i从x-2开始，一直遍历到x+2。
-			{
-				for (int j = y - 2; j <= y + 2; j++)//在外层循环内部，执行一个嵌套循环，循环变量j从y-2开始，一直遍历到y+2。
-				{
-					if(list.Count >100)
+                bool pass;
+                int c = 0;
+                int cx = 0;
+                int cz = 0;
+                //do while语句格式： do{循环体}while（条件语句）；
+                //不管满不满足条件先执行一次，
+                //然后在看条件语句，如果满足那就继续执行，如果不满足则不再执行循环体，注意语法格式，
+                //while后面必须要加上分号哦，而while语句就不需要分号，要注意一些细节
+                do
+                {
+                    pass = true;
+                    c++;
+                    cx = random.Int(-50, 50);
+                    cz = random.Int(-50, 50);
+                    foreach (BuildingInfo buildingInfo in buildingInfos)
                     {
-						list.Clear();
-					}//清空列表list，准备存储新的洞穴点的信息。
-					Random random = new Random(this.m_seed + i + 9973 * j); //创建一个名为random的Random对象，使用一个种子值来初始化。
-					int num = i * 16 + random.Int(0, 15);//根据当前循环变量i计算出一个x坐标，乘以16得到具体的地块内的x坐标。
-														 //根据当前嵌套循环变量j计算出一个y坐标，乘以16得到具体的地块内的y坐标。
-														 //然后使用随机数生成器random生成一个0到15之间的随机整数，加上前面计算的y坐标，得到num2。然后使用随机数生成器random生成一个0到15之间的随机整数，加上前面计算的y坐标，得到num2。
-
-					int num2 = j * 16 + random.Int(0, 15);
-					float probability = 1f;
-					//使用随机数生成器random调用Bool方法，传入probability作为参数。
-					//这个方法根据给定的概率返回一个随机的布尔值
-					//如果返回的布尔值为true，表示概率为probability的情况发生。
-					if (random.Bool(probability))
-					{
-						//调用当前对象的CalculateHeight方法，传入num和num2作为参数，获取一个高度值。
-						//将高度值转换为整型，并将其赋值给变量num3。
-						int num3 = (int)this.CalculateHeight((float)num, (float)num2);
-
-						//调用当前对象的CalculateHeight方法，传入num+3和num2作为参数，获取一个高度值。
-						//将高度值转换为整型，并将其赋值给变量num4。
-						int num4 = (int)this.CalculateHeight((float)(num + 3), (float)num2);
-
-						//调用当前对象的CalculateHeight方法，传入num和num2+3作为参数，获取一个高度值。
-						//将高度值转换为整型，并将其赋值给变量num5。
-						int num5 = (int)this.CalculateHeight((float)num, (float)(num2 + 3));
-
-						//创建一个名为position的Vector3对象，它的坐标由num、num3-1和num2组成。
-						//这个位置表示洞穴点的起始位置，y坐标减1表示在地面下方。
-						Vector3 position = new Vector3((float)num, (float)(num3 - 1), (float)num2);
-
-						//创建一个名为v的Vector3对象，它的坐标由3、num4-num3和0组成。
-						//这个向量表示洞穴点在x方向上的延伸。
-						Vector3 v = new Vector3(3f, (float)(num4 - num3), 0f);
-
-						//创建一个名为v2的Vector3对象，它的坐标由0、num5-num3和3组成。
-						//这个向量表示洞穴点在z方向上的延伸。
-						Vector3 v2 = new Vector3(0f, (float)(num5 - num3), 3f);
-
-						//创建一个名为vector的Vector3对象，它是v和v2的叉积向量的单位向量形式。
-						//这个向量表示洞穴点的方向。
-						Vector3 vector = Vector3.Normalize(Vector3.Cross(v, v2));
-
-
-						if (vector.Y > -0.6f)//检查vector的Y坐标是否大于-0.6。
-						{
-							//如果满足条件，说明洞穴点的方向与地表接近垂直，可以被加入到生成的洞穴列表中。
-
-							//创建一个新的CavePoint对象，设置它的Position属性为position，Direction属性为vector，BrushType属性为0，Length属性为一个在80到240之间的随机整数。
-							//将这个对象添加到列表list中。
-							list.Add(new NewModLoaderShengcheng.CavePoint
-							{
-								Position = position,//洞穴起始位置
-								Direction = vector,//洞穴方向
-								BrushType = 0,
-								Length = random.Int(80, 240)
-							});
-										
-						}
-						else
+                        if (MathUtils.Abs(buildingInfo.OriginateCoord.X - cx) < 50 && MathUtils.Abs(buildingInfo.OriginateCoord.Y - cz) < 50)
                         {
-							if(position.Y <64)
-                            {
-								list.Add(new NewModLoaderShengcheng.CavePoint
-								{
-									Position = position,//洞穴起始位置
-									Direction = vector,//洞穴方向
-									BrushType = 0,
-									Length = random.Int(80, 240)
-								});
-							}
+                            pass = false;//重新执行
+                            break;
                         }
-
-						//根据当前循环变量i计算出一个x坐标，乘以16得到具体的地块内的x坐标。
-						//然后加上8，得到num6。
-						int num6 = i * 16 + 8;
-						int num7 = j * 16 + 8;////根据当前嵌套循环变量j计算出一个y坐标，乘以16得到具体的地块内的y坐标。然后加上8，得到num7。
-						int k = 0;
-
-						while (k < list.Count)//执行一个循环，循环条件是k小于列表list的元素个数。
-						{
-							//获取列表list中第k个元素，并将其赋值给变量cavePoint。
-							NewModLoaderShengcheng.CavePoint cavePoint = list[k];
-							//根据cavePoint的BrushType属性从caveBrushesByType列表中获取对应的笔刷列表，将其赋值给list2。
-							List<TerrainBrush> list2 = NewModLoaderShengcheng.m_fccaveBrushesByType[cavePoint.BrushType];
-
-							//从list2中随机选择一个笔刷，然后调用该笔刷的PaintFastAvoidWater方法来在指定的地块中绘制洞穴。
-							//PaintFastAvoidWater方法接收chunk对象和cavePoint的Position属性的各个坐标值（转换为整型）作为参数。
-
-							list2[random.Int(0, list2.Count - 1)].PaintFastAvoidWater(chunk, Terrain.ToCell(cavePoint.Position.X), Terrain.ToCell(cavePoint.Position.Y), Terrain.ToCell(cavePoint.Position.Z));
-							
-							
-							//将cavePoint的Position属性增加2倍的cavePoint的Direction属性。
-							//这样就更新了洞穴点的位置。
-							cavePoint.Position += 2f * cavePoint.Direction;
-							cavePoint.StepsTaken += 2;//将cavePoint的StepsTaken属性增加2。这表示洞穴点已经前进了两个步骤。
-							float num8 = cavePoint.Position.X - (float)num6;//计算cavePoint的Position属性的X坐标与num6之间的差值，赋值给num8。
-							float num9 = cavePoint.Position.Z - (float)num7;//计算cavePoint的Position属性的Z坐标与num7之间的差值，赋值给num9。
-
-							if (random.Bool(0.5f))//使用随机数生成器random调用Bool方法，传入概率0.5f作为参数。/这个0.5表示有百分之50的概率改变洞穴方向，取反操作。
-							{
-								//使用随机数生成器random调用Vector3方法，生成一个随机的三维向量。
-								//然后对该向量进行单位化，得到一个单位向量，并将其赋值给vector2。
-								Vector3 vector2 = Vector3.Normalize(random.Vector3(1f));
-
-								//检查num8是否小于-25.5，并且vector2的X坐标是否小于0，或者num8是否大于25.5，并且vector2的X坐标是否大于0。
-								//如果满足其中一种情况，将vector2的X坐标取相反数。
-								if ((num8 < -25.5f && vector2.X < 0f) || (num8 > 25.5f && vector2.X > 0f))
-								{
-									vector2.X = 0f - vector2.X;
-								}
-
-								//检查num9是否小于-25.5，并且vector2的Z坐标是否小于0，或者num9是否大于25.5，并且vector2的Z坐标是否大于0。
-								//如果满足其中一种情况，将vector2的Z坐标取相反数。
-								if ((num9 < -25.5f && vector2.Z < 0f) || (num9 > 25.5f && vector2.Z > 0f))
-								{
-									vector2.Z = 0f - vector2.Z;
-								}
-
-
-								//检查cavePoint的Direction属性的Y坐标是否小于-0.5，并且vector2的Y坐标是否小于-10，或者cavePoint的Direction属性的Y坐标是否大于0.1，并且vector2的Y坐标是否大于0。
-								//如果满足其中一种情况，将vector2的Y坐标取相反数。
-								if ((cavePoint.Direction.Y < -0.5f && vector2.Y < -10f) || (cavePoint.Direction.Y > 0.1f && vector2.Y > 0f))
-								{
-									vector2.Y = 0f - vector2.Y;
-								}
-								//将cavePoint的Direction属性加上0.5倍的vector2，然后对结果进行单位化。
-								//这样更新了洞穴点的方向。
-								cavePoint.Direction = Vector3.Normalize(cavePoint.Direction + 0.5f * vector2);
-							}
-
-							//第二套判断
-							//检查cavePoint的StepsTaken属性是否大于20，且随机数生成器random返回的布尔值为true，概率为0.06。
-							if (cavePoint.StepsTaken > 20 && random.Bool(0.06f))
-							{
-								//在满足条件的情况下，使用随机数生成器random调用Vector3方法，生成一个随机的三维向量。
-								//然后将这个向量乘以(1, 0.33, 1)，得到一个新的向量，然后对其进行单位化。
-								//这个向量作为新的洞穴点的方向。
-								cavePoint.Direction = Vector3.Normalize(random.Vector3(1f) * new Vector3(1f, 0.33f, 1f));
-							}
-
-							//检查cavePoint的StepsTaken属性是否大于20，且随机数生成器random返回的布尔值为true，概率为0.05。
-							if (cavePoint.StepsTaken > 20 && random.Bool(0.5f))
-							{
-								//将cavePoint的Direction属性的Y坐标设为0。
-								cavePoint.Direction.Y = 0f;
-								//将cavePoint的BrushType属性增加2，并将结果与caveBrushesByType列表的元素个数-1取较小值。
-								//这个操作用于更新洞穴点的笔刷类型。
-								cavePoint.BrushType = MathUtils.Min(cavePoint.BrushType + 2, NewModLoaderShengcheng.m_fccaveBrushesByType.Count - 1);
-							}
-
-							//检查cavePoint的StepsTaken属性是否大于30，且随机数生成器random返回的布尔值为true，概率为0.03。
-							if (cavePoint.StepsTaken > 20 && random.Bool(0.03f))
-							{
-								//将cavePoint的Direction属性的X坐标设为0。 //洞穴垂直向下
-								cavePoint.Direction.X = 0f;
-								cavePoint.Direction.Y = -1f;
-								cavePoint.Direction.Z = 0f;
-							}
-							//检查cavePoint的StepsTaken属性是否大于30，且cavePoint的Position属性的Y坐标是否小于30，且随机数生成器random返回的布尔值为true，概率为0.02。
-							if (cavePoint.StepsTaken > 20 && cavePoint.Position.Y < 30f && random.Bool(0.02f))
-							{
-								cavePoint.Direction.X = 0f;
-								cavePoint.Direction.Y = 1f; //洞穴垂直向上
-								cavePoint.Direction.Z = 0f;
-							}
-
-							//使用随机数生成器random调用Bool方法，传入概率0.33f作为参数。
-							//如果返回的布尔值为true，表示概率为0.33的情况发生。
-
-							if (random.Bool(0.33f))//修改点1
-							{
-								//在满足条件的情况下，通过随机数生成器random生成一个0到0.999之间的随机浮点数。
-								//将这个浮点数的7次方乘以TerrainContentsGenerator23.m_caveBrushesByType.Count，然后取整数部分，赋值给cavePoint的BrushType属性。
-								//这个操作基于随机数生成的概率，选择了一个新的洞穴笔刷的类型。
-								cavePoint.BrushType = (int)(MathUtils.Pow(random.Float(0f, 0.999f), 7f) * (float)NewModLoaderShengcheng.m_fccaveBrushesByType.Count);
-							}
-
-							//检查随机数生成器random返回的布尔值为true，概率为0.06，且列表list的元素个数小于12，
-							//且cavePoint的StepsTaken属性大于20，且cavePoint的Position属性的Y坐标小于58。
-							if (random.Bool(0.76f) || list.Count < 30 || cavePoint.StepsTaken > 20 || cavePoint.Position.Y < 58f)//修改点
-							{
-								//在满足条件的情况下，创建一个新的CavePoint对象，设置它的Position属性为cavePoint的Position属性，
-								//Direction属性为一个通过随机数生成器random生成的向量进行单位化得到的向量，
-								//BrushType属性为一个根据随机数生成的概率得到的整数，
-								//Length属性为一个在40到180之间的随机整数。
-								//添加到列表
-								list.Add(new NewModLoaderShengcheng.CavePoint
-								{
-									Position = cavePoint.Position,
-									Direction = Vector3.Normalize(random.Vector3(1f, 1f) * new Vector3(1f, 0.33f, 1f)),
-									BrushType = (int)(MathUtils.Pow(random.Float(0f, 0.999f), 7f) * (float)NewModLoaderShengcheng.m_fccaveBrushesByType.Count),
-									Length = random.Int(40, 180)
-								});
-							}
-							//检查cavePoint的StepsTaken属性是否大于等于cavePoint的Length属性，
-							//或者num8的绝对值是否大于34，或者num9的绝对值是否大于34，
-							//或者cavePoint的Position属性的Y坐标是否小于5或大于246。
-							if (cavePoint.StepsTaken >= cavePoint.Length  || cavePoint.Position.Y < 5f || cavePoint.Position.Y > 246f)
-							{
-								
-								//如果满足其中一种情况，则将k的值增加1，进入下一个洞穴点的处理。
-								k++;
-							}
-							//否则，如果cavePoint的StepsTaken属性能够被20整除，即取模等于0。
-							else if (cavePoint.StepsTaken % 20 == 0)
-							{
-								//调用CalculateHeight方法，传入cavePoint的Position属性的X和Z坐标作为参数，获取一个高度值。
-								//如果cavePoint的Position属性的Y坐标大于num10加上1。
-								//将k的值增加1，进入下一个洞穴点的处理。
-								float num10 = this.CalculateHeight(cavePoint.Position.X, cavePoint.Position.Z);
-								if (cavePoint.Position.Y > num10 + 1f)
-								{
-									
-									k++;
-									//整个循环的目的是对洞穴点列表中的每个点进行处理，包括更新位置、方向，绘制洞穴，
-									//并根据一些条件判断是否继续处理当前洞穴点。当满足结束条件时，进入下一个洞穴点的处理。
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		public float CalculateHeight(float x, float z)
-		{
-			float num = this.TGOceanSlope + this.TGOceanSlopeVariation * MathUtils.PowSign(2f * SimplexNoise.OctavedNoise(x + this.m_mountainsOffset.X, z + this.m_mountainsOffset.Y, 0.01f, 1, 2f, 0.5f, false) - 1f, 0.5f);
-			float num2 = this.CalculateOceanShoreDistance(x, z);
-			float num3 = MathUtils.Saturate(2f - 0.05f * MathUtils.Abs(num2));
-			float num4 = MathUtils.Saturate(MathUtils.Sin(this.TGIslandsFrequency * num2));
-			float num5 = MathUtils.Saturate(MathUtils.Saturate((0f - num) * num2) - 0.85f * num4);
-			float num6 = MathUtils.Saturate(MathUtils.Saturate(0.05f * (0f - num2 - 10f)) - num4);
-			float v = this.CalculateMountainRangeFactor(x, z);
-			float f = (1f - num3) * SimplexNoise.OctavedNoise(x, z, 0.001f / this.TGBiomeScaling, 2, 2f, 0.5f, false);
-			float f2 = (1f - num3) * SimplexNoise.OctavedNoise(x, z, 0.0017f / this.TGBiomeScaling, 2, 4f, 0.7f, false);
-			float num7 = (1f - num6) * (1f - num3) * TerrainContentsGenerator23.Squish(v, 1f - this.TGHillsPercentage, 1f - this.TGMountainsPercentage);
-			float num8 = (1f - num6) * TerrainContentsGenerator23.Squish(v, 1f - this.TGMountainsPercentage, 1f);
-			float num9 = 1f * SimplexNoise.OctavedNoise(x, z, this.TGHillsFrequency, this.TGHillsOctaves, 1.93f, this.TGHillsPersistence, false);
-			float amplitudeStep = MathUtils.Lerp(0.75f * TerrainContentsGenerator23.TGMountainsDetailPersistence, 1.33f * TerrainContentsGenerator23.TGMountainsDetailPersistence, f);
-			float num10 = 1.5f * SimplexNoise.OctavedNoise(x, z, TerrainContentsGenerator23.TGMountainsDetailFreq, TerrainContentsGenerator23.TGMountainsDetailOctaves, 1.98f, amplitudeStep, false) - 0.5f;
-			float num11 = MathUtils.Lerp(60f, 30f, MathUtils.Saturate(1f * num8 + 0.5f * num7 + MathUtils.Saturate(1f - num2 / 30f)));
-			float x2 = MathUtils.Lerp(-2f, -4f, MathUtils.Saturate(num8 + 0.5f * num7));
-			float num12 = MathUtils.Saturate(1.5f - num11 * MathUtils.Abs(2f * SimplexNoise.OctavedNoise(x + this.m_riversOffset.X, z + this.m_riversOffset.Y, 0.001f, 4, 2f, 0.5f, false) - 1f));
-			float num13 = -50f * num5 + this.TGHeightBias;
-			float num14 = MathUtils.Lerp(0f, 8f, f);
-			float num15 = MathUtils.Lerp(0f, -6f, f2);
-			float num16 = this.TGHillsStrength * num7 * num9;
-			float num17 = this.TGMountainsStrength * num8 * num10;
-			float f3 = this.TGRiversStrength * num12;
-			float num18 = num13 + num14 + num15 + num17 + num16;
-			float num19 = MathUtils.Min(MathUtils.Lerp(num18, x2, f3), num18);
-			return MathUtils.Clamp(64f + num19, 10f, 251f);
-		}
-		public float CalculateOceanShoreDistance(float x, float z)
-		{
-			if (this.m_islandSize != null)
-			{
-				float num = this.CalculateOceanShoreX(z);
-				float num2 = this.CalculateOceanShoreZ(x);
-				float num3 = this.CalculateOceanShoreX(z + 1000f) + this.m_islandSize.Value.X;
-				float num4 = this.CalculateOceanShoreZ(x + 1000f) + this.m_islandSize.Value.Y;
-				return MathUtils.Min(x - num, z - num2, num3 - x, num4 - z);
-			}
-			float num5 = this.CalculateOceanShoreX(z);
-			float num6 = this.CalculateOceanShoreZ(x);
-			return MathUtils.Min(x - num5, z - num6);
-		}
-
-		public float CalculateOceanShoreX(float z)
-		{
-			return this.m_oceanCorner.X + this.TGShoreFluctuations * SimplexNoise.OctavedNoise(z, 0f, 0.005f / this.TGShoreFluctuationsScaling, 4, 1.95f, 1f, false);
-		}
-
-		public float CalculateOceanShoreZ(float x)
-		{
-			return this.m_oceanCorner.Y + this.TGShoreFluctuations * SimplexNoise.OctavedNoise(0f, x, 0.005f / this.TGShoreFluctuationsScaling, 4, 1.95f, 1f, false);
-		}
-		public float TGOceanSlopeVariation;
-		public float TGOceanSlope;
-		public Vector2 m_mountainsOffset;
-		public Vector2 m_riversOffset;
-		public float TGIslandsFrequency;
-		public float TGHillsPercentage;
-		public float TGHillsStrength;
-		public float TGMountainsStrength;
-		public float TGMountainRangeFreq;
-		public float TGMountainsPercentage;
-		public int TGHillsOctaves;
-		public float TGHillsFrequency;
-		public float TGHillsPersistence;
-		public float TGHeightBias;
-		public float TGRiversStrength;
-		public Vector2? m_islandSize;
-		public Vector2 m_oceanCorner;
-		public float TGShoreFluctuations;
-		public float TGShoreFluctuationsScaling;
-		public float TGTurbulenceStrength;
-		public float TGTurbulenceFreq;
-		public int TGTurbulenceOctaves;
-		public float TGTurbulencePersistence;
-		public float TGMinTurbulence;
-		public float TGTurbulenceZero;
-		public float TGDensityBias;
-		#endregion
-
-		#region 空腔替换
-		public void GenerateFCPockets(TerrainChunk chunk)
-		{
-			if (!this.TGCavesAndPockets)//检查是否启用了岩浆口袋的生成。如果未启用，则直接返回，不进行生成岩浆口袋的操作。
-			{
-				return;
-			}
-			for (int i = -1; i <= 1; i++) //双重循环，遍历以当前区块为中心的相邻区块。i和j的值为-1、0和1，用于遍历所有相邻的区块。
-			{
-				for (int j = -1; j <= 1; j++)
-				{
-					int num = i + chunk.Coords.X; //计算相邻区块的坐标，以当前区块的坐标为基础。
-					int num2 = j + chunk.Coords.Y;
-					Random random = new Random(this.m_seed + num + 71 * num2); //创建一个随机数生成器，种子使用了当前区块的坐标和一个固定的偏移量。
-					int num3 = random.Int(0, 10);//生成一个介于0和10之间的随机数，用于决定生成岩浆口袋的数量。
-					for (int k = 0; k < num3; k++) //根据上一步生成的随机数，进行循环，决定生成岩浆口袋的具体位置。
-					{
-						random.Int(0, 1);
-					}
-					float num4 = this.CalculateMountainRangeFactor((float)(num * 16), (float)(num2 * 16));//根据相邻区块的坐标计算一个山脉范围因子。
-
-
-
-					if (random.Bool(0.06f + 0.05f * num4)) //根据之前计算的山脉范围因子和随机数生成器，判断是否生成岩浆口袋。判断的条件为一个布尔值，其概率为0.06加上0.05乘以山脉范围因子。
-					{
-						int num18 = num * 16;
-						int num19 = random.Int(35, 42); //生成一个介于15和42之间的随机数，用于确定岩浆口袋的高度位置。
-						int num20 = num2 * 16;
-						int num21 = random.Int(1, 2); //生成一个介于1和2之间的随机数，用于确定生成岩浆口袋的数量。
-
-						
-
-						for (int num22 = 0; num22 < num21; num22++) //据上一步生成的数量，进行循环，确定生成岩浆口袋的具体位置。
-						{
-							Vector2 vector2 = random.Vector2(7f); //使用随机数生成器生成一个二维向量，向量的每个分量介于-7和7之间。
-							int num23 = 8 + (int)MathUtils.Round(vector2.X); //根据生成的二维向量，确定岩浆口袋在区块内的具体位置。
-							int num24 = random.Int(0, 1);
-							int num25 = 8 + (int)MathUtils.Round(vector2.Y); //根据随机数生成器，选择一个岩浆口袋的绘制方法，并使用给定的参数在区块内绘制岩浆口袋。
-							NewModLoaderShengcheng.m_fcmagmaPocketBrushes[random.Int(0, NewModLoaderShengcheng.m_fcmagmaPocketBrushes.Count - 1)].PaintFast(chunk, num18 + num23, num19 + num24, num20 + num25);
-						}
-					}
-				}
-			}
-		}
-		#endregion
-
-		#region 静态地形刷子（岩浆湖之类的）
-		public static void FCCreateBrushes()
-		{
-			Random random = new Random(17);
-
-
-
-
-
-			#region 已合并到模组的刷子
-
-			int[] array3 = new int[]//洞穴生成的空腔
-			{
-				8,
-				12,
-				14,
-				16
-			};
-			for (int num73 = 0; num73 < 4 * array3.Length; num73++)
-			{
-				TerrainBrush terrainBrush16 = new TerrainBrush();
-				int num74 = array3[num73 / 4];
-				int num75 = num74 + 2;
-				float num76 = (num73 % 4 == 2) ? 0.5f : 1f;
-				int num77 = (num73 % 4 == 1) ? (num74 * num74) : (2 * num74 * num74);
-				for (int num78 = 0; num78 < num77; num78++)
-				{
-					Vector2 vector16 = random.Vector2(0f, (float)num74);
-					float num79 = vector16.Length();
-					int num80 = random.Int(3, 4);
-					int sizeY2 = 1 + (int)MathUtils.Lerp(MathUtils.Max((float)(num74 / 3), 2.5f) * num76, 0f, num79 / (float)num74) + random.Int(0, 1);
-					int num81 = 1 + (int)MathUtils.Lerp((float)num75, 0f, num79 / (float)num74) + random.Int(0, 1);
-					terrainBrush16.AddBox((int)MathUtils.Floor(vector16.X), 0, (int)MathUtils.Floor(vector16.Y), num80, sizeY2, num80, 0);
-					terrainBrush16.AddBox((int)MathUtils.Floor(vector16.X), -num81, (int)MathUtils.Floor(vector16.Y), num80, num81, num80, 0);
-				}
-				terrainBrush16.Compile();
-				NewModLoaderShengcheng.m_fcmagmaPocketBrushes2.Add(terrainBrush16);
-			}
-
-			#region 空腔
-			NumberWeightPair[] numberWeightPairs = new NumberWeightPair[]
-			{
-				new NumberWeightPair(16, 8),   // 煤的权重为 （这里的权重判断其实不是很管用，因为会被重复的空气盒子替换，所以建议用下面的bool判断
-				new NumberWeightPair(0,	80),   // 空气的权重为
-				new NumberWeightPair(41, 3),  //铜
-				new NumberWeightPair(39, 3), //铁
-				new NumberWeightPair(101, 1),//硫
-				new NumberWeightPair(112, 1),//钻石
-				new NumberWeightPair(934, 4), // 萤石的权重为
-												// 其他数字和权重的对应关系...
-			};
-			int totalWeight = 0;
-			foreach (NumberWeightPair pair in numberWeightPairs)
-			{
-				totalWeight += pair.weight; //总权重
-			}
-			int randomWeight = random.Int(0, totalWeight - 1);
-
-			
-			
-
-			int[] array2 = new int[]//定义了一个整型数组array2，包含了4个不同的整数值，用于确定岩浆池刷子的尺寸。
-			{
-				16,
-				24,
-				28,
-				30
-			};
-			for (int num73 = 0; num73 < 4 * array2.Length; num73++)//外层循环，循环次数为4乘以array2数组的长度，用于生成多个岩浆池刷子。num73 < 16
-			{
-				TerrainBrush terrainBrush16 = new TerrainBrush(); //创建一个新的空岩浆池刷子实例。
-				int num74 = array2[num73 / 4]; //根据循环索引来选择对应的岩浆池大小，从array2数组中获取值。8,12,14,16
-				int num75 = num74 + 2; //计算岩浆池刷子尺寸的偏移量，为岩浆池大小加上2。
-				float num76 = (num73 % 4 == 2) ? 0.5f : 1f;//根据循环索引的模运算结果，确定岩浆池刷子的缩放因子。当索引模4等于2时，缩放因子为0.5，否则为1。
-
-
-				int num77 = (num73 % 4 == 1) ? (num74 * num74) : (2 * num74 * num74);//根据循环索引的模运算结果，确定岩浆池刷子需要绘制的盒子数量。如果索引模4等于1，盒子数量为岩浆池大小的平方，否则为岩浆池大小的两倍平方。
-				for (int num78 = 0; num78 < num77; num78++)//内层循环，循环次数为岩浆池需要绘制的盒子数量。
-				{
-					Vector2 vector16 = random.Vector2(0f, (float)num74);//生成一个在二维平面上的随机向量，x和y分量的范围为0到岩浆池大小。
-					float num79 = vector16.Length();//计算随机向量的长度。 向量长度为洞穴大小的值。8-16
-					int num80 = random.Int(3, 4);//随机生成一个高度值，范围为3到4。
-					 //根据岩浆池大小、缩放因子和随机向量长度，计算盒子的尺寸。使用线性插值函数MathUtils.Lerp来计算盒子的Y轴尺寸，并添加一个随机值。
-					int sizeY2 = 1 + (int)MathUtils.Lerp(MathUtils.Max((float)(num74 / 3), 2.5f) * num76, 0f, num79 / (float)num74) + random.Int(0, 1);
-					//根据岩浆池大小、偏移量和随机向量长度，计算盒子的高度。使用线性插值函数MathUtils.Lerp来计算盒子的Y轴高度，并添加一个随机值。
-					
-					int num81 = 1 + (int)MathUtils.Lerp((float)num75, 0f, num79 / (float)num74) + random.Int(0, 1);
-					//在岩浆池刷子中添加一个盒子形状，位置和尺寸由随机生成的参数确定。
-
-
-					int selectedNumber = -1;
-					int selectedNumber2 = 0;
-					int accumulatedWeight = 0;
-					foreach (NumberWeightPair pair in numberWeightPairs)//权重分配所有可能的矿物
-					{
-						accumulatedWeight += pair.weight;
-						if (randomWeight < accumulatedWeight)
-						{
-							selectedNumber = pair.number;
-							
-							break;
-						}
-					}
-					selectedNumber2 = selectedNumber;
-					if (selectedNumber2 == 0)
-                    {
-						selectedNumber2 = 980;
-
-					}
-					if(num81 - 15 >0)
-                    {
-						if (random.Bool(0.0001f) && selectedNumber == 0) //煤
-						{
-							selectedNumber = 16;
-
-						}
-						if (random.Bool(0.0001f) && selectedNumber == 0) //铁
-						{
-							selectedNumber = 39;
-
-						}
-						if (random.Bool(0.0001f) && selectedNumber == 0)//钻石
-						{
-							selectedNumber = 112;
-						}
-						if (random.Bool(0.0001f) && selectedNumber == 0)//铜
-						{
-							selectedNumber = 41;
-
-						}
-						if (random.Bool(0.0001f) && selectedNumber == 0)//硫
-						{
-							selectedNumber = 101;
-
-						}
-						if (random.Bool(0.0001f) && selectedNumber == 0)//锗
-						{
-							selectedNumber = 148;
-
-						}
-					}
-					
-
-					terrainBrush16.AddBox((int)MathUtils.Floor(vector16.X), 0, (int)MathUtils.Floor(vector16.Y), num80, sizeY2, num80, 0);
-					/*if (random.Bool(0.1f) )//生成钟乳石
-					{
-						terrainBrush16.AddRay((int)MathUtils.Floor(vector16.X), 5, (int)MathUtils.Floor(vector16.Y), (int)MathUtils.Floor(vector16.X), 0, (int)MathUtils.Floor(vector16.Y), 1, 1, 1, selectedNumber2);
-						//生成钟乳石
-					}*/
-					if (selectedNumber != 0)//如果不为0
-                    {
-						if (random.Bool(0.1f))//进行二次判断 概率为x生成矿物
-                        {
-						   terrainBrush16.AddBox((int)MathUtils.Floor(vector16.X), -num81, (int)MathUtils.Floor(vector16.Y), num80, num81, num80, selectedNumber);//生成矿物分布
-						}
-
-					}
-					else if (selectedNumber == 0)
-                    {
-						terrainBrush16.AddBox((int)MathUtils.Floor(vector16.X), -num81, (int)MathUtils.Floor(vector16.Y), num80, num81, num80, selectedNumber);//生成矿物分布
-
-					}
-				}
-				terrainBrush16.Compile();
-				NewModLoaderShengcheng.m_fcmagmaPocketBrushes.Add(terrainBrush16);
-			}
-            #endregion
-            for (int num82 = 0; num82 < 7; num82++) //外层循环，生成7种不同类型的洞穴刷子。
-			{
-				NewModLoaderShengcheng.m_fccaveBrushesByType.Add(new List<TerrainBrush>());//为每种洞穴类型创建一个空的刷子列表。
-				for (int num83 = 0; num83 < 3; num83++)//内层循环，为每种洞穴类型生成3个刷子实例。
-				{
-					TerrainBrush terrainBrush17 = new TerrainBrush();//创建一个新的空洞穴刷子实例。
-					int num84 = 6 + 4 * num82; //根据洞穴类型计算刷子的大小。每种类型增加4个单位，起始值为6。
-					int max = 7 + num82 / 3; //根据洞穴类型计算随机参数的上限。每3种类型增加1个单位，起始值为3。
-					int max2 = 12 + num82;  //根据洞穴类型计算随机参数的上限。每种类型增加1个单位，起始值为9。
-					for (int num85 = 0; num85 < num84; num85++) //循环生成刷子中的盒子形状，盒子的数量由num84定义。
-					{
-						int num86 = random.Int(6, max);//随机生成盒子的尺寸，范围为2到max之间。
-						int num87 = random.Int(11, max2) -   num86;//随机生成盒子的数量，范围为8到max2之间，减去2倍盒子的尺寸。
-						Vector3 v15 = 0.5f * new Vector3(random.Float(-1f, 1f), random.Float(0f, 1f), random.Float(-1f, 1f));//生成一个随机的向量，用于确定盒子的位置偏移。
-						Vector3 vector17 = Vector3.Zero;//初始化盒子的起始位置为零向量。
-						for (int num88 = 0; num88 < num87; num88++)//循环生成多个盒子。
-						{
-							//在洞穴刷子中添加一个盒子形状，位置和尺寸由随机生成的参数确定。
-							terrainBrush17.AddBox((int)MathUtils.Floor(vector17.X) - num86 / 2, (int)MathUtils.Floor(vector17.Y) - num86 / 2, (int)MathUtils.Floor(vector17.Z) - num86 / 2, num86, num86, num86, 0);
-							//更新盒子的位置，加上随机生成的向量
-							vector17 += v15;
-						}
-					}
-					terrainBrush17.Compile();
-					NewModLoaderShengcheng.m_fccaveBrushesByType[num82].Add(terrainBrush17);
-				}
-			}
-		}
-		#endregion
-		#endregion
-		#region 岩浆周围生成
-		/*public void PaintFastWithLava(TerrainChunk chunk, int x, int y, int z)
-		{
-			Terrain terrain = chunk.Terrain;
-			x -= chunk.Origin.X;
-			z -= chunk.Origin.Y;
-			foreach (TerrainBrush.Cell cell in this.Cells)
-			{
-				int num = (int)cell.X + x;
-				int num2 = (int)cell.Y + y;
-				int num3 = (int)cell.Z + z;
-				if (num >= 0 && num < 16 && num2 >= 0 && num2 < 255 && num3 >= 0 && num3 < 16)
-				{
-					int num4 = num + chunk.Origin.X;
-					int y2 = num2;
-					int num5 = num3 + chunk.Origin.Y;
-					if (chunk.GetCellContentsFast(num, num2, num3) == 92 && terrain.GetCellContents(num4 - 1, y2, num5) == 92 && terrain.GetCellContents(num4 + 1, y2, num5) == 92 && terrain.GetCellContents(num4, y2, num5 - 1) == 92 && terrain.GetCellContents(num4, y2, num5 + 1) == 92 && chunk.GetCellContentsFast(num, num2 + 1, num3) == 92)
-					{
-						chunk.SetCellValueFast(num, num2, num3, cell.Value);
-					}
-				}
-			}
-		}*/
-
-
-		#endregion
-		public struct NumberWeightPair
-		{
-			public int number;
-			public int weight;
-
-			public NumberWeightPair(int number, int weight)
-			{
-				this.number = number;
-				this.weight = weight;
-			}
-		}
-
-		
-		public static List<TerrainBrush> m_fcmagmaPocketBrushes = new List<TerrainBrush>();
-		public static List<TerrainBrush> m_fcmagmaPocketBrushes2 = new List<TerrainBrush>();
-		public static List<List<TerrainBrush>> m_fccaveBrushesByType = new List<List<TerrainBrush>>();
-		
-
-		#region 地形板块生成(还未应用）
-		public void FCGenerateTerrain(TerrainChunk chunk, int x1, int z1, int x2, int z2)
-		{
-			int num = x2 - x1;
-			int num2 = z2 - z1;
-			Terrain terrain = this.m_subsystemTerrain.Terrain;
-			int num3 = chunk.Origin.X + x1;
-			int num4 = chunk.Origin.Y + z1;
-			TerrainContentsGenerator23.Grid2d grid2d = new TerrainContentsGenerator23.Grid2d(num, num2);
-			TerrainContentsGenerator23.Grid2d grid2d2 = new TerrainContentsGenerator23.Grid2d(num, num2);
-			for (int i = 0; i < num2; i++)
-			{
-				for (int j = 0; j < num; j++)
-				{
-					grid2d.Set(j, i, this.CalculateOceanShoreDistance((float)(j + num3), (float)(i + num4)));
-					grid2d2.Set(j, i, this.CalculateMountainRangeFactor((float)(j + num3), (float)(i + num4)));
-				}
-			}
-			TerrainContentsGenerator23.Grid3d grid3d = new TerrainContentsGenerator23.Grid3d(num / 4 + 1, 33, num2 / 4 + 1);
-			for (int k = 0; k < grid3d.SizeX; k++)
-			{
-				for (int l = 0; l < grid3d.SizeZ; l++)
-				{
-					int num5 = k * 4 + num3;
-					int num6 = l * 4 + num4;
-					float num7 = this.CalculateHeight((float)num5, (float)num6);
-					float v = this.CalculateMountainRangeFactor((float)num5, (float)num6);
-					float num8 = MathUtils.Lerp(this.TGMinTurbulence, 1f, TerrainContentsGenerator23.Squish(v, this.TGTurbulenceZero, 1f));
-					for (int m = 0; m < grid3d.SizeY; m++)
-					{
-						int num9 = m * 8;
-						float num10 = this.TGTurbulenceStrength * num8 * MathUtils.Saturate(num7 - (float)num9) * (2f * SimplexNoise.OctavedNoise((float)num5, (float)num9, (float)num6, this.TGTurbulenceFreq, this.TGTurbulenceOctaves, 4f, this.TGTurbulencePersistence, false) - 1f);
-						float num11 = (float)num9 + num10;
-						float num12 = num7 - num11;
-						num12 += MathUtils.Max(4f * (this.TGDensityBias - (float)num9), 0f);
-						grid3d.Set(k, m, l, num12);
-					}
-				}
-			}
-			SubsystemTerrain subsystemTerrain = new SubsystemTerrain();
-			TerrainContentsGenerator23 generator = new TerrainContentsGenerator23(subsystemTerrain);
-			int oceanLevel = generator.OceanLevel;
-			
-			for (int n = 0; n < grid3d.SizeX - 1; n++)
-			{
-				for (int num13 = 0; num13 < grid3d.SizeZ - 1; num13++)
-				{
-					for (int num14 = 0; num14 < grid3d.SizeY - 1; num14++)
-					{
-						float num15;
-						float num16;
-						float num17;
-						float num18;
-						float num19;
-						float num20;
-						float num21;
-						float num22;
-						grid3d.Get8(n, num14, num13, out num15, out num16, out num17, out num18, out num19, out num20, out num21, out num22);
-						float num23 = (num16 - num15) / 4f;
-						float num24 = (num18 - num17) / 4f;
-						float num25 = (num20 - num19) / 4f;
-						float num26 = (num22 - num21) / 4f;
-						float num27 = num15;
-						float num28 = num17;
-						float num29 = num19;
-						float num30 = num21;
-						for (int num31 = 0; num31 < 4; num31++)
-						{
-							float num32 = (num29 - num27) / 4f;
-							float num33 = (num30 - num28) / 4f;
-							float num34 = num27;
-							float num35 = num28;
-							for (int num36 = 0; num36 < 4; num36++)
-							{
-								float num37 = (num35 - num34) / 8f;
-								float num38 = num34;
-								int num39 = num31 + n * 4;
-								int num40 = num36 + num13 * 4;
-								int x3 = x1 + num39;
-								int z3 = z1 + num40;
-								float num41 = grid2d.Get(num39, num40);
-								float num42 = grid2d2.Get(num39, num40);
-								int temperatureFast = chunk.GetTemperatureFast(x3, z3);
-								int humidityFast = chunk.GetHumidityFast(x3, z3);
-								float num43 = num42 - 0.01f * (float)humidityFast;
-								float num44 = MathUtils.Lerp(100f, 0f, num43);
-								float num45 = MathUtils.Lerp(300f, 30f, num43);
-								bool flag = (temperatureFast > 8 && humidityFast < 8 && num42 < 0.97f) || (MathUtils.Abs(num41) < 16f && num42 < 0.97f);
-								int num46 = TerrainChunk.CalculateCellIndex(x3, 0, z3);
-								for (int num47 = 0; num47 < 8; num47++)
-								{
-									int num48 = num47 + num14 * 8;
-									int value = 0;
-									if (num38 < 0f)
-									{
-										if (num48 <= oceanLevel)
-										{
-											value = 18;
-										}
-									}
-									else
-									{
-										value = ((!flag) ? ((num38 >= num45) ? 67 : 3) : ((num38 >= num44) ? ((num38 >= num45) ? 67 : 3) : 4));
-									}
-									chunk.SetCellValueFast(num46 + num48, value);
-									num38 += num37;
-								}
-								num34 += num32;
-								num35 += num33;
-							}
-							num27 += num23;
-							num28 += num24;
-							num29 += num25;
-							num30 += num26;
-						}
-					}
-				}
-			}
-		}
-
-		#endregion
-
-		#region 地表群系生成/村庄生成
-
-		public class RoadPoint//路径点
-		{
-			public Point3 Position;
-
-			
-
-			public int BrushType;//这是道路类型，0为沿x轴的纵向路面，1为沿着z轴的横向路面，2为弯道。
-
-			public bool TG;//代表该路径点是否已经生成
-
-			public bool TFirst;//判断该路径点是否为村庄起点。
-
-			public bool Tturn;//判断该路径点是否为转折点。
-
-			public bool is_Vice;//判断是否为副路
-
-			public Point2 chunkCoords;//储存区块绝对坐标
-
-		}
-		public static List<NewModLoaderShengcheng.RoadPoint> listRD = new List<NewModLoaderShengcheng.RoadPoint>();//创建一个名为listRD的空列表，用于储存路径点的信息。
-		public static List<NewModLoaderShengcheng.BuildPoint> listBD = new List<NewModLoaderShengcheng.BuildPoint>();//创建一个名为listBD的空列表，用于存储建筑点的信息。
-		public static List<NewModLoaderShengcheng.RoadPoint> listRDF = new List<NewModLoaderShengcheng.RoadPoint>();//创建一个名为listRDF的空列表，用于存储村庄起点的信息。
-		public static Dictionary<Point2, int> Dic_Chunk_Village3 = new Dictionary<Point2, int>();  //村庄区块
-		public static Dictionary<Point2, TerrainChunk> Dic_Chunk_Village_Build = new Dictionary<Point2, TerrainChunk>(); //建筑点区块。
-		 
-
-		public int StepsTaken;//判断村庄生成的步长。
-		public int StepsTaken_Max;//判断村庄生成的最大步长。
-		public class BuildPoint//建筑点
-		{
-			public Point3 Position;
-
-			
-
-			public int BrushType;
-
-			public bool TG;//代表该路径点是否已经生成
-
-			
-		}
-
-
-
-		/*              try
-						{public ComponentPlayer m_componentPlayer;
-
-						}
-						catch (Exception ex)
-						{
-							Log.Error($"报错是,{ex.Message}");
-						}
-		*/
-
-		public void FCGenerateSurface(TerrainChunk chunk)
-		{
-			//Dictionary<Point2, int> Dic_Chunk_Village = m_subsystemtownchunk.Dic_Chunk_Village;
-			ComponentPlayer m_componentPlayer= new ComponentPlayer();
-			FCSubsystemTown fCSubsystemTown  = new FCSubsystemTown();
-			bool flag_tree = true;//是否生成树。当一个区块生成村庄的时候，那么这个区块不会生成树
-			bool flag_v2 = true;//是否生成村庄起点，如果已经生成过，则改为false。优化算法。
-			bool YH_tree = true;//默认樱花树生成一次，优化算法，避免重复检测区块进行无用生成。
-			bool RD_tree = true;//默认单区块热带树生成一次。优化算法。
-			bool flag_v = false;//根据高度差判断是否生成村庄
-			int origin = chunk.Origin.X;
-		    int origin2 = chunk.Origin.Y;
-			int x1 = chunk.Coords.X;//获取区块的绝对坐标。
-			int y1 = chunk.Coords.Y;
-			int middle_x = origin + 8;
-			int middle_z = origin2 + 8;
-			Vector3 player_position =m_subsystemTerrain.TerrainContentsGenerator.FindCoarseSpawnPosition();//获取玩家出生点
-			
-			Point2 player_positon2 = ((int)player_position.X, (int)player_position.Z);//转化成point2坐标
-			Point2 point_village_T = (x1, y1);//获取当前区块的绝对坐标，用于和区块字典进行比对，判断是否为村庄区块，如果是村庄区块则不进行起点生成。
-
-			Terrain terrain = this.m_subsystemTerrain.Terrain;
-			int middle_y = terrain.CalculateTopmostCellHeight(middle_x, middle_z);//获取当前区块中心点的高度
-			Random random = new Random(this.m_seed + chunk.Coords.X + 101 * chunk.Coords.Y);
-			
-			
-			List<int> height = new List<int>(); // 创建一个空的 List<int>,储存区块高度
-
-			bool isvillage_chunk = FCSubsystemTownChunk.Dic_Chunk_Village.ContainsKey(point_village_T);
-			bool ischunkload2 = Dic_Chunk_Village3.ContainsKey(point_village_T);
-
-			if (listRD.Count == 0 && isvillage_chunk == false&& ischunkload2 == false);//如果路径点为空，且不为村庄区块，则执行遍历区块，村庄符合第一条件。
-			{
-				int num_villageRange=0;//用来检测村庄之间的距离，计数。
-
-
-				for (int i = 0; i < 16; i++)//遍历当前区块
-				{
-					for (int j = 0; j < 16; j++)
-					{
-						int num1 = i + chunk.Origin.X;//x坐标
-
-						int num2 = j + chunk.Origin.Y;//z坐标
-						int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度
-						height.Add(num7);//统计区块内的所有地表高度
-					}
-				}
-
-				int max1 = height[0];
-				int min1 = height[0];
-
-				for (int i = 1; i < height.Count; i++)//计算高度差
-				{
-					if (height[i] > max1)
-					{
-						max1 = height[i];
-					}
-					if (height[i] < min1)
-					{
-						min1 = height[i];//该方法第一部分先对该区块进行高度差判断。
-					}
-				}
-
-				int height1 = (max1 - min1);
-
-				if(num_villageRange<Village_start.Count)
-                {
-					for (int i1 = 0; i1 < Village_start.Count; i1++)
-					{
-						int point_x = Village_start[i1].X;
-						int point_z = Village_start[i1].Z;
-
-						double distance1 = Math.Sqrt(((Math.Abs(middle_x - point_x)) * (Math.Abs(middle_x - point_x))) + ((Math.Abs(middle_z - point_z)) * (Math.Abs(middle_z - point_z))));
-						if (distance1 > 1000)
-						{
-							num_villageRange++;
-						}
-
-					}
-				}
-				
-				if (height1 < 5 && middle_y > 64 && middle_y < 84 && Village_start.Count == 0&&random.Bool(0.73f))//当地图还没有村庄的时候，先找到第一个可生成点生成村庄。
-                {
-
-
-					double distance1 = Math.Sqrt(((Math.Abs(middle_x - player_positon2.X)) * (Math.Abs(middle_x - player_positon2.X))) + ((Math.Abs(middle_z - player_positon2.Y)) * (Math.Abs(middle_z - player_positon2.Y))));
-					
-					if(distance1 > 500)//大于出生点300距离
-                    {
-						flag_v = true;
-					}
-					
-                }
-				if (height1 < 5 && middle_y > 64 && middle_y < 84 &&ischunkloding2 == false&& num_villageRange == Village_start.Count && num_villageRange != 0 && Village_start.Count != 0 && random.Bool(0.73f))//如果高度差小于5，且中心点位于高度66-86之间,距离每一个村庄点都大于300。生成村庄。
-				{
-					flag_v = true;
-				}
-			}
-
-			
-
-			for (int i = 0; i < 16; i++)//遍历当前区块  这里的循环执行的是泥土，村庄路径点建筑点，树生成。
-			{
-				for (int j = 0; j < 16; j++)
-				{
-					int num = i + chunk.Origin.X;
-					int num2 = j + chunk.Origin.Y;
-					int num3 = TerrainChunk.CalculateCellIndex(i, 254, j);
-					int k = 254;
-					
-					while (k >= 64)
-					{
-						
-						int cellValueFast = chunk.GetCellValueFast(num3);//获取当前单元格的值。
-						int num4 = Terrain.ExtractContents(cellValueFast);//从单元格值中提取方块的内容
-						if (!BlocksManager.Blocks[num4].IsTransparent_(cellValueFast)) //检查当前单元格的方块是否为不透明的方块。如果是不透明的方块，则说明已经到达地表下方，结束当前网格点的生成。
-						{
-							
-							float num5 = this.CalculateMountainRangeFactor((float)num, (float)num2);
-							//根据当前网格点的全局坐标计算山脉范围因子。这个因子可能用于调整地表的特征。
-							int temperature = terrain.GetTemperature(num, num2);
-							int humidity = terrain.GetHumidity(num, num2);
-							//获取当前网格点的温度和湿度。这些值可能影响地表生成中的一些特征。
-							int num6 = 8 ;//定义一个整数6，这代表要生成的内容。
-
-							int num8 = (k + 1 < 255) ? chunk.GetCellContentsFast(i, k + 1, j) : 0;
-							int numfc1 = (k + 1 < 255) ? chunk.GetCellContentsFast(i, k - 1, j) : 0;
-							//获取当前网格点上方单元格的内容。
-							//下面是核心判断生成语句
-
-							if (num4 == 8)//如果是草方块
-							{
-								
-
-								
-
-								if (num8 != 233 && num8 != 232 && num8 != 18 && numfc1 == 2  && humidity >= 5 && temperature >= 3 && temperature <= 10)
-								//否则，根据上方单元格的内容（num8）、湿度、湿度模 2 余数（humidity % 2），
-								//以及温度模 3 余数（temperature % 3）进行条件判断：
-								//如果上方单元格的内容不是砂岩（ID为 4），或者湿度小于等于 8，或者湿度模 2 余数不为 0，
-								//或者温度模 3 余数不为 0，方块内容为普通的土壤（ID为 2）。
-								{
-									num6 = 984;//土
-
-								}
-								else if (num8 != 233 && num8 != 232 && num8 != 18 && numfc1 == 2 && humidity >= 7 && temperature >= 8)
-								{
-									num6 = 985;//热带土
-								}
-
-							}
-							else
-                            {
-								return;
-                            }
-
-							
-							
-
-
-
-
-
-							/*//根据温度、湿度、高度和上方单元格的内容来确定当前网格点的方块内容。
-							int num9;//声明一个变量用于存储当前网格点的高度。
-							
-							float num10 = MathUtils.Saturate(((float)k - 100f) * 0.05f);//根据当前高度计算一个饱和度值。
-							float num11 = MathUtils.Saturate(MathUtils.Saturate((num5 - 0.9f) / 0.1f) - MathUtils.Saturate(((float)humidity - 3f) / 12f) + TerrainContentsGenerator23.TGSurfaceMultiplier * num10);
-							//根据山脉范围因子、湿度和饱和度计算一个调整值。
-
-
-							int min = (int)MathUtils.Lerp(4f, 0f, num11);//根据调整值将方块的高度范围限制在最小值和最大值之间。
-							int max = (int)MathUtils.Lerp(7f, 0f, num11);
-							num9 = MathUtils.Min(random.Int(min, max), k);//使用随机数生成器在高度范围内生成一个随机高度。
-							//以上未使用*/
-
-							
-							int num12 = TerrainChunk.CalculateCellIndex(i, k + 1, j);//计算当前网格点上方单元格的索引。
-							Block block1 = BlocksManager.Blocks[Terrain.ExtractContents(chunk.GetCellValueFast(num12))];
-							if(isvillage_chunk == false&& tg_num == 0)//如果不是村庄区块则生成。
-                            {
-								if (Terrain.ExtractContents(chunk.GetCellValueFast(num12)) == 0||block1.IsTransparent==true)//如果当前单元格不为空方块。
-								{
-
-									int value1 = Terrain.ReplaceContents(0, num6);//将当前网格点的方块内容替换为新的方块内容。
-									chunk.SetCellValueFast(num12 - 1, value1);
-
-
-								}
-							}
-							
-							//上面是生成地表群系泥土。
-
-							
-							if (num6 != 8)//如果生成了群系土，说明群系生成成功，接下来判断是否开始生成村庄。
-                            {
-								
-								if( flag_v == true &&flag_v2 ==true)//如果当前区块生成村庄起点。高度差合适！
-                                { 
-									if(listRD.Count == 0)//如果当前的列表是空的。说明村庄还没有起点。则生成起点。
-                                    {
-										listRD.Add(new NewModLoaderShengcheng.RoadPoint
-										{
-											Position= (middle_x, middle_y, middle_z),
-											BrushType = 0,
-											TG = false,//代表该路径点是否已经生成
-											TFirst = true,//判断该路径点是否为村庄起点。
-											Tturn =false,//判断该路径点是否为转折点。
-											is_Vice = false,
-											chunkCoords = (chunk.Coords.X,chunk.Coords.Y),
-
-										});
-										Point3 point_start = (middle_x, middle_y ,middle_z);
-										Village_start.Add(point_start);//记录村庄起点。
-										
-										
-										listRD.Add(new NewModLoaderShengcheng.RoadPoint
-										{
-											Position = (middle_x, middle_y, middle_z + 16),
-											BrushType = 0,
-											TG = false,//代表该路径点是否已经生成
-											TFirst = true,//判断该路径点是否为村庄起点。
-											Tturn = false,//判断该路径点是否为转折点。
-											is_Vice = true,
-											chunkCoords = (chunk.Coords.X, chunk.Coords.Y+1),
-
-										});
-										listBD.Add(new NewModLoaderShengcheng.BuildPoint//同时生成建筑点
-										{
-											Position = (middle_x, middle_y, middle_z +16),
-											BrushType = 0,
-											TG = false,//代表该路径点是否已经生成
-											
-
-										});
-
-										Log.Information(string.Format("村庄起点的坐标是：{0}, {1}, {2}", middle_x, middle_y, middle_z));
-										
-										for (int a = 1; a < 5; a++)
-										{
-											if(a == 2)//如果生成到第三个路径点，则第三个为转折点
-                                            {
-												listRD.Add(new NewModLoaderShengcheng.RoadPoint
-												{
-													Position = (listRD[a].Position.X + 16, middle_y, listRD[ a ].Position.Z),
-													BrushType = 2,//拐弯
-													TG = false,//代表该路径点是否已经生成
-													TFirst = false,//判断该路径点是否为村庄起点。
-													Tturn = true,//判断该路径点是否为转折点。
-													chunkCoords = (chunk.Coords.X+2, chunk.Coords.Y),
-
-												});
-												Log.Information(string.Format("村庄转折点的坐标是：{0}, {1}, {2}", listRD[a ].Position.X + 16, middle_y, listRD[a ].Position.Z));
-												
-											}
-                                            else
-                                            {
-												if(a >2)//拐弯后
-                                                {
-													if(a == 3)
-                                                    {
-														listRD.Add(new NewModLoaderShengcheng.RoadPoint
-														{
-															Position = (listRD[a + 1].Position.X, middle_y, listRD[a + 1].Position.Z + 16),
-															BrushType = 1,//z轴路径
-															TG = false,//代表该路径点是否已经生成
-															TFirst = false,//判断该路径点是否为村庄起点。
-															Tturn = false,//判断该路径点是否为转折点。
-															is_Vice = false,
-															chunkCoords = (chunk.Coords.X+2, chunk.Coords.Y+1),
-
-														});
-														Log.Information(string.Format("村庄z轴路径的坐标是：{0}, {1}, {2}", listRD[a + 1].Position.X, middle_y, listRD[a + 1].Position.Z + 16));
-													}
-													
-													if(a == 4)
-                                                    {
-														listRD.Add(new NewModLoaderShengcheng.RoadPoint
-														{
-															Position = (listRD[a + 1].Position.X, middle_y, listRD[a + 1].Position.Z + 16),
-															BrushType = 1,//z轴路径
-															TG = false,//代表该路径点是否已经生成
-															TFirst = false,//判断该路径点是否为村庄起点。
-															Tturn = false,//判断该路径点是否为转折点。
-															is_Vice = false,
-															chunkCoords = (chunk.Coords.X+2, chunk.Coords.Y+2),
-
-														});
-														Log.Information(string.Format("村庄z轴路径的坐标是：{0}, {1}, {2}", listRD[a + 1].Position.X, middle_y, listRD[a + 1].Position.Z + 16));
-														listRD.Add(new NewModLoaderShengcheng.RoadPoint
-														{
-															Position = (listRD[6].Position.X - 16, middle_y, listRD[6].Position.Z ),
-															BrushType = 1,//z轴路径
-															TG = false,//代表该路径点是否已经生成
-															TFirst = false,//判断该路径点是否为村庄起点。
-															Tturn = false,//判断该路径点是否为转折点。
-															is_Vice = true,
-															chunkCoords = (chunk.Coords.X+1, chunk.Coords.Y+2),
-
-														});
-														listBD.Add(new NewModLoaderShengcheng.BuildPoint//同时生成建筑点
-														{
-															Position = (listRD[a - 1].Position.X - 16, middle_y, listRD[a - 1].Position.Z + 16),
-															BrushType = 1,
-															TG = false,//代表该路径点是否已经生成
-
-
-														});
-													}
-													
-												}
-												else
-                                                {
-													listRD.Add(new NewModLoaderShengcheng.RoadPoint//主路，x轴方向
-													{
-														Position = (listRD[0].Position.X + 16, middle_y, listRD[0].Position.Z),
-														BrushType = 0,//x轴路径
-														TG = false,//代表该路径点是否已经生成
-														TFirst = false,//判断该路径点是否为村庄起点。
-														Tturn = false,//判断该路径点是否为转折点。
-														is_Vice =false,
-														chunkCoords = (chunk.Coords.X+1, chunk.Coords.Y),
-													});
-													Log.Information(string.Format("村庄主路的坐标是：{0}, {1}, {2}", listRD[0].Position.X + 16, middle_y, listRD[0].Position.Z));
-													listRD.Add(new NewModLoaderShengcheng.RoadPoint//主路，x轴方向
-													{
-														Position = (listRD[2].Position.X , middle_y, listRD[2].Position.Z + 16),
-														BrushType = 0,//x轴路径
-														TG = false,//代表该路径点是否已经生成
-														TFirst = false,//判断该路径点是否为村庄起点。
-														Tturn = false,//判断该路径点是否为转折点。
-														is_Vice = true,
-														chunkCoords = (chunk.Coords.X+1, chunk.Coords.Y+1),
-													});
-													listBD.Add(new NewModLoaderShengcheng.BuildPoint//同时生成建筑点右侧
-													{
-														Position = (listRD[a - 1].Position.X + 16, middle_y, listRD[a - 1].Position.Z+16),
-														BrushType = 0,
-														TG = false,//代表该路径点是否已经生成
-
-
-													});
-												}
-												
-											}
-											
-										}
-
-										
-										flag_v2 = false;//让本区块的村庄起点判断只执行一次。
-									}
-									
-
-
-                                }
-                            }
-
-
-
-                            #region 生成树
-                            if (num6 != 8)//如果允许生成树
-                            {
-								
-								if(listRD.Count != 0)
-                                {
-									if (isvillage_chunk == true) ;
-									{
-										flag_tree = false;
-
-									}
-								}
-
-								
-									
-								
-								if(flag_tree == true)
-                                {
-									if (num6 == 984 && YH_tree == true)//如果当前生成的是樱花土，则执行樱花树生成判定
-									{
-										for (int a = x1; a <= x1; a++)
-										{
-											for (int b = y1; b <= y1; b++)
-											{
-												float num80 = MathUtils.Saturate((SimplexNoise.OctavedNoise(a, b, 0.1f, 2, 2f, 0.5f) - 0.25f) / 0.2f + (random.Bool(0.25f) ? 0.5f : 0f));
-												int num81 = (int)(5f * num80);
-												int num82 = 0;
-												for (int k11 = 0; k11 < 20; k11++) //生成k 32棵树
-                                                {
-													if (num82 >= num81) //如果已生成的树木大于num3，则停止
-													{
-														break;
-													}//噪声算法
-
-													int cx = a * 16 + random.Int(2, 13); //cx cz用来计算树生成的位置
-													int cz = b * 16 + random.Int(2, 13);
-													int num7 = terrain.CalculateTopmostCellHeight(cx, cz);//获取预生成位置的最大高度块
-													if (num7 < 66)//高度大于66，不然跳过，继续循环
-													{
-														continue;
-													}
-
-
-													int cellContentsFast = terrain.GetCellContentsFast(cx, num7, cz); //获取这个预生成方块的值
-
-													if (cellContentsFast != 2 && cellContentsFast != 8 && cellContentsFast != 984)//如果不是泥土或者草地
-													{
-														continue;
-													}//选择方块
-
-													num7++; //高度加一，继续生成
-															//这个if是检查树周围的方块是否可碰撞。
-													if (!BlocksManager.Blocks[terrain.GetCellContentsFast(cx + 1, num7, cz)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(cx - 1, num7, cz)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(cx, num7, cz + 1)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(cx, num7, cz - 1)].IsCollidable)
-													{
-
-														// 生成樱花树
-														// 获取樱花树的地形刷子
-														ReadOnlyList<TerrainBrush> cherryBlossomBrushes = FCPlantManager.GetTreeBrushes(FCTreeType.Yinghua);
-														TerrainBrush terrainBrush = cherryBlossomBrushes[random.Int(cherryBlossomBrushes.Count)];
-														// 应用樱花树的地形刷子到地形上
-
-														terrainBrush.PaintFast(chunk, cx, num7, cz);
-														chunk.AddBrushPaint(cx, num7, cz, terrainBrush);
-
-														num82++; //成功生成一个树木，num82加1
-
-													}
-												}
-												
-
-											}
-										}
-
-										YH_tree = false;
-
-
-									}
-
-									if (num6 == 985 && RD_tree == true)//如果当前生成的是热带群系土，则执行果树的生成判定
-									{
-
-										for (int a = x1; a <= x1; a++)
-										{
-											for (int b = y1; b <= y1; b++)
-											{
-												float num80 = MathUtils.Saturate((SimplexNoise.OctavedNoise(a, b, 0.1f, 2, 2f, 0.5f) - 0.25f) / 0.2f + (random.Bool(0.25f) ? 0.5f : 0f));
-												int num81 = (int)(5f * num80);
-												int num82 = 0;
-												for (int c = 0; c < 10; c++) //生成c 10棵树
-												{
-													if (num82 >= num81) //如果已生成的树木大于num3，则停止
-													{
-														break;
-													}//噪声算法
-
-													int cx = a * 16 + random.Int(2, 13); //cx cz用来计算树生成的位置
-													int cz = b * 16 + random.Int(2, 13);
-													int num7 = terrain.CalculateTopmostCellHeight(cx, cz);//获取预生成位置的最大高度块
-													FCTreeType[] treeTypes = new FCTreeType[] { FCTreeType.Apple, FCTreeType.Orange, FCTreeType.Coco };
-													FCTreeType selectedTreeType = treeTypes[random.Int(treeTypes.Length)];
-
-													int cellContentsFast = terrain.GetCellContentsFast(cx, num7, cz); //获取这个预生成方块的值
-
-													if (cellContentsFast != 2 && cellContentsFast != 8 && cellContentsFast != 984)//如果不是泥土或者草地
-													{
-														continue;
-													}//选择方块
-
-													num7++; //高度加一，继续生成
-															//这个if是检查树周围的方块是否可碰撞。
-													if (!BlocksManager.Blocks[terrain.GetCellContentsFast(cx + 1, num7, cz)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(cx - 1, num7, cz)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(cx, num7, cz + 1)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(cx, num7, cz - 1)].IsCollidable)
-													{
-
-														if (random.Bool(0.1f))
-														{
-															selectedTreeType = FCTreeType.Lorejun;//十分之一的概率为老君树
-														}
-														ReadOnlyList<TerrainBrush> treeBrushes = FCPlantManager.GetTreeBrushes(selectedTreeType);
-														TerrainBrush terrainBrush = treeBrushes[random.Int(treeBrushes.Count)];
-														terrainBrush.PaintFast(chunk, cx, num7, cz);
-														chunk.AddBrushPaint(cz, num7, cz, terrainBrush);
-
-														num82++; //成功生成一个树木，num82加1
-													}
-												}
-											}
-										}
-
-										RD_tree = false;
-
-
-									}
-
-
-
-									break;//生成树之后才会打破循环
-								}
-						
-								
-							}
-                            #endregion
-
-                        }
-                        k--;
-						num3--;
-					}
-
-
-				}
-			}
-		}
-		#region 注释掉的代码，请忽略
-		//树生成,生成群系土之后执行。
-
-
-		/*int lx1 = num; // x原始坐标
-			int ly1 = k - 1; // y原始坐标
-			int lz1 = num2; // z原始坐标
-
-			int lx = num + random.Int(2, 6); // x坐标 待生成
-			int ly = k - 1; // y坐标
-			int lz = num2 + random.Int(2, 6); // z坐标
-
-			int cx = num + random.Int(2, 6); // x坐标 待生成
-			int cy = k - 1; // y坐标
-			int cz = num2 + random.Int(2, 6); // z坐标
-
-
-			if (terrain.GetCellContentsFast(lx, ly, lz) != 0 && terrain.GetCellContentsFast(lx, ly, lz) == 8 && terrain.GetCellContentsFast(lx, ly + 1, lz) != 18 && terrain.GetCellContentsFast(lx, ly + 1, lz) == 0)
-			{
-
-
-
-				// 生成樱花树
-				// 获取樱花树的地形刷子
-				ReadOnlyList<TerrainBrush> cherryBlossomBrushes = FCPlantManager.GetTreeBrushes(FCTreeType.Yinghua);
-				TerrainBrush terrainBrush = cherryBlossomBrushes[random.Int(cherryBlossomBrushes.Count)];
-				// 应用樱花树的地形刷子到地形上
-
-				terrainBrush.PaintFast(chunk, cx, cy, cz);
-				chunk.AddBrushPaint(cx, cy, cz, terrainBrush);
-
-
-
-			}
-			/*else if (!BlocksManager.Blocks[terrain.GetCellContentsFast(cx + 1, cy, cz)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(cx - 1, cy, cz)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(cx, cy, cz + 1)].IsCollidable && !BlocksManager.Blocks[terrain.GetCellContentsFast(cx, cy, cz - 1)].IsCollidable)
-			{
-				cx = lx1;
-				cz = lz1;
-			}*/
-
-		/*if (Yh_Tree == true) //生成樱花树。
-		{
-
-		}
-
-		int lx1 = num; // x原始坐标
-			int ly1 = k - 1; // y原始坐标
-			int lz1 = num2; // z原始坐标
-
-			int lx = num + random.Int(1, 3); // x坐标 待生成
-			int ly = k - 1; // y坐标
-			int lz = num2 + random.Int(1, 3); // z坐标
-
-			int cx = num + random.Int(1, 3); // x坐标 待生成
-			int cy = k - 1; // y坐标
-			int cz = num2 + random.Int(1, 3); // z坐标
-			FCTreeType[] treeTypes = new FCTreeType[] { FCTreeType.Apple, FCTreeType.Orange, FCTreeType.Coco };
-			FCTreeType selectedTreeType = treeTypes[random.Int(treeTypes.Length)];
-
-
-
-			if (terrain.GetCellContentsFast(lx, ly, lz) != 0 && terrain.GetCellContentsFast(lx, ly, lz) == 8 && terrain.GetCellContentsFast(lx, ly + 1, lz) != 18 && terrain.GetCellContentsFast(lx, ly + 1, lz) == 0)
-			{
-				if (random.Bool(0.1f))
-				{
-					selectedTreeType = FCTreeType.Lorejun;
-				}
-				ReadOnlyList<TerrainBrush> treeBrushes = FCPlantManager.GetTreeBrushes(selectedTreeType);
-				TerrainBrush terrainBrush = treeBrushes[random.Int(treeBrushes.Count)];
-				terrainBrush.PaintFast(chunk, cx, cy, cz);
-				chunk.AddBrushPaint(cz, cy, cz, terrainBrush);
-
-			}
-		 */
-		#endregion
-		#endregion
-
-		#region 村庄生成子方法
-
-		
-		public bool ischunkloding2 = false;//用来保证村庄生成的全过程独立性
-		public int Bg_num = 0;//计算副建筑区块的生成个数，到3清零。//建筑列表暂时未使用过。
-		public int tg_num = 0;//用来计算村庄的生成个数，到5清零。
-		/*public void FCGenerateVillageBuild1(TerrainChunk chunk, SubsystemTerrain m_systemTerrain) //未使用。
-        {
-			int origin = chunk.Origin.X;
-			int origin2 = chunk.Origin.Y;
-			int x1 = chunk.Coords.X;//获取区块的绝对坐标。
-			int y1 = chunk.Coords.Y;
-			int middle_x = origin + 8;
-			int middle_z = origin2 + 8;
-			Terrain terrain = m_systemTerrain.Terrain;
-
-			int middle_y = terrain.CalculateTopmostCellHeight(middle_x, middle_z);//获取当前区块中心点的高度
-			Random random = new Random(this.m_seed + chunk.Coords.X + 555 * chunk.Coords.Y);
-			if (listBD.Count != 0)//如果有路径点。
-			{
-				for (int i = 0; i < 3; i++)
-				{
-					TerrainChunk chunk_v = terrain.GetChunkAtCell(listBD[i].Position.X, listBD[i].Position.Z);
-					if (chunk_v == null || listBD[i].TG == true)//如果区块为空，则跳过该路径点的生成。
-					{
-						continue;
-					}
-					else if (chunk == chunk_v) //如果不为空，则准备生成路径
-					{
-						if (listBD[i].TG == false && listBD[i].BrushType == 0)
-						{
-							List<int> height_T = new List<int>(); // 创建一个空的 List<int>,储存区块高度
-							int x_T = chunk_v.Origin.X;//获取该路径点区块的原始坐标。
-							int z_T = chunk_v.Origin.Y;
-							int x_T_coords = chunk_v.Coords.X;
-							int z_T_coords = chunk_v.Coords.Y;
-							Point2 point_t1 = (x_T_coords, z_T_coords);//如果可以生成，则先获取绝对坐标，比较区块字典，如果发现是已生成区块，则不生成。
-
-							bool ischunkload = Dic_Chunk_Village.ContainsKey(point_t1);
-							if (ischunkload == false)
-							{
-								for (int a1 = 0; a1 < 16; a1++)//遍历路径点区块这里是先摧毁区块的多余物质。
-								{
-									for (int j1 = 0; j1 < 16; j1++)
-									{
-
-										int num1 = a1 + x_T;//x坐标
-
-										int num2 = j1 + z_T;//z坐标
-															//int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度
-										int k = 110;//从86的高度开始遍历
-
-										while (k > 64)// 当k高度大于65的时候。 
-										{
-
-											int num3 = terrain.GetCellContentsFast(num1, k, num2);//获取起始的高度的方块
-											if (num3 != 8 || num3 != 3 || num3 != 7 || num3 != 4 || num3 != 2 || num3 != 985 || num3 != 984 || num3 != 18 || num3 != 6 || num3 != 66)//如果不是草地、沙子、砂岩、花岗岩，水，则销毁
-											{
-
-												terrain.SetCellValueFast(num1, k + 1, num2, 0);
-
-											}
-											if (num3 == 8 || num3 == 3 || num3 == 7 || num3 == 4 || num3 == 2 || num3 == 985 || num3 == 18 || num3 == 984 || num3 == 6 || num3 == 66)
-											{
-
-
-												break;
-											}
-
-											k--;
-
-										}
-										int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度块
-										height_T.Add(num7);//统计区块内的所有地表高度
-
-
-									}
-
-								}
-								int list_count = height_T.Count;
-								Log.Information(String.Format("列表元素个数为：{0}", list_count));
-								int max1 = height_T[0];
-								int min1 = height_T[0];
-
-								for (int i1 = 1; i1 < height_T.Count; i1++)//计算高度差
-								{
-									if (height_T[i1] > max1)
-									{
-										max1 = height_T[i1];
-									}
-									if (height_T[i1] < min1)
-									{
-										min1 = height_T[i1];
-									}
-								}
-
-								int height_T1 = (max1 - min1);//高度差
-								if (i == 0)//如果是副区块第一个，则生成养殖间。
-								{
-									string blocks = ContentManager.Get<string>("House/PetHouse");
-									blocks = blocks.Replace("\n", "#");
-									string[] blockArray = blocks.Split(new char[1] { '#' });
-									foreach (string blockLine in blockArray)
-									{
-										string[] block = blockLine.Split(new char[1] { ',' });
-										if (block.Length > 3)
-										{
-											int x = int.Parse(block[0]);
-											int y = int.Parse(block[1]);
-											int z = int.Parse(block[2]);
-											int block_house = int.Parse(block[3]);
-											int x1t = x + x_T;
-											int y1t = y + max1 - 4;
-											int z1t = z_T + z;
-											terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-										}
-									}
-								}
-								else
-								{
-									if (random.Bool(0.1f))
-									{
-										string blocks = ContentManager.Get<string>("House/IronHouse");//0.1的概率再生成铁匠铺。
-										blocks = blocks.Replace("\n", "#");
-										string[] blockArray = blocks.Split(new char[1] { '#' });
-										foreach (string blockLine in blockArray)
-										{
-											string[] block = blockLine.Split(new char[1] { ',' });
-											if (block.Length > 3)
-											{
-												int x = int.Parse(block[0]);
-												int y = int.Parse(block[1]);
-												int z = int.Parse(block[2]);
-												int block_house = int.Parse(block[3]);
-												int x1t = x + x_T;
-												int y1t = y + max1 - 4;
-												int z1t = z_T + z;
-												terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-											}
-										}
-									}
-									else
-									{
-										string blocks = ContentManager.Get<string>("House/LivingHouse1");
-										blocks = blocks.Replace("\n", "#");
-										string[] blockArray = blocks.Split(new char[1] { '#' });
-										foreach (string blockLine in blockArray)
-										{
-											string[] block = blockLine.Split(new char[1] { ',' });
-											if (block.Length > 3)
-											{
-												int x = int.Parse(block[0]);
-												int y = int.Parse(block[1]);
-												int z = int.Parse(block[2]);
-												int block_house = int.Parse(block[3]);
-												int x1t = x + x_T;
-												int y1t = y + max1 - 4;
-												int z1t = z_T + z;
-												terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-											}
-										}
-									}
-
-
-								}
-								Point2 pointRD1 = (chunk_v.Coords.X, chunk_v.Coords.Y);
-								Dic_Chunk_Village.Add(pointRD1, chunk_v);
-								listBD[i].TG = true;
-								Bg_num++;
-
-
-
-								m_systemTerrain.ChangeCell(x_T, 3, z_T, 0);
-							}
-
-						}//x轴主路
-						if (listBD[i].TG == false && listBD[i].BrushType == 1)
-						{
-							List<int> height_T = new List<int>(); // 创建一个空的 List<int>,储存区块高度
-							int x_T = chunk_v.Origin.X;//获取该路径点区块的原始坐标。
-							int z_T = chunk_v.Origin.Y;
-							int x_T_coords = chunk_v.Coords.X;
-							int z_T_coords = chunk_v.Coords.Y;
-							Point2 point_t1 = (x_T_coords, z_T_coords);//如果可以生成，则先获取绝对坐标，比较区块字典，如果发现是已生成区块，则不生成。
-
-							bool ischunkload = Dic_Chunk_Village.ContainsKey(point_t1);
-							if (ischunkload == false)
-							{
-								for (int a1 = 0; a1 < 16; a1++)//遍历路径点区块这里是先摧毁区块的多余物质。
-								{
-									for (int j1 = 0; j1 < 16; j1++)
-									{
-
-										int num1 = a1 + x_T;//x坐标
-
-										int num2 = j1 + z_T;//z坐标
-															//int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度
-										int k = 110;//从86的高度开始遍历
-
-										while (k > 64)// 当k高度大于65的时候。 
-										{
-
-											int num3 = terrain.GetCellContentsFast(num1, k, num2);//获取起始的高度的方块
-											if (num3 != 8 || num3 != 3 || num3 != 7 || num3 != 4 || num3 != 2 || num3 != 985 || num3 != 984 || num3 != 18 || num3 != 6 || num3 != 66)//如果不是草地、沙子、砂岩、花岗岩，水，则销毁
-											{
-
-												terrain.SetCellValueFast(num1, k + 1, num2, 0);
-
-											}
-											if (num3 == 8 || num3 == 3 || num3 == 7 || num3 == 4 || num3 == 2 || num3 == 985 || num3 == 18 || num3 == 984 || num3 == 6 || num3 == 66)
-											{
-
-
-												break;
-											}
-
-											k--;
-
-										}
-										int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度块
-										height_T.Add(num7);//统计区块内的所有地表高度
-
-
-									}
-
-								}
-								int list_count = height_T.Count;
-								Log.Information(String.Format("列表元素个数为：{0}", list_count));
-								int max1 = height_T[0];
-								int min1 = height_T[0];
-
-								for (int i1 = 1; i1 < height_T.Count; i1++)//计算高度差
-								{
-									if (height_T[i1] > max1)
-									{
-										max1 = height_T[i1];
-									}
-									if (height_T[i1] < min1)
-									{
-										min1 = height_T[i1];
-									}
-								}
-
-								int height_T1 = (max1 - min1);//高度差
-
-								string blocks = ContentManager.Get<string>("House/shuijing");
-								blocks = blocks.Replace("\n", "#");
-								string[] blockArray = blocks.Split(new char[1] { '#' });
-								foreach (string blockLine in blockArray)
-								{
-									string[] block = blockLine.Split(new char[1] { ',' });
-									if (block.Length > 3)
-									{
-										int x = int.Parse(block[0]);
-										int y = int.Parse(block[1]);
-										int z = int.Parse(block[2]);
-										int block_house = int.Parse(block[3]);
-										int x1t = x + x_T;
-										int y1t = y + max1 - 4;
-										int z1t = z_T + z;
-										terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-									}
-								}
-
-
-
-
-								Point2 pointRD1 = (chunk_v.Coords.X, chunk_v.Coords.Y);
-								Dic_Chunk_Village.Add(pointRD1, chunk_v);
-								listBD[i].TG = true;
-								Bg_num++;
-
-
-
-								m_systemTerrain.ChangeCell(x_T, 3, z_T, 0);
-							}
-						}
-					}
-				}
-
-			}
-		}*/
-		public async Task FCGenerateVillage(TerrainChunk chunk ,SubsystemTerrain m_systemTerrain)
-        {
-			ischunkloding2 = true;
-			SubsystemBlockEntities entityScan = new SubsystemBlockEntities();//实体检测
-			SubsystemCreatureSpawn spawn1 = new SubsystemCreatureSpawn();
-			FCSubsystemTownChunk m_subsystemtownchunk= new FCSubsystemTownChunk();
-			int origin = chunk.Origin.X;
-			int origin2 = chunk.Origin.Y;
-			int x1 = chunk.Coords.X;//获取区块的绝对坐标。
-			int y1 = chunk.Coords.Y;
-			int middle_x = origin + 8;
-			int middle_z = origin2 + 8;
-			Terrain terrain = m_systemTerrain.Terrain;
-			
-			int middle_y = terrain.CalculateTopmostCellHeight(middle_x, middle_z);//获取当前区块中心点的高度
-			Random random = new Random(this.m_seed + chunk.Coords.X + 555 * chunk.Coords.Y);
-			
-			
-			
-			if (listRD.Count != 0)//如果路径点等于5，说明已经路径点已经完毕，执行生成。
-			{
-				await Task.Delay(100);
-				for (int i = 0; i < listRD.Count; i++)
-				{
-					TerrainChunk chunk_v = terrain.GetChunkAtCell(listRD[i].Position.X, listRD[i].Position.Z);
-					
-					
-					if (chunk_v == null || listRD[i].TG == true)//如果区块为空，则跳过该路径点的生成。
-					{
-						continue;
-					}
-					else  //如果不为空，则准备生成
-					{
-						int chunkX1 = chunk_v.Coords.X; //根据坐标判断
-						int chunkY1 = chunk_v.Coords.Y;
-
-						if (x1 == chunkX1&& y1 == chunkY1)
-                        {
-						
-							
-							if (listRD[i].TG == false && listRD[i].BrushType == 0)//x轴主路
-							{
-								List<int> height_T = new List<int>(); // 创建一个空的 List<int>,储存区块高度
-								int x_T = chunk_v.Origin.X;//获取该路径点区块的原始坐标。
-								int z_T = chunk_v.Origin.Y;
-								int x_T_coords = chunk_v.Coords.X;
-								int z_T_coords = chunk_v.Coords.Y;
-								Point2 point_t1 = (x_T_coords, z_T_coords);//如果可以生成，则先获取绝对坐标，比较区块字典，如果发现是已生成区块，则不生成。
-
-								bool ischunkload = FCSubsystemTownChunk.Dic_Chunk_Village.ContainsKey(point_t1);//检测存档保存的坐标
-								bool ischunkload2 = Dic_Chunk_Village3.ContainsKey(point_t1);//检测游戏进行时候的坐标
-
-								if (ischunkload == false && ischunkload2 == false)
-								{
-									for (int a1 = 0; a1 < 16; a1++)//遍历路径点区块这里是先摧毁区块的多余物质。
-									{
-										for (int j1 = 0; j1 < 16; j1++)
-										{
-
-											int num1 = a1 + x_T;//x坐标
-
-											int num2 = j1 + z_T;//z坐标
-																//int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度
-											int k = 110;//从86的高度开始遍历
-
-											while (k > 64)// 当k高度大于65的时候。 
-											{
-
-												int num3 = terrain.GetCellContentsFast(num1, k, num2);//获取起始的高度的方块
-												if (num3 != 8 || num3 != 3 || num3 != 7 || num3 != 4 || num3 != 2 || num3 != 985 || num3 != 984 || num3 != 18 || num3 != 6 || num3 != 66)//如果不是草地、沙子、砂岩、花岗岩，水，则销毁
-												{
-
-													terrain.SetCellValueFast(num1, k + 1, num2, 0);
-
-												}
-												if (num3 == 8 || num3 == 3 || num3 == 7 || num3 == 4 || num3 == 2 || num3 == 985 || num3 == 18 || num3 == 984 || num3 == 6 || num3 == 66)
-												{
-
-
-													break;
-												}
-
-												k--;
-
-											}
-											int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度块
-											height_T.Add(num7);//统计区块内的所有地表高度
-
-
-										}
-
-									}
-									int list_count = height_T.Count;
-									Log.Information(String.Format("列表元素个数为：{0}", list_count));
-									int max1 = height_T[0];
-									int min1 = height_T[0];
-
-									for (int i1 = 1; i1 < height_T.Count; i1++)//计算高度差
-									{
-										if (height_T[i1] > max1)
-										{
-											max1 = height_T[i1];
-										}
-										if (height_T[i1] < min1)
-										{
-											min1 = height_T[i1];
-										}
-									}
-
-									int height_T1 = (max1 - min1);//高度差
-
-
-									/*if (height_T1 > 7)// 如果高度大于13，过于崎岖，不生成建筑。
-									{
-										Point2 pointRD2 = (chunk_v.Coords.X, chunk_v.Coords.Y);//把当前区块记录下来，作为村庄区块。
-										if (Dic_Chunk_Village3.ContainsKey(pointRD2) == false)
-										{
-											Dic_Chunk_Village3.Add(pointRD2, 0);
-										}
-										listRD[i].TG = true;
-										tg_num++;
-										
-										continue;
-									}*/
-									if (listRD[i].is_Vice == false)//如果不是副路，是主路
-									{
-										for (int a1 = 14; a1 < 16; a1++)//遍历路径点区块的路径z轴
-										{
-											for (int j1 = 0; j1 < 16; j1++)//x轴
-											{
-												int top_height = height_T[a1 + j1 * 16];
-												terrain.SetCellValueFast(x_T + j1, top_height, z_T + a1, 5);
-											}
-										}
-										Log.Information(string.Format("村庄起点和主路x轴生成完毕：{0}, {1}, {2}", listRD[i].Position.X, listRD[i].Position.Y, listRD[i].Position.Z));
-										Point2 pointRD1 = (chunk_v.Coords.X, chunk_v.Coords.Y);
-										if (Dic_Chunk_Village3.ContainsKey(pointRD1)==false)
-                                        {
-											Dic_Chunk_Village3.Add(pointRD1, 0);
-										}
-										
-										listRD[i].TG = true;
-
-									}
-
-
-									/*for (int a2 = 0; a2 < 14; a2++) //z轴 执行建筑生成。
-									{
-										for(int j2 = 0; j2 < 16; j2++)//x轴
-										{
-											int num1 = j2 + x_T;//x坐标
-
-											int num2 = a2 + z_T;//z坐标
-
-
-											int Y_t = (min1 + max1) / 2;
-											int k = max1 -Y_t;//从86的高度开始遍历
-											while (k > Y_t)// 当k高度大于65的时候。 
-											{
-												terrain.SetCellValueFast(num1, k, z_T + num2, 0);
-												k--;
-											}
-										}
-									}*/
-
-									List<string> HouseX = new List<string>() { "House/IronHouse", "House/chunkTwohouse" }; ;
-									if (listRD[i].is_Vice == false)//如果不是副路
-									{
-										if (i == 2)//如果是主路第二条。
-										{
-											if (random.Bool(0.5f))
-											{
-												try
-												{
-													string blocks = ContentManager.Get<string>("House/Livinghouse02");
-													blocks = blocks.Replace("\n", "#");
-													string[] blockArray = blocks.Split(new char[1] { '#' });
-													foreach (string blockLine in blockArray)
-													{
-														string[] block = blockLine.Split(new char[1] { ',' });
-														if (block.Length > 3)
-														{
-															int x = int.Parse(block[0]);
-															int y = int.Parse(block[1]);
-															int z = int.Parse(block[2]);
-															int block_house = int.Parse(block[3]);
-															int x1t = x + x_T;
-															int y1t = y + max1 - 3;
-															int z1t = z_T + z;
-															int Block_reset = Terrain.ExtractContents(terrain.GetCellValueFast(x1t, y1t, z1t));
-															try
-                                                            {
-																if (Block_reset == 27)
-																{
-																	continue;
-																}
-																else
-																{
-																	terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-																}
-															}
-															catch
-                                                            {
-																Log.Error("Generation1 failed.");
-																break;
-															}
-															
-
-
-															if (Terrain.ExtractContents(block_house) == 27)//如果是工作台
-															{
-																ComponentBlockEntity result= entityScan.GetBlockEntity(x1t, y1t, z1t);
-																if(result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("CraftingTable", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																}
-																
-															}
-
-														}
-													}
-												}
-												catch
-												{
-													Log.Error("Generation failed.");
-													
-												}
-												
-
-												tg_num++;
-											}
-											else
-											{
-												try
-												{
-													string blocks = ContentManager.Get<string>("House/IronHouse");
-													blocks = blocks.Replace("\n", "#");
-													string[] blockArray = blocks.Split(new char[1] { '#' });
-													foreach (string blockLine in blockArray)
-													{
-														string[] block = blockLine.Split(new char[1] { ',' });
-														if (block.Length > 3)
-														{
-															int x = int.Parse(block[0]);
-															int y = int.Parse(block[1]);
-															int z = int.Parse(block[2]);
-															int block_house = int.Parse(block[3]);
-															int x1t = x + x_T;
-															int y1t = y + max1 - 3;
-															int z1t = z_T + z;
-															int Block_reset = terrain.GetCellContentsFast(x1t, y1t, z1t);
-															try
-                                                            {
-																if (Block_reset == 64 || Block_reset == 45)
-																{
-																	continue;
-
-																}
-																else
-																{
-																	terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-																}
-															}
-															catch
-                                                            {
-																Log.Error("Generation2 failed.");
-																break;
-															}
-
-															
-															if (Terrain.ExtractContents(block_house) == 64)//如果是熔炉
-															{
-																ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-																if (result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Furnace", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																}
-																
-															}
-															if (Terrain.ExtractContents(block_house) == 45)//如果等于箱子，补充实体
-															{
-																ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-																if (result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Chest", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																	ComponentChest chest_componentchest = entity.FindComponent<ComponentChest>();//创建实体，并获取组件
-																	int Item_num;
-																	//126钻石块，46铁块，71孔雀石，47铜块，231锗块,228燃烧炸弹，201炸弹，236燃烧炸药，107普通炸药,150煤块，167磁铁，248经验，132南瓜灯
-																	//196羽毛，198线，206布 ，40铁锭，22煤
-
-																	int[] blocks1 = { 40, 22 };
-																	for (int a11 = 0; a11 < 5; a11++)//遍历箱子格子
-																	{
-																		if (a11 < 4)//煤矿的分布概率
-																		{
-																			if (random.Bool(0.1f))
-																			{
-																				Item_num = 3;
-
-																			}
-																			else
-																			{
-																				Item_num = 1;
-																			}
-																			chest_componentchest.AddSlotItems(a11, blocks1[1], Item_num);
-																		}
-																		else if (a11 == 4)
-																		{
-																			if (random.Bool(0.05f))
-																			{
-																				chest_componentchest.AddSlotItems(4, blocks1[0], 1);
-																			}
-																			else
-																			{
-																				chest_componentchest.AddSlotItems(4, blocks1[1], 2);
-																			}
-																		}
-
-																	}
-																}
-																	
-
-
-
-															}
-														}
-													}
-												}
-												catch
-												{
-													Log.Error("Generation failed.");
-													
-												}
-
-
-												tg_num++;
-
-											}
-										}
-										else if (i==0)//如果不是主路第二条
-										{
-											if (random.Bool(0.5f))
-											{
-												try
-												{
-													string blocks = ContentManager.Get<string>("House/chunkTwohouse");
-													blocks = blocks.Replace("\n", "#");
-													string[] blockArray = blocks.Split(new char[1] { '#' });
-													foreach (string blockLine in blockArray)
-													{
-														string[] block = blockLine.Split(new char[1] { ',' });
-														if (block.Length > 3)
-														{
-															int x = int.Parse(block[0]);
-															int y = int.Parse(block[1]);
-															int z = int.Parse(block[2]);
-															int block_house = int.Parse(block[3]);
-															int x1t = x + x_T;
-															int y1t = y + max1 - 3;
-															int z1t = z_T + z;
-															int Block_reset = terrain.GetCellContentsFast(x1t, y1t, z1t);
-															try
-                                                            {
-																if (Block_reset == 27)
-																{
-																	continue;
-																}
-																else
-																{
-																	terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-																}
-															}
-															catch
-                                                            {
-																Log.Error("Generation3 failed.");
-																break;
-															}
-
-															
-
-															if (Terrain.ExtractContents(block_house) == 27)//如果是工作台
-															{
-																ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-																if(result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("CraftingTable", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																}
-																
-															}
-														}
-													}
-												}
-												catch
-												{
-													Log.Error("Generation failed.");
-													
-												}
-
-												tg_num++;
-											}
-											else
-											{
-												try
-
-												{
-													string blocks = ContentManager.Get<string>("House/IronHouse");
-													blocks = blocks.Replace("\n", "#");
-													string[] blockArray = blocks.Split(new char[1] { '#' });
-													foreach (string blockLine in blockArray)
-													{
-														string[] block = blockLine.Split(new char[1] { ',' });
-														if (block.Length > 3)
-														{
-															int x = int.Parse(block[0]);
-															int y = int.Parse(block[1]);
-															int z = int.Parse(block[2]);
-															int block_house = int.Parse(block[3]);
-															int x1t = x + x_T;
-															int y1t = y + max1 - 3;
-															int z1t = z_T + z;
-															int Block_reset = terrain.GetCellContentsFast(x1t, y1t, z1t);
-															try
-                                                            {
-																if (Block_reset == 64 || Block_reset == 45)
-																{
-																	continue;
-																}
-																else
-																{
-																	terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-																}
-															}
-															catch
-                                                            {
-																Log.Error("Generation4 failed.");
-																break;
-															}
-															
-
-															if (Terrain.ExtractContents(block_house) == 64)//如果是熔炉
-															{
-																ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-																if(result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Furnace", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																}
-
-																
-															}
-															if (Terrain.ExtractContents(block_house) == 45)//如果等于箱子，补充实体
-															{
-																ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-
-															    if(result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Chest", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																	ComponentChest chest_componentchest = entity.FindComponent<ComponentChest>();//创建实体，并获取组件
-																	int Item_num;
-																	//126钻石块，46铁块，71孔雀石，47铜块，231锗块,228燃烧炸弹，201炸弹，236燃烧炸药，107普通炸药,150煤块，167磁铁，248经验，132南瓜灯
-																	//196羽毛，198线，206布 ，40铁锭，22煤
-
-																	int[] blocks1 = { 40, 22, };
-																	for (int a11 = 0; a11 < 5; a11++)//遍历箱子格子
-																	{
-																		if (a11 < 4)//煤矿的分布概率
-																		{
-																			if (random.Bool(0.1f))
-																			{
-																				Item_num = 3;
-
-																			}
-																			else
-																			{
-																				Item_num = 1;
-																			}
-																			chest_componentchest.AddSlotItems(a11, blocks1[1], Item_num);
-																		}
-																		else if (a11 == 4)
-																		{
-																			if (random.Bool(0.05f))
-																			{
-																				chest_componentchest.AddSlotItems(4, blocks1[0], 1);
-																			}
-																			else
-																			{
-																				chest_componentchest.AddSlotItems(4, blocks1[1], 2);
-																			}
-																		}
-
-																	}
-																}
-																
-
-
-
-															}
-														}
-													}
-												}
-												catch
-												{
-													Log.Error("Generation failed.");
-													
-												}
-
-												tg_num++;
-
-											}
-										}
-
-									}
-									else//如果是辅路
-									{
-										if (i - 1 == 0)//如果是副区块第一个，则生成养殖间。
-										{
-											try
-											{
-												string blocks = ContentManager.Get<string>("House/PetHouse");
-												blocks = blocks.Replace("\n", "#");
-												string[] blockArray = blocks.Split(new char[1] { '#' });
-												foreach (string blockLine in blockArray)
-												{
-													string[] block = blockLine.Split(new char[1] { ',' });
-													if (block.Length > 3)
-													{
-														int x = int.Parse(block[0]);
-														int y = int.Parse(block[1]);
-														int z = int.Parse(block[2]);
-														int block_house = int.Parse(block[3]);
-														int x1t = x + x_T;
-														int y1t = y + max1 - 3;
-														int z1t = z_T + z + 2;
-														m_systemTerrain.ChangeCell(x1t, y1t, z1t, block_house);
-													}
-												}
-											}
-											catch
-											{
-												Log.Error("Generation failed.");
-												
-											}
-
-											Point2 pointRD1 = (chunk_v.Coords.X, chunk_v.Coords.Y);
-											if (Dic_Chunk_Village3.ContainsKey(pointRD1) == false)
-											{
-												Dic_Chunk_Village3.Add(pointRD1, 0);
-											}
-											listRD[i].TG = true;
-
-											tg_num++;
-										}
-										else
-										{
-											if (random.Bool(0.05f))
-											{
-												try
-												{
-													string blocks = ContentManager.Get<string>("House/IronHouse");//0.1的概率再生成铁匠铺。
-													blocks = blocks.Replace("\n", "#");
-													string[] blockArray = blocks.Split(new char[1] { '#' });
-													foreach (string blockLine in blockArray)
-													{
-														string[] block = blockLine.Split(new char[1] { ',' });
-														if (block.Length > 3)
-														{
-															int x = int.Parse(block[0]);
-															int y = int.Parse(block[1]);
-															int z = int.Parse(block[2]);
-															int block_house = int.Parse(block[3]);
-															int x1t = x + x_T;
-															int y1t = y + max1 - 3;
-															int z1t = z_T + z;
-															int Block_reset = terrain.GetCellContentsFast(x1t, y1t, z1t);
-															try
-                                                            {
-																if (Block_reset == 64 || Block_reset == 45)
-																{
-																	continue;
-																}
-																else
-																{
-																	terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-																}
-															}
-															catch
-                                                            {
-																Log.Error("Generation5 failed.");
-																break;
-															}
-															
-
-															if (Terrain.ExtractContents(block_house) == 64)//如果是熔炉
-															{
-																ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-																if(result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Furnace", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																}
-																
-															}
-															if (Terrain.ExtractContents(block_house) == 45)//如果等于箱子，补充实体
-															{
-																ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-																if(result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Chest", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																	ComponentChest chest_componentchest = entity.FindComponent<ComponentChest>();//创建实体，并获取组件
-																	int Item_num;
-																	//126钻石块，46铁块，71孔雀石，47铜块，231锗块,228燃烧炸弹，201炸弹，236燃烧炸药，107普通炸药,150煤块，167磁铁，248经验，132南瓜灯
-																	//196羽毛，198线，206布 ，40铁锭，22煤
-
-																	int[] blocks1 = { 40, 22, };
-																	for (int a11 = 0; a11 < 5; a11++)//遍历箱子格子
-																	{
-																		if (a11 < 4)//煤矿的分布概率
-																		{
-																			if (random.Bool(0.1f))
-																			{
-																				Item_num = 3;
-
-																			}
-																			else
-																			{
-																				Item_num = 1;
-																			}
-																			chest_componentchest.AddSlotItems(a11, blocks1[1], Item_num);
-																		}
-																		else if (a11 == 4)
-																		{
-																			if (random.Bool(0.05f))
-																			{
-																				chest_componentchest.AddSlotItems(4, blocks1[0], 1);
-																			}
-																			else
-																			{
-																				chest_componentchest.AddSlotItems(4, blocks1[1], 2);
-																			}
-																		}
-
-																	}
-																}
-																
-
-
-
-															}
-														}
-													}
-												}
-												catch
-												{
-													Log.Error("Generation failed.");
-													
-												}
-
-												Point2 pointRD1 = (chunk_v.Coords.X, chunk_v.Coords.Y);
-												if (Dic_Chunk_Village3.ContainsKey(pointRD1) == false)
-												{
-													Dic_Chunk_Village3.Add(pointRD1, 0);
-												}
-												listRD[i].TG = true;
-
-												tg_num++;
-											}
-											else
-											{
-												try
-												{
-													string blocks = ContentManager.Get<string>("House/LivingHouse1");
-													blocks = blocks.Replace("\n", "#");
-													string[] blockArray = blocks.Split(new char[1] { '#' });
-													foreach (string blockLine in blockArray)
-													{
-														string[] block = blockLine.Split(new char[1] { ',' });
-														if (block.Length > 3)
-														{
-															int x = int.Parse(block[0]);
-															int y = int.Parse(block[1]);
-															int z = int.Parse(block[2]);
-															int block_house = int.Parse(block[3]);
-															int x1t = x + x_T;
-															int y1t = y + max1 - 3;
-															int z1t = z_T + z + 2;
-															int Block_reset = terrain.GetCellContentsFast(x1t, y1t, z1t);
-															try
-															{
-																if (Block_reset == 64 || Block_reset == 45 || Block_reset == 27)
-																{
-																	continue;
-																}
-																else
-																{
-																	terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-																}
-															}
-															catch
-                                                            {
-																Log.Error("Generation6 failed.");
-																break;
-															}															
-															
-
-
-															if (Terrain.ExtractContents(block_house) == 27)//如果是工作台
-															{
-																ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-																if(result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("CraftingTable", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																}
-																
-															}
-															if (Terrain.ExtractContents(block_house) == 64)//如果是熔炉
-															{
-																ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-																if(result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Furnace", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																}
-																
-															}
-															if (Terrain.ExtractContents(block_house) == 45)//如果等于箱子，补充实体
-															{
-																ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-																if(result == null)
-                                                                {
-																	DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Chest", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-																	ValuesDictionary valuesDictionary = new ValuesDictionary();
-																	valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-																	valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-																	Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-																	m_systemTerrain.Project.AddEntity(entity);
-																	ComponentChest chest_componentchest = entity.FindComponent<ComponentChest>();//创建实体，并获取组件
-																																				 //167磁铁，132南瓜灯
-																																				 //196羽毛，198线，206布 ，40铁锭，22煤，207毛皮,159 皮革
-																	int diamond_num;//小麦数量
-																	int[] blocks1 = { 167, 132, 196, 198, 206, 207, 22, 114862, 159 };
-																	for (int a11 = 0; a11 < 16; a11++)//遍历箱子格子
-																	{
-																		if (random.Bool(0.1f))//随机钻石数量
-																		{
-																			diamond_num = 2;
-																		}
-																		else
-																		{
-																			diamond_num = 1;
-																		}
-																		if (random.Bool(0.4f))
-																		{
-																			chest_componentchest.AddSlotItems(a11, blocks1[a11 % 9], diamond_num);
-																		}
-
-																	}
-																}
-																
-
-															}
-														}
-													}
-												}
-												catch
-												{
-													Log.Error("Generation failed.");
-													
-												}
-
-												Point2 pointRD1 = (chunk_v.Coords.X, chunk_v.Coords.Y);
-												if (Dic_Chunk_Village3.ContainsKey(pointRD1) == false)
-												{
-													Dic_Chunk_Village3.Add(pointRD1, 0);
-												}
-												listRD[i].TG = true;
-
-												tg_num++;
-											}
-										}
-									}
-
-
-
-
-
-									m_systemTerrain.ChangeCell(x_T, 3, z_T, 0);
-									/*Time.QueueTimeDelayedExecution(Time.FrameStartTime + 1.0, delegate
-									{
-										m_subsystemTerrain.TerrainUpdater.DowngradeAllChunksState(TerrainChunkState.InvalidLight, forceGeometryRegeneration: false);
-
-									});*/
-
-								}
-
-							}
-							if (listRD[i].TG == false && listRD[i].BrushType == 2)//转折点
-							{
-								List<int> height_T = new List<int>(); // 创建一个空的 List<int>,储存区块高度
-								int x_T = chunk_v.Origin.X;//获取该路径点区块的原始坐标。
-								int z_T = chunk_v.Origin.Y;
-								int x_T_coords = chunk_v.Coords.X;
-								int z_T_coords = chunk_v.Coords.Y;
-								Point2 point_t1 = (x_T_coords, z_T_coords);//如果可以生成，则先获取绝对坐标，比较区块字典，如果发现是已生成区块，则不生成。
-
-								bool ischunkload = FCSubsystemTownChunk.Dic_Chunk_Village.ContainsKey(point_t1);
-								bool ischunkload2 = Dic_Chunk_Village3.ContainsKey(point_t1);
-								if (ischunkload == false && ischunkload2 == false)
-								{
-									for (int a1 = 0; a1 < 16; a1++)//遍历路径点区块这里是先摧毁区块的多余物质。
-									{
-										for (int j1 = 0; j1 < 16; j1++)
-										{
-
-											int num1 = a1 + x_T;//x坐标
-
-											int num2 = j1 + z_T;//z坐标
-																//int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度
-											int k = 120;//从86的高度开始遍历
-
-											while (k > 64)// 当k高度大于65的时候。 
-											{
-
-												int num3 = terrain.GetCellContentsFast(num1, k, num2);//获取起始的高度的方块
-												if (num3 != 8 || num3 != 3 || num3 != 7 || num3 != 4 || num3 != 2 || num3 != 985 || num3 != 984 || num3 != 18 || num3 != 6 || num3 != 66)//如果不是草地、沙子、砂岩、花岗岩，水，则销毁
-												{
-
-													terrain.SetCellValueFast(num1, k + 1, num2, 0);
-
-												}
-												if (num3 == 8 || num3 == 3 || num3 == 7 || num3 == 4 || num3 == 2 || num3 == 985 || num3 == 18 || num3 == 984 || num3 == 6 || num3 == 66)
-												{
-
-
-													break;
-												}
-
-												k--;
-
-											}
-											int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度块
-											height_T.Add(num7);//统计区块内的所有地表高度
-
-
-										}
-
-									}
-									int list_count = height_T.Count;
-									Log.Information(String.Format("列表元素个数为：{0}", list_count));
-									int max1 = height_T[0];
-									int min1 = height_T[0];
-
-									for (int i1 = 1; i1 < height_T.Count; i1++)//计算高度差
-									{
-										if (height_T[i1] > max1)
-										{
-											max1 = height_T[i1];
-										}
-										if (height_T[i1] < min1)
-										{
-											min1 = height_T[i1];
-										}
-									}
-
-									int height_T1 = (max1 - min1);//高度差
-
-
-									/*if (height_T1 > 7)// 如果高度大于13，过于崎岖，不生成建筑。
-									{
-										Point2 pointRD2 = (chunk_v.Coords.X, chunk_v.Coords.Y);//把当前区块记录下来，作为村庄区块。
-										if (Dic_Chunk_Village3.ContainsKey(pointRD2) == false)
-										{
-											Dic_Chunk_Village3.Add(pointRD2, 0);
-										}
-										listRD[i].TG = true;
-										tg_num++;
-										continue;
-									}*/
-									for (int a1 = 14; a1 < 16; a1++)//遍历路径点区块的路径z轴
-									{
-										for (int j1 = 0; j1 < 2; j1++)//x轴
-										{
-											int top_height = height_T[a1 + j1 * 16];
-											terrain.SetCellValueFast(x_T + j1, top_height, z_T + a1, 5);
-										}
-									}
-									Log.Information(string.Format("村庄转折点生成完毕：{0}, {1}, {2}", listRD[i].Position.X, listRD[i].Position.Y, listRD[i].Position.Z));
-									Point2 pointRD1 = (chunk_v.Coords.X, chunk_v.Coords.Y);//把当前区块记录下来，作为村庄区块。
-									if (Dic_Chunk_Village3.ContainsKey(pointRD1) == false)
-									{
-										Dic_Chunk_Village3.Add(pointRD1, 0);
-									}
-									listRD[i].TG = true;
-
-									try
-									{
-										string blocks = ContentManager.Get<string>("House/jiaotang2");
-										blocks = blocks.Replace("\n", "#");
-										string[] blockArray = blocks.Split(new char[1] { '#' });
-										foreach (string blockLine in blockArray)
-										{
-											string[] block = blockLine.Split(new char[1] { ',' });
-											if (block.Length > 3)
-											{
-												int x = int.Parse(block[0]);
-												int y = int.Parse(block[1]);
-												int z = int.Parse(block[2]);
-												int block_house = int.Parse(block[3]);
-												int x1t = x + x_T;
-												int y1t = y + max1 - 3;
-												int z1t = z_T + z;
-												int Block_reset = terrain.GetCellContentsFast(x1t, y1t, z1t);
-												try
-                                                {
-													if (Block_reset == 45)
-													{
-														continue;
-													}
-													else
-													{
-														terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-													}
-												}
-												catch
-                                                {
-													Log.Error("Generation7 failed.");
-													break;
-												}
-												
-
-												if (Terrain.ExtractContents(block_house) == 45)//如果等于箱子，补充实体
-												{
-													ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-													if(result == null)
-                                                    {
-														DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Chest", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-														ValuesDictionary valuesDictionary = new ValuesDictionary();
-														valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-														valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-														Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-														m_systemTerrain.Project.AddEntity(entity);
-														ComponentChest chest_componentchest = entity.FindComponent<ComponentChest>();//创建实体，并获取组件
-														int Item_num;
-														//126钻石块，46铁块，71孔雀石，47铜块，231锗块,228燃烧炸弹，201炸弹，236燃烧炸药，107普通炸药,150煤块，167磁铁，248经验，132南瓜灯
-														//196羽毛，198线，206布
-														if (block_house == 49197)//如果是最高的箱子，则进行特殊奖励生成。
-														{
-															int[] blocks1 = { 126, 46, 71, 47, 231, 228, 201, 236, 107, 150, 167, 248, 132, 196, 198, 206 };
-															for (int a11 = 0; a11 < 16; a11++)//遍历箱子格子
-															{
-																if (blocks1[a11] == 248)
-																{
-
-																	chest_componentchest.AddSlotItems(a11, blocks1[a11], 40);
-																}
-																else
-																{
-																	chest_componentchest.AddSlotItems(a11, blocks1[a11], 1);
-																}
-
-															}
-
-														}
-														else
-														{
-															int[] blocks1 = { 248, 196, 198, 206 };
-															for (int a11 = 0; a11 < 4; a11++)//遍历箱子格子
-															{
-																if (random.Bool(0.01f))//随机数量
-																{
-																	Item_num = 3;
-																}
-																else
-																{
-																	Item_num = 1;
-																}
-																if (random.Bool(0.67f))
-																{
-																	chest_componentchest.AddSlotItems(a11, blocks1[a11], Item_num);
-																}
-
-															}
-														}
-													}
-													
-
-												}
-											}
-										}
-									}
-									catch
-									{
-										Log.Error("Generation failed.");
-										
-									}
-
-									tg_num++;
-									m_systemTerrain.ChangeCell(x_T, 3, z_T, 0);
-								}
-
-							}
-							if (listRD[i].TG == false && listRD[i].BrushType == 1)//z轴小路
-							{
-								List<int> height_T = new List<int>(); // 创建一个空的 List<int>,储存区块高度
-								int x_T = chunk_v.Origin.X;//获取该路径点区块的原始坐标。
-								int z_T = chunk_v.Origin.Y;
-								int x_T_coords = chunk_v.Coords.X;
-								int z_T_coords = chunk_v.Coords.Y;
-								Point2 point_t1 = (x_T_coords, z_T_coords);//如果可以生成，则先获取绝对坐标，比较区块字典，如果发现是已生成区块，则不生成。
-
-								bool ischunkload = FCSubsystemTownChunk.Dic_Chunk_Village.ContainsKey(point_t1);
-								bool ischunkload2 = Dic_Chunk_Village3.ContainsKey(point_t1);
-								if (ischunkload == false && ischunkload2 == false)
-								{
-									for (int a1 = 0; a1 < 16; a1++)//遍历路径点区块这里是先摧毁区块的多余物质。
-									{
-										for (int j1 = 0; j1 < 16; j1++)
-										{
-
-											int num1 = a1 + x_T;//x坐标
-
-											int num2 = j1 + z_T;//z坐标
-																//int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度
-											int k = 120;//从86的高度开始遍历
-
-											while (k > 64)// 当k高度大于65的时候。 
-											{
-
-												int num3 = terrain.GetCellContentsFast(num1, k, num2);//获取起始的高度的方块
-												if (num3 != 8 || num3 != 3 || num3 != 7 || num3 != 4 || num3 != 2 || num3 != 985 || num3 != 984 || num3 != 18 || num3 != 6 || num3 != 66)//如果不是草地、沙子、砂岩、花岗岩，水，则销毁
-												{
-
-													terrain.SetCellValueFast(num1, k + 1, num2, 0);
-
-												}
-												if (num3 == 8 || num3 == 3 || num3 == 7 || num3 == 4 || num3 == 2 || num3 == 985 || num3 == 18 || num3 == 984 || num3 == 6 || num3 == 66)
-												{
-
-
-													break;
-												}
-
-												k--;
-
-											}
-											int num7 = terrain.CalculateTopmostCellHeight(num1, num2);//获取预生成位置的最大高度块
-											height_T.Add(num7);//统计区块内的所有地表高度
-
-
-										}
-
-									}
-									int list_count = height_T.Count;
-									Log.Information(String.Format("列表元素个数为：{0}", list_count));
-									int max1 = height_T[0];
-									int min1 = height_T[0];
-
-									for (int i1 = 1; i1 < height_T.Count; i1++)//计算高度差
-									{
-										if (height_T[i1] > max1)
-										{
-											max1 = height_T[i1];
-										}
-										if (height_T[i1] < min1)
-										{
-											min1 = height_T[i1];
-										}
-									}
-
-									int height_T1 = (max1 - min1);//高度差
-
-
-									/*if (height_T1 > 7)// 如果高度大于13，过于崎岖，不生成建筑。
-									{
-										Point2 pointRD2 = (chunk_v.Coords.X, chunk_v.Coords.Y);//把当前区块记录下来，作为村庄区块。
-										if (Dic_Chunk_Village3.ContainsKey(pointRD2) == false)
-										{
-											Dic_Chunk_Village3.Add(pointRD2, 0);
-										}
-										listRD[i].TG = true;
-										tg_num++;
-										continue;
-									}*/
-									if (listRD[i].is_Vice == false)//如果不是副路
-									{
-										for (int a1 = 0; a1 < 2; a1++)//遍历路径点区块的路径x轴
-										{
-											for (int j1 = 0; j1 < 16; j1++)//z轴
-											{
-												int top_height = height_T[j1 + a1 * 16];
-												terrain.SetCellValueFast(x_T + a1, top_height, z_T + j1, 5);
-											}
-										}
-										Log.Information(string.Format("村庄z轴小路生成完毕：{0}, {1}, {2}", listRD[i].Position.X, listRD[i].Position.Y, listRD[i].Position.Z));
-										Point2 pointRD1 = (chunk_v.Coords.X, chunk_v.Coords.Y);
-										if (Dic_Chunk_Village3.ContainsKey(pointRD1) == false)
-										{
-											Dic_Chunk_Village3.Add(pointRD1, 0);
-										}
-										listRD[i].TG = true;
-
-									}
-
-
-									if (listRD[i].is_Vice == false)//如果不是副路
-									{
-										try
-										{
-											string blocks = ContentManager.Get<string>("House/field");
-											blocks = blocks.Replace("\n", "#");
-											string[] blockArray = blocks.Split(new char[1] { '#' });
-											foreach (string blockLine in blockArray)
-											{
-												string[] block = blockLine.Split(new char[1] { ',' });
-												if (block.Length > 3)
-												{
-													int x = int.Parse(block[0]);
-													int y = int.Parse(block[1]);
-													int z = int.Parse(block[2]);
-													int block_house = int.Parse(block[3]);
-													int x1t = x + x_T + 2;
-													int y1t = y + max1 - 3;
-													int z1t = z_T + z;
-													int Block_reset = terrain.GetCellContentsFast(x1t, y1t, z1t);
-													try
-                                                    {
-														if (Block_reset == 45)
-														{
-															continue;
-														}
-														else
-														{
-															terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-														}
-													}
-													catch
-                                                    {
-														Log.Error("Generation8 failed.");
-														break;
-													}
-													
-
-													if (Terrain.ExtractContents(block_house) == 45)//如果等于箱子，补充实体
-													{
-														ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-														if(result == null)
-                                                        {
-															DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Chest", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-															ValuesDictionary valuesDictionary = new ValuesDictionary();
-															valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-															valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-															Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-															m_systemTerrain.Project.AddEntity(entity);
-															ComponentChest chest_componentchest = entity.FindComponent<ComponentChest>();//创建实体，并获取组件
-															int diamond_num;//小麦数量
-															for (int a11 = 0; a11 < 16; a11++)//遍历箱子格子
-															{
-																if (random.Bool(0.1f))//
-																{
-																	diamond_num = 2;
-																}
-																else
-																{
-																	diamond_num = 1;
-																}
-																chest_componentchest.AddSlotItems(a11, 114862, diamond_num);
-															}
-														}
-														
-
-													}
-												}
-											}
-										}
-										catch
-										{
-											Log.Error("Generation failed.");
-											
-										}
-
-										Point2 pointRD1 = (chunk_v.Coords.X, chunk_v.Coords.Y);
-
-										listRD[i].TG = true;
-										tg_num++;
-									}
-									else if (listRD[i].is_Vice == true && i == 7)
-									{
-
-										try
-										{
-											string blocks = ContentManager.Get<string>("House/shuijing");
-											blocks = blocks.Replace("\n", "#");
-											string[] blockArray = blocks.Split(new char[1] { '#' });
-											foreach (string blockLine in blockArray)
-											{
-												string[] block = blockLine.Split(new char[1] { ',' });
-												if (block.Length > 3)
-												{
-													int x = int.Parse(block[0]);
-													int y = int.Parse(block[1]);
-													int z = int.Parse(block[2]);
-													int block_house = int.Parse(block[3]);
-													int x1t = x + x_T + 2;
-													int y1t = y + max1 - 4;
-													int z1t = z_T + z;
-													int Block_reset = terrain.GetCellContentsFast(x1t, y1t, z1t);
-													try
-                                                    {
-														if (Block_reset == 45)
-														{
-															continue;
-														}
-														else
-														{
-															terrain.SetCellValueFast(x1t, y1t, z1t, block_house);
-														}
-													}
-													catch
-                                                    {
-														Log.Error("Generation9 failed.");
-														break;
-													}
-													
-
-													if (Terrain.ExtractContents(block_house) == 45)//如果等于箱子，补充实体
-													{
-														ComponentBlockEntity result = entityScan.GetBlockEntity(x1t, y1t, z1t);
-														if(result == null)
-                                                        {
-															DatabaseObject databaseObject = m_systemTerrain.Project.GameDatabase.Database.FindDatabaseObject("Chest", m_systemTerrain.Project.GameDatabase.EntityTemplateType, true);
-															ValuesDictionary valuesDictionary = new ValuesDictionary();
-															valuesDictionary.PopulateFromDatabaseObject(databaseObject);
-															valuesDictionary.GetValue<ValuesDictionary>("BlockEntity").SetValue<Point3>("Coordinates", new Point3(x1t, y1t, z1t));
-															Entity entity = m_systemTerrain.Project.CreateEntity(valuesDictionary);
-															m_systemTerrain.Project.AddEntity(entity);
-															ComponentChest chest_componentchest = entity.FindComponent<ComponentChest>();//创建实体，并获取组件
-															int diamond_num;
-															if (random.Bool(0.01f))//随机钻石数量
-															{
-																diamond_num = 5;
-															}
-															else
-															{
-																diamond_num = 2;
-															}
-															chest_componentchest.AddSlotItems(0, 111, diamond_num);
-														}
-														
-													}
-
-												}
-											}
-										}
-										catch
-										{
-											Log.Error("Generation failed.");
-										
-										}
-
-										Point2 pointRD1 = (chunk_v.Coords.X, chunk_v.Coords.Y);
-										if (Dic_Chunk_Village3.ContainsKey(pointRD1) == false)
-										{
-											Dic_Chunk_Village3.Add(pointRD1, 0);
-										}
-
-										tg_num++;
-										listRD[i].TG = true;
-									}
-
-									m_systemTerrain.ChangeCell(x_T, 3, z_T, 0);
-
-
-								}
-
-							}
-							try
-                            {
-								int height_Villager = terrain.CalculateTopmostCellHeight(chunk_v.Origin.X, chunk_v.Origin.Y);
-								int height_cell = terrain.GetCellContentsFast(chunk_v.Origin.X, height_Villager - 1, chunk_v.Origin.Y);//如果是悬空方块
-								int true_height = height_Villager;
-								if (height_cell == 0)
-								{
-									true_height = height_Villager - 1;
-
-								}
-								Entity entity1 = DatabaseManager.CreateEntity(m_systemTerrain.Project, "FCVillager", true);
-								entity1.FindComponent<ComponentBody>(true).Position = (chunk_v.Origin.X, true_height, chunk_v.Origin.Y);
-								entity1.FindComponent<ComponentBody>(true).Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, random.Float(0f, 6.2831855f));
-								entity1.FindComponent<ComponentCreature>(true).ConstantSpawn = false;
-								
-								m_systemTerrain.Project.AddEntity(entity1);
-							}
-							catch
-                            {
-								Log.Error("Generation villager failed.");
-								
-							}
-							
-						}
-
-						
-					}
-
-					
-				}
-				
-				
-				Log.Information(string.Format("生成完毕的区块总数：{0}", tg_num));
-
-
-
-				if(tg_num==8)
-                {
-					
-					
-					tg_num = 0;
-					Bg_num = 0;
-					listRD.Clear();
-					listBD.Clear();
-					ischunkloding2 = false;
-				}
-				
-				/*for (int i = 0; i < listRD.Count; i++)
-                {
-					if(listRD[i].TG == true)
-                    {
-						
-                        RemoveChunks007(listRD[i].chunkCoords.X, listRD[i].chunkCoords.Y);
-						Bg_num++;
                     }
-					if(Bg_num==listRD.Count)
+                }
+                while (!pass && c < 10000);
+                point = new Point2(cx, cz);
+            }
+            WorldType worldType = m_subsystemWorldDemo.worldType;//获取当前所在世界
+            if (worldType == WorldType.Default)//如果是主世界（地球）
+            {
+                string name = id == 0 ? "悦灵城" : id == 1 ? "天空城" : id == 2 ? "小镇" : "";
+                Log.Warning($"{name}坐标：[x:{point.X * 16},y:?,z:{point.Y * 16}]");
+                //System.Diagnostics.Debug.WriteLine($"{name}:建筑坐标：[x:{point.X * 16},y:生成高度随机,z:{point.Y * 16}]");
+            }
+            return point;
+        }
+
+        /// <summary>
+        /// 生成建筑
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="originatePoint"></param>
+        /// <param name="chunk"></param>
+        public static void GenerateBuildings(BuildingInfo buildingInfo, Point3 originatePoint, TerrainChunk chunk)
+        {
+            int dchunkX = chunk.Coords.X - (int)(originatePoint.X / 16);
+            int dchunkY = chunk.Coords.Y - (int)(originatePoint.Z / 16);
+            //计算地形块的坐标和建筑起始点的距离，分别在x轴和z轴上。
+            if (Buildings[buildingInfo.Name].TryGetValue(new Point2(dchunkX, dchunkY), out Dictionary<Point3, int> cells))
+            {
+                //判断建筑信息中是否有对应于当前地形块的建筑单元格信息，如果有，则获取这些单元格信息。
+                for (int i = 0; i < 16; i++)
+                {
+                    for (int j = 0; j < 16; j++)
                     {
-						tg_num = 0;
-						Bg_num = 0;
-						listRD.Clear();
-						listBD.Clear();
-					}
-					else
+                        //对于地形块内的每一个单元格，如果该单元格的高度大于建筑起始点的高度，那么就将这个单元格设为空。这是为了清除可能存在的原始地形。
+                        for (int k = originatePoint.Y + buildingInfo.HightShiftCount + 1; k < 254; k++)
+                        {
+                            chunk.SetCellValueFast(i, k, j, 0);
+                        }
+                    }
+                }
+                //接着遍历所有的建筑单元格，对于每一个单元格，首先获取它的值。
+                foreach (Point3 point in cells.Keys)
+                {
+                    int value = cells[point];
+                    //如果这个单元格的高度小于或等于建筑信息中的高度偏移量，并且这个单元格的类型是玻璃（ID为15），那么将这个单元格设为空。这可能是为了清除建筑的底部的玻璃。
+                    if (point.Y <= buildingInfo.HightShiftCount && Terrain.ExtractContents(value) == 15)//15为玻璃
                     {
-						Bg_num = 0;
-					}
-					
+                        value = 0;
+                    }
+                    //最后，根据建筑单元格的值，设置地形块中对应位置的单元格。
+                    chunk.SetCellValueFast(point.X, point.Y + originatePoint.Y, point.Z, value);
+                }
+            }
+        }
 
-				}*/
-				
+        /// <summary>
+        /// 装载建筑数据
+        /// </summary>
+        /// <param name="name"></param>
+        public static void LoadBuilding(string name)
+        {
+            //定义一个l变量用于记录处理的行数。
+            int l = 0;
+            try
+            {
+                Log.Information("加载了1");
 
+                //从内容管理器中获取名字为name的字符串，这个字符串是以文本形式存储的建筑数据。然后将这个字符串中的回车换行符"\r"替换为空字符串。
+                string buildingText = ContentManager.Get<string>(name).Replace("\r", string.Empty);
+                //将处理后的字符串按照换行符"\n"分割为多行。
+                string[] lines = buildingText.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+				buildingText = string.Empty;
+                Log.Information("加载了2");
+                foreach (string line in lines)
+                {
+                    
+                    //对于每一行，首先增加l变量的值。然后将这一行按照逗号","分割为多个参数。
+                    l++;
+                    
+                    string[] parameters = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    //如果参数的数量大于3，那么将这些参数转化为单元格的坐标和值。
+                    if (parameters.Length > 3)
+                    {
+                        
+                        int x = int.Parse(parameters[0]);
+                        int y = int.Parse(parameters[1]);
+                        int z = int.Parse(parameters[2]);
+                        int value = int.Parse(parameters[3]);
+                        //计算这个单元格所在的地形块的坐标，以及它在地形块中的位置。
+                        Point2 coords = new Point2((int)(x / 16), (int)(z / 16));
+                        Point3 point = new Point3(x % 16, y, z % 16);
+                        //检查Buildings字典中是否包含名字为name的建筑数据，如果不包含，那么就添加一个新的字典。
+                        if (!Buildings.ContainsKey(name))
+                        {
+                            Buildings[name] = new Dictionary<Point2, Dictionary<Point3, int>>();
+                        }
+                        //检查这个建筑的字典中是否包含当前地形块的坐标，如果不包含，那么就添加一个新的字典。
+                        if (!Buildings[name].ContainsKey(coords))
+                        {
+                            Buildings[name][coords] = new Dictionary<Point3, int>();
+                        }
 
-			}
-			
-			
-
-			/*if (listRD.Count == 5)//如果路径点等于5，说明已经路径点已经完毕，执行生成。
-			{
-				TGNum tgNum = new TGNum();
-				await GenerateVillageAsync(chunk, terrain, tgNum);
-				if (tgNum.Value == 5)
-				{
-					
-					listRD.Clear();
-					listBD.Clear();
-				}
-
-
-
-
-				
-
-
-			}*/
-		}
-		private async Task GenerateVillageAsync(TerrainChunk chunk,Terrain terrain)
-		{
-			await Task.Run(() =>
-			{
-				
-
-
-			});
-		}
-			#endregion
-		}
-
-
-
+                        Buildings[name][coords][point] = value;
+                    }
+                }
+                
+                Log.Information("加载了2");
+            }
+            catch (Exception e)
+            {
+                //如果出现任何异常，那么就从Buildings字典中移除这个建筑的数据，然后将错误信息输出到日志中。
+                if (Buildings.ContainsKey(name)) Buildings.Remove(name);
+                Log.Warning($"LoadBuilding-{name}-Line-{l}:{e.Message}");
+                //总的来说，这个方法的作用是加载一个建筑的数据，然后将这些数据存储到Buildings字典中，以便之后生成建筑时使用。
+            }
+        }
+    }
     #endregion
+   
 
     #region 区块（植物）
-    #region 草皮方块子系统
-    public class FCSubsystemGrassBlockBehavior : SubsystemPollableBlockBehavior, IUpdateable
+    #region 草皮方块子系统（已经废弃）
+    /*public class FCSubsystemGrassBlockBehavior : SubsystemPollableBlockBehavior, IUpdateable
 	{
 		public override int[] HandledBlocks
 		{
@@ -8852,7 +5704,7 @@ namespace Game
 		public Dictionary<Point3, int> m_toUpdate = new Dictionary<Point3, int>();
 
 		public Random m_random = new Random();
-	}
+	}*/
 	#endregion
 
 	#region 摔落方块子系统未使用
@@ -9358,18 +6210,6 @@ namespace Game
 			{
 				return new int[]
 				{
-					19,
-					20,
-					24,
-					25,
-					28,
-					99,
-					131,
-					244,
-					132,
-					174,
-					204,
-					
 					938,//西瓜
 					936,//腐烂西瓜
 					937,//sunflower
@@ -9389,7 +6229,7 @@ namespace Game
 					if (num != 244)//烂南瓜
 					{
 
-						if (num2 != 8 && num2 != 2 && num2 != 7 && num2 != 168 && num2 != 984 && num2 != 985 && num2 != 986)//草地，泥土，沙子，土壤
+						if (num2 != 8 && num2 != 2 && num2 != 7 && num2 != 168 )//草地，泥土，沙子，土壤
 						{
 							base.SubsystemTerrain.DestroyCell(0, x, y, z, 0, false, false);
 							return;
@@ -9408,7 +6248,7 @@ namespace Game
 					return;
 				}
 			}
-			if (num2 != 8 && num2 != 2 && num2 != 168 && num2 != 984 && num2 != 985 && num2 != 986)
+			if (num2 != 8 && num2 != 2 && num2 != 168 )
 			{
 				base.SubsystemTerrain.DestroyCell(0, x, y, z, 0, false, false);
 				return;
@@ -9578,11 +6418,11 @@ namespace Game
 			public int Value;
 		}
 	}
+    
+    #endregion
 
-	#endregion
-
-	#region 树木种类
-	public enum FCTreeType
+    #region 树木种类
+    public enum FCTreeType
 	{
 		Coco,
 		Orange,
@@ -10605,11 +7445,21 @@ namespace Game
 		public SubsystemPlayers m_subsystemPlayer;
 		public ComponentPlayer m_componentPlayer;
 		public ComponentTest1 m_componentTest1;
+		public SubsystemWorldDemo m_subsystemWorldDemo;
 
         public override void OnEntityAdded(Entity entity)
         {
-            m_componentPlayer = m_subsystemPlayer.ComponentPlayers[0];
-            m_componentTest1 = m_componentPlayer.Entity.FindComponent<ComponentTest1>();
+            ComponentPlayer componentPlayer = entity.FindComponent<ComponentPlayer>();
+            if (componentPlayer != null)
+			{
+                m_componentPlayer = componentPlayer;
+                m_componentTest1 = m_componentPlayer.Entity.FindComponent<ComponentTest1>();
+            }
+                
+
+            
+            
+            
         }
 
         public float FCCalculateLightIntensity(float timeOfDay, Camera camera)
@@ -10673,6 +7523,8 @@ namespace Game
         }
         public Color FCCalculateSkyColor(Vector3 direction, float timeOfDay, float precipitationIntensity, int temperature, Camera camera)
         {
+            WorldType worldType = m_subsystemWorldDemo.worldType;
+           // if (worldType == WorldType.Default)
             direction = Vector3.Normalize(direction);
             Vector2 vector = Vector2.Normalize(new Vector2(direction.X, direction.Z));
             float s = this.FCCalculateLightIntensity(timeOfDay, camera);
@@ -10696,14 +7548,36 @@ namespace Game
             float s3 = num2 * MathUtils.Sqr(MathUtils.Saturate(vector.X));
             if (m_componentTest1 != null)
             {
-                if (m_componentTest1.Sen < 20)
-                {
-					return new Color(0.2f, 0f, 0f);
+                if (worldType == WorldType.Default)//如果是主世界（地球）
+				{
+					
+                    if (m_componentTest1.Sen < 20)
+                    {
+                        return new Color(0.2f, 0f, 0f);
+                    }
+					else if(m_componentTest1.Areaname == "血泪之池")
+
+                    {
+                        return Color.DarkRed;
+                    }
+                    else
+                    {
+                        return new Color(Vector3.Lerp(v5 + v6 * s2 + v7 * s3, v4, f2));
+                    }
                 }
-                else
-                {
-                    return new Color(Vector3.Lerp(v5 + v6 * s2 + v7 * s3, v4, f2));
+				else if (worldType == WorldType.Moon|| worldType == WorldType.StationMoon)//如果是宇宙空间站或者无大气层星球，渲染黑色
+				{
+                    if (m_componentTest1.Sen < 20)//sen值为底层渲染决定因素
+                    {
+                        return new Color(0.2f, 0f, 0f);
+                    }
+                    else
+                    {
+                        return new Color(0f,0f,0f);
+                    }
                 }
+
+
             }
             return new Color(Vector3.Lerp(v5 + v6 * s2 + v7 * s3, v4, f2));
         }
@@ -10727,7 +7601,8 @@ namespace Game
         }
         public new void Draw(Camera camera, int drawOrder)
         {
-			//第一个和雾有关
+            WorldType worldType = m_subsystemWorldDemo.worldType;//获取当前所在世界
+            //第一个和雾有关
             if (drawOrder == this.m_drawOrders[0])
             {
                 this.ViewUnderWaterDepth = 0f;
@@ -10748,20 +7623,42 @@ namespace Game
                     {
                         this.ViewUnderMagmaDepth = surfaceHeight.Value + 1f - viewPosition.Y;
                     }
+					else if(fluidBlock is BloodBlock)
+					{
+                        this.ViewUnderWaterDepth = surfaceHeight.Value + 0.1f - viewPosition.Y;
+                    }
                 }
                 if (this.ViewUnderWaterDepth > 0f)//水下
                 {
-                    int seasonalHumidity = this.m_subsystemTerrain.Terrain.GetSeasonalHumidity(x, z);
-                    int temperature = this.m_subsystemTerrain.Terrain.GetSeasonalTemperature(x, z) + SubsystemWeather.GetTemperatureAdjustmentAtHeight(y);
-                    Color c = BlockColorsMap.WaterColorsMap.Lookup(temperature, seasonalHumidity);
-                    float num = MathUtils.Lerp(1f, 0.5f, (float)seasonalHumidity / 15f);
-                    float num2 = MathUtils.Lerp(1f, 0.2f, MathUtils.Saturate(0.075f * (this.ViewUnderWaterDepth - 2f)));
-                    float num3 = MathUtils.Lerp(0.33f, 1f, this.SkyLightIntensity);
-                    this.m_viewFogRange.X = 0f;
-                    this.m_viewFogRange.Y = MathUtils.Lerp(4f, 10f, num * num2 * num3);
-                    this.m_viewFogColor = Color.MultiplyColorOnly(c, 0.66f * num2 * num3);
-                    this.VisibilityRangeYMultiplier = 1f;
-                    this.m_viewIsSkyVisible = false;
+					if(fluidBlock is BloodBlock)
+					{
+                        int seasonalHumidity = this.m_subsystemTerrain.Terrain.GetSeasonalHumidity(x, z);
+                        int temperature = this.m_subsystemTerrain.Terrain.GetSeasonalTemperature(x, z) + SubsystemWeather.GetTemperatureAdjustmentAtHeight(y);
+                        Color c = BlockColorsMap.WaterColorsMap.Lookup(temperature, seasonalHumidity);
+                        float num = MathUtils.Lerp(1f, 0.5f, (float)seasonalHumidity / 15f);
+                        float num2 = MathUtils.Lerp(1f, 0.2f, MathUtils.Saturate(0.075f * (this.ViewUnderWaterDepth - 2f)));
+                        float num3 = MathUtils.Lerp(0.33f, 1f, this.SkyLightIntensity);
+                        this.m_viewFogRange.X = 0f;
+                        this.m_viewFogRange.Y = MathUtils.Lerp(4f, 10f, num * num2 * num3);
+						this.m_viewFogColor = Color.DarkRed;
+                        this.VisibilityRangeYMultiplier = 1f;
+                        
+                    }
+					else
+					{
+                        int seasonalHumidity = this.m_subsystemTerrain.Terrain.GetSeasonalHumidity(x, z);
+                        int temperature = this.m_subsystemTerrain.Terrain.GetSeasonalTemperature(x, z) + SubsystemWeather.GetTemperatureAdjustmentAtHeight(y);
+                        Color c = BlockColorsMap.WaterColorsMap.Lookup(temperature, seasonalHumidity);
+                        float num = MathUtils.Lerp(1f, 0.5f, (float)seasonalHumidity / 15f);
+                        float num2 = MathUtils.Lerp(1f, 0.2f, MathUtils.Saturate(0.075f * (this.ViewUnderWaterDepth - 2f)));
+                        float num3 = MathUtils.Lerp(0.33f, 1f, this.SkyLightIntensity);
+                        this.m_viewFogRange.X = 50f;
+                        this.m_viewFogRange.Y = MathUtils.Lerp(50f, 200f, num * num2 * num3);
+                        this.m_viewFogColor = Color.MultiplyColorOnly(c, 0.66f * num2 * num3);
+                        this.VisibilityRangeYMultiplier = 1f;
+                        this.m_viewIsSkyVisible = false;
+                    }
+                    
                 }
                 else if (this.ViewUnderMagmaDepth > 0f)//岩浆
                 {
@@ -10788,6 +7685,24 @@ namespace Game
                 {
                     this.m_viewFogRange = new Vector2(100000f, 100000f);
                 }
+
+				//处理无大气的星球雾气渲染
+                if (worldType == WorldType.Moon || worldType == WorldType.StationMoon)//如果是宇宙空间站或者无大气层星球，渲染黑色
+				{
+                    this.m_viewFogColor = FCCalculateSkyColor(new Vector3(camera.ViewDirection.X, 0f, camera.ViewDirection.Z), this.m_subsystemTimeOfDay.TimeOfDay, this.m_subsystemWeather.GlobalPrecipitationIntensity, 0,camera);
+
+                }
+				else if(worldType == WorldType.Default)
+				{
+					if(m_componentTest1.Areaname=="血泪之池")
+					{
+                        float RangeFactor = m_componentTest1.Sen / 100f;
+                        m_viewFogColor = Color.DarkRed;
+                        m_viewFogRange.X = MathUtils.Lerp(3f, 50f, RangeFactor);//表示雾气的起始距离，也就是从摄像机多远的地方开始雾化的效果。
+                        m_viewFogRange.Y = MathUtils.Lerp(50f, 60f, RangeFactor);//表示雾气的结束距离，即雾气效果完全覆盖视野的最大距离,sen越低。离人越近。
+                    }
+				}
+
                 if (m_componentTest1.Sen < 20)//如果sen小于20
                 {
                     
@@ -10799,11 +7714,7 @@ namespace Game
                     m_viewFogRange.Y = MathUtils.Lerp(16f, 30f,RangeFactor);//表示雾气的结束距离，即雾气效果完全覆盖视野的最大距离,sen越低。离人越近。
                     FlatBatch2D flatBatch2D = this.m_primitivesRenderer2d.FlatBatch(-1, DepthStencilState.None, RasterizerState.CullNoneScissor, BlendState.Opaque);
                     int count = flatBatch2D.TriangleVertices.Count;
-                    ModsManager.HookAction("ViewFogColor", delegate (ModLoader modLoader)
-                    {
-                        modLoader.ViewFogColor(this.ViewUnderWaterDepth, this.ViewUnderMagmaDepth, ref this.m_viewFogColor);
-                        return false;
-                    });
+                   
 
                     flatBatch2D.QueueQuad(Vector2.Zero, camera.ViewportSize, 0f, this.m_viewFogColor);
                     flatBatch2D.TransformTriangles(camera.ViewportMatrix, count, -1);
@@ -10817,16 +7728,12 @@ namespace Game
 
                     float RangeFactor = m_componentTest1.Sen / 20f;
                     m_viewFogColor = Color.DarkRed;
-                    m_viewIsSkyVisible = false;
+                    
                     m_viewFogRange.X = MathUtils.Lerp(3f, 15f, RangeFactor);//表示雾气的起始距离，也就是从摄像机多远的地方开始雾化的效果。
                     m_viewFogRange.Y = MathUtils.Lerp(16f, 30f, RangeFactor);//表示雾气的结束距离，即雾气效果完全覆盖视野的最大距离,sen越低。离人越近。
                     FlatBatch2D flatBatch2D = this.m_primitivesRenderer2d.FlatBatch(-1, DepthStencilState.None, RasterizerState.CullNoneScissor, BlendState.Opaque);
                     int count = flatBatch2D.TriangleVertices.Count;
-                    ModsManager.HookAction("ViewFogColor", delegate (ModLoader modLoader)
-                    {
-                        modLoader.ViewFogColor(this.ViewUnderWaterDepth, this.ViewUnderMagmaDepth, ref this.m_viewFogColor);
-                        return false;
-                    });
+                   
 
                     flatBatch2D.QueueQuad(Vector2.Zero, camera.ViewportSize, 0f, this.m_viewFogColor);
                     flatBatch2D.TransformTriangles(camera.ViewportMatrix, count, -1);
@@ -10838,11 +7745,7 @@ namespace Game
                 {
                     FlatBatch2D flatBatch2D = this.m_primitivesRenderer2d.FlatBatch(-1, DepthStencilState.None, RasterizerState.CullNoneScissor, BlendState.Opaque);
                     int count = flatBatch2D.TriangleVertices.Count;
-                    ModsManager.HookAction("ViewFogColor", delegate (ModLoader modLoader)
-                    {
-                        modLoader.ViewFogColor(this.ViewUnderWaterDepth, this.ViewUnderMagmaDepth, ref this.m_viewFogColor);
-                        return false;
-                    });
+                   
 
                     flatBatch2D.QueueQuad(Vector2.Zero, camera.ViewportSize, 0f, this.m_viewFogColor);
                     flatBatch2D.TransformTriangles(camera.ViewportMatrix, count, -1);
@@ -10858,18 +7761,39 @@ namespace Game
                     this.DrawSkydome(camera);
                     if (SubsystemSky.DrawGalaxyEnabled)
                     {
-                        this.DrawStars(camera);
-                        this.DrawSunAndMoon(camera);
-                        this.DrawClouds(camera);
-                        this.DrawEarth(camera);
+                        if (worldType == WorldType.Default)//如果是主世界（地球）
+						{
+                            DrawStars(camera);
+                            DrawSunAndMoon(camera);
+                            DrawClouds(camera);
+                            DrawEarth(camera);
+                        }
+                        else if (worldType == WorldType.Moon )//如果是无大气层星球
+						{
+                            DrawStars(camera);
+                            DrawSunAndMoon(camera);
+                            DrawClouds(camera);
+							DrawPlanetSurface(camera);
+                        }
+                        else if (worldType == WorldType.StationMoon)//如果是地月空间站，或者空间站类型
+						{
+                            DrawStars(camera);
+                            DrawSunAndMoon(camera);
+                            DrawClouds(camera);
+                        }
+                        else//默认
+						{
+                            DrawStars(camera);
+                            DrawSunAndMoon(camera);
+                            DrawClouds(camera);
+                            DrawEarth(camera);
+                        }
+
+
 
                     }
                     
-                    ModsManager.HookAction("SkyDrawExtra", delegate (ModLoader loader)
-                    {
-                        loader.SkyDrawExtra(this, camera);
-                        return false;
-                    });
+                   
                     if (SubsystemSky.Shader != null && SubsystemSky.ShaderAlphaTest != null)
                     {
                         if (this.m_primitiveRender.Shader == null && this.m_primitiveRender.ShaderAlphaTest == null)
@@ -10923,39 +7847,253 @@ namespace Game
                 base.QueueCelestialBody(batch, camera.ViewPosition, color, camera.ViewPosition.Y / 400f + 100f, num5 * 10f / (camera.ViewPosition.Y / 1000f) * 4f, num3 - num6);
             }*/
         }
+        public void DrawPlanetSurface(Camera camera)
+        {
+            WorldType worldType = m_subsystemWorldDemo.worldType;//获取当前所在世界
+            float f = 0f;
+            float num = 12f;
+            float f2 = MathUtils.Max(SubsystemSky.CalculateDawnGlowIntensity(num), SubsystemSky.CalculateDuskGlowIntensity(num));
+            float num2 = 2f * num * 3.1415927f;
+            float num3 = num2;
+            float num4 = MathUtils.Lerp(90f, 160f, f2);
+            float num5 = MathUtils.Lerp(60f, 80f, f2);
+            Color c = Color.Lerp(new Color(255, 255, 255), new Color(255, 255, 160), f2);
+            Color color = new Color(255, 255, 255);
+            color *= 1f;
+            c *= MathUtils.Lerp(1f, 0f, f);
+            color *= MathUtils.Lerp(1f, 0f, f);
+            TexturedBatch3D batch = this.m_primitivesRenderer3d.TexturedBatch(this.m_EarthTexture, false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+
+            if (worldType == WorldType.Moon )//如果是月球，贴图置换
+            {
+                 batch = this.m_primitivesRenderer3d.TexturedBatch(m_moon, false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+
+            }
+
+            if (worldType == WorldType.Default)//如果是月球，贴图置换
+			{
+                float num6 = Vector2.Angle(new Vector2(1f, 1f), new Vector2(camera.ViewPosition.X, camera.ViewPosition.Z)) / camera.ViewPosition.Y;
+                bool flag = camera.ViewPosition.Y <= 600 && camera.ViewPosition.Y > 360f;
+                if (flag)
+                {
+                    base.QueueCelestialBody(batch, camera.ViewPosition, color, camera.ViewPosition.Y / 100f + 150f, num5 * 100f / camera.ViewPosition.Y * 4f * 10f, num3 - num6);
+                }
+                bool flag2 = camera.ViewPosition.Y > 600f;
+                if (flag2)
+                {
+                    base.QueueCelestialBody(batch, camera.ViewPosition, color, camera.ViewPosition.Y / 400f + 100f, num5 * 10f / (camera.ViewPosition.Y / 1000f) * 4f, num3 - num6);
+                }
+            }
+			else if (worldType == WorldType.Moon )
+			{
+                float num6 = Vector2.Angle(new Vector2(1f, 1f), new Vector2(camera.ViewPosition.X, camera.ViewPosition.Z)) / camera.ViewPosition.Y;
+                bool flag =   camera.ViewPosition.Y > 360f;
+                if (flag)
+                {
+                    base.QueueCelestialBody(batch, camera.ViewPosition, color, camera.ViewPosition.Y / 100f + 150f, num5 * 100f / camera.ViewPosition.Y * 4f * 10f, num3 - num6);
+                }
+            }
+			
+
+            /*bool flag3 = camera.ViewPosition.Y < -120f;
+            if (flag2)
+            {
+                base.QueueCelestialBody(batch, camera.ViewPosition, color, camera.ViewPosition.Y / 400f + 100f, num5 * 10f / (camera.ViewPosition.Y / 1000f) * 4f, num3 - num6);
+            }*/
+        }
         public override void Load(ValuesDictionary valuesDictionary)
         {
             base.Load(valuesDictionary);
             this.m_EarthTexture = ContentManager.Get<Texture2D>("Textures/Earth");
 			m_subsystemPlayer = Project.FindSubsystem<SubsystemPlayers>();
+			m_subsystemWorldDemo = Project.FindSubsystem<SubsystemWorldDemo>();
+            m_earth = ContentManager.Get<Texture2D>("Textures/Earth");
+            m_moon = ContentManager.Get<Texture2D>("Textures/MoonShadow");
         }
         public Texture2D m_EarthTexture;
+		public float f1;//渲染星球的明度
+        public Color color;//渲染辉光
         public new void DrawSunAndMoon(Camera camera)
         {
-            float f = (camera.ViewPosition.Y > 1000f) ? 0f : this.m_subsystemWeather.GlobalPrecipitationIntensity;
+            float num8 = (camera.ViewPosition.Y > 1000f) ? 0f : this.m_subsystemWeather.GlobalPrecipitationIntensity;
             float timeOfDay = this.m_subsystemTimeOfDay.TimeOfDay;
+            bool flag = this.m_starsVertexBuffer == null || this.m_starsIndexBuffer == null;
+            if (flag)
+            {
+                Utilities.Dispose<VertexBuffer>(ref this.m_starsVertexBuffer);
+                Utilities.Dispose<IndexBuffer>(ref this.m_starsIndexBuffer);
+                this.m_starsVertexBuffer = new VertexBuffer(this.m_starsVertexDeclaration, 200);
+                this.m_starsIndexBuffer = new IndexBuffer(IndexFormat.SixteenBits, 500);
+                base.FillStarsBuffers();
+            }
+            Display.DepthStencilState = DepthStencilState.DepthRead;
+            Display.RasterizerState = RasterizerState.CullNoneScissor;
+
+
+            WorldType worldType = m_subsystemWorldDemo.worldType;//获取当前所在世界
+            if (worldType == WorldType.Default)//如果是主世界（地球）
+			{
+                 f1 = (camera.ViewPosition.Y > 1000f) ? 0f : this.m_subsystemWeather.GlobalPrecipitationIntensity;
+            }
+            else if (worldType == WorldType.Moon || worldType == WorldType.StationMoon)//如果是宇宙空间站或者无大气层星球，渲染黑色
+			{
+				 f1 = 0;
+			}
+			else
+			{
+                f1 = (camera.ViewPosition.Y > 1000f) ? 0f : this.m_subsystemWeather.GlobalPrecipitationIntensity;
+            }
+
+           
             float f2 = MathUtils.Max(SubsystemSky.CalculateDawnGlowIntensity(timeOfDay), SubsystemSky.CalculateDuskGlowIntensity(timeOfDay));
             float num = 2f * timeOfDay * 3.1415927f;
             float angle = num + 3.1415927f;
-            float num2 = MathUtils.Lerp(90f, 160f, f2);
-            float num3 = MathUtils.Lerp(60f, 80f, f2);
-            Color color = Color.Lerp(new Color(255, 255, 255), new Color(255, 255, 160), f2);
+			//默认
+            float num2 = MathUtils.Lerp(90f, 160f, f2);//太阳大小
+            float num3 = MathUtils.Lerp(60f, 80f, f2);//月球大小
+
+            if (worldType == WorldType.Default)//如果是主世界（地球）
+            {
+                num2 = MathUtils.Lerp(90f, 160f, f2);//太阳大小
+                num3 = MathUtils.Lerp(60f, 80f, f2);//月球大小
+            }
+            else if (worldType == WorldType.Moon )//如果是月球
+            {
+                num2 = MathUtils.Lerp(90f, 160f, f2);//太阳大小
+                num3 = MathUtils.Lerp(180f, 240f, f2);//地球大小
+            }
+			else if( worldType == WorldType.StationMoon)//如果是地月空间站
+			{
+                num2 = MathUtils.Lerp(90f, 160f, f2);//太阳大小
+                num3 = MathUtils.Lerp(1600f, 1800f, f2);//地球大小
+            }
+            
+           
+
+			//调节辉光color
+            if (worldType == WorldType.Default)//如果是主世界（地球）
+            {
+                color = Color.Lerp(new Color(255, 255, 255), new Color(255, 255, 160), f2);//辉光
+            }
+            else if (worldType == WorldType.Moon || worldType == WorldType.StationMoon)//如果是宇宙空间站或者无大气层星球
+            {
+                color = new Color(255, 255, 255);//无辉光
+            }
+			else
+			{
+                color = Color.Lerp(new Color(255, 255, 255), new Color(255, 255, 160), f2);//辉光
+            }
+
+
+           //调节星球可见度
             Color color2 = Color.White;
-            color2 *= 1f - base.SkyLightIntensity;
-            color *= MathUtils.Lerp(1f, 0f, f);
-            color2 *= MathUtils.Lerp(1f, 0f, f);
-            Color color3 = color * 0.6f * MathUtils.Lerp(1f, 0f, f);
-            Color color4 = color * 0.2f * MathUtils.Lerp(1f, 0f, f);
-            TexturedBatch3D batch = this.m_primitivesRenderer3d.TexturedBatch(this.m_glowTexture, false, 0, DepthStencilState.DepthRead, null, BlendState.Additive, null);
-            TexturedBatch3D batch2 = this.m_primitivesRenderer3d.TexturedBatch(this.m_sunTexture, false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
-            TexturedBatch3D batch3 = this.m_primitivesRenderer3d.TexturedBatch(this.m_moonTextures[base.MoonPhase], false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
-            base.QueueCelestialBody(batch, camera.ViewPosition, color3, 900f, 3.5f * num2, num);
-            base.QueueCelestialBody(batch, camera.ViewPosition, color4, 900f, 3.5f * num3, angle);
-            base.QueueCelestialBody(batch2, camera.ViewPosition, color, 900f, num2, num);
-            base.QueueCelestialBody(batch3, camera.ViewPosition, color2, 900f, num3, angle);
+            if (worldType == WorldType.Default)//如果是主世界（地球）
+            {
+                color2 *= 1f - base.SkyLightIntensity;//月球在背面可见度
+            }
+            else if (worldType == WorldType.Moon || worldType == WorldType.StationMoon)//如果是宇宙空间站或者无大气层星球
+            {
+				color2 *= 1f;//无论如何都可见
+            }
+			else
+			{
+                color2 *= 1f - base.SkyLightIntensity;//月球可见度
+            }
+            
+
+
+
+            color *= MathUtils.Lerp(1f, 0f, f1);
+            color2 *= MathUtils.Lerp(1f, 0f, f1);
+            Color color3 = color * 0.6f * MathUtils.Lerp(1f, 0f, f1);
+            Color color4 = color * 0.2f * MathUtils.Lerp(1f, 0f, f1);
+            if (worldType == WorldType.Default)//如果是主世界（地球）
+			{
+                TexturedBatch3D batch = this.m_primitivesRenderer3d.TexturedBatch(this.m_glowTexture, false, 0, DepthStencilState.DepthRead, null, BlendState.Additive, null);
+                TexturedBatch3D batch2 = this.m_primitivesRenderer3d.TexturedBatch(this.m_sunTexture, false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+                TexturedBatch3D batch3 = this.m_primitivesRenderer3d.TexturedBatch(this.m_moonTextures[base.MoonPhase], false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+                base.QueueCelestialBody(batch, camera.ViewPosition, color3, 900f, 3.5f * num2, num);
+                base.QueueCelestialBody(batch, camera.ViewPosition, color4, 900f, 3.5f * num3, angle);
+                base.QueueCelestialBody(batch2, camera.ViewPosition, color, 900f, num2, num);
+                base.QueueCelestialBody(batch3, camera.ViewPosition, color2, 900f, num3, angle);
+            }
+            else if (worldType == WorldType.Moon )//如果是月球的星空
+			{
+                TexturedBatch3D batch = this.m_primitivesRenderer3d.TexturedBatch(this.m_glowTexture, false, 0, DepthStencilState.DepthRead, null, BlendState.Additive, null);
+                TexturedBatch3D batch2 = this.m_primitivesRenderer3d.TexturedBatch(this.m_sunTexture, false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+                TexturedBatch3D batch3 = this.m_primitivesRenderer3d.TexturedBatch(m_earth, false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+
+                base.QueueCelestialBody(batch, camera.ViewPosition, color3, 900f, 3.5f * num2, num);
+                base.QueueCelestialBody(batch, camera.ViewPosition, color4, 900f, 3.5f * num3, angle);
+                base.QueueCelestialBody(batch2, camera.ViewPosition, color, 900f, num2, num);
+                base.QueueCelestialBody(batch3, camera.ViewPosition, color2, 900f, num3, angle);
+            }
+            else if ( worldType == WorldType.StationMoon)//地月空间站
+			{
+                float num7 = MathUtils.Sqr((1f - this.FCCalculateLightIntensity(timeOfDay, camera)) * (1f -num8));
+                //这是着色器绘制星空
+                Display.BlendState = BlendState.Additive;
+                SubsystemSky.m_shaderTextured.Transforms.World[0] = CreateEarthRotationMatrix(timeOfDay,3f) * Matrix.CreateTranslation(camera.ViewPosition) * camera.ViewProjectionMatrix;
+                SubsystemSky.m_shaderTextured.Color = new Vector4(3.4f, 4f, 4f, 255f);
+                SubsystemSky.m_shaderTextured.Texture = ContentManager.Get<Texture2D>("Textures/Stone");
+                SubsystemSky.m_shaderTextured.SamplerState = SamplerState.LinearClamp;
+                Display.DrawIndexed(PrimitiveType.TriangleList, SubsystemSky.m_shaderTextured, this.m_starsVertexBuffer, this.m_starsIndexBuffer, 0, this.m_starsIndexBuffer.IndicesCount);
+
+				
+                TexturedBatch3D batch = this.m_primitivesRenderer3d.TexturedBatch(this.m_glowTexture, false, 0, DepthStencilState.DepthRead, null, BlendState.Additive, null);
+                TexturedBatch3D batch2 = this.m_primitivesRenderer3d.TexturedBatch(m_moon, false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+                TexturedBatch3D batch3 = this.m_primitivesRenderer3d.TexturedBatch(m_earth, false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+                TexturedBatch3D batch4 = this.m_primitivesRenderer3d.TexturedBatch(m_sunTexture, false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+
+				//float earthRotationAngle = 2f * timeOfDay * 3.1415927f; // 假设地球每天旋转一圈
+				if(timeOfDay<0.22||timeOfDay>0.77)
+				{
+                    color *= SkyLightIntensity*MathUtils.Lerp(1f,0f,timeOfDay);//线性变化，1是深夜，随着夜深，逐渐不见
+                }
+				
+                //base.QueueCelestialBody(batch, camera.ViewPosition, color3, 900f, 3.5f * num2, num);
+                //base.QueueCelestialBody(batch, camera.ViewPosition, color4, 900f, 3.5f * num3, angle);
+                base.QueueCelestialBody(batch2, camera.ViewPosition, color2, 900f, num2, angle);//月球
+                base.QueueCelestialBody(batch3, camera.ViewPosition, color2, 800f, num3, num);//地球
+                base.QueueCelestialBody(batch4, camera.ViewPosition, color, 900f, num2, num);//太阳
+                batch3.TransformTriangles(Matrix.CreateRotationZ(2f * timeOfDay * 3.1415927f));//这个貌似决定了地球的位置会在一圈的哪里，0会和太阳一样转，2固定在脚下
+            }
+			else//默认
+			{
+                TexturedBatch3D batch = this.m_primitivesRenderer3d.TexturedBatch(this.m_glowTexture, false, 0, DepthStencilState.DepthRead, null, BlendState.Additive, null);
+                TexturedBatch3D batch2 = this.m_primitivesRenderer3d.TexturedBatch(this.m_sunTexture, false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+                TexturedBatch3D batch3 = this.m_primitivesRenderer3d.TexturedBatch(this.m_moonTextures[base.MoonPhase], false, 1, DepthStencilState.DepthRead, null, BlendState.AlphaBlend, null);
+                base.QueueCelestialBody(batch, camera.ViewPosition, color3, 900f, 3.5f * num2, num);
+                base.QueueCelestialBody(batch, camera.ViewPosition, color4, 900f, 3.5f * num3, angle);
+                base.QueueCelestialBody(batch2, camera.ViewPosition, color, 900f, num2, num);
+                base.QueueCelestialBody(batch3, camera.ViewPosition, color2, 900f, num3, angle);
+            }
+
+
+        }
+        public Texture2D m_earth;//地球渲染
+        public Texture2D m_moon;//月球渲染
+        public Matrix CreateEarthRotationMatrix(float timeOfDay, float earthRotationSpeed = 1f)
+        {
+            // 地球每天旋转360度，
+            float earthRotationAngle = timeOfDay * earthRotationSpeed * 3.1415927f;
+
+            // 地球自转的轴线倾角约为23.5度，这里将其转换为弧度
+            float earthTiltAngle = 23.5f;
+
+            // 创建绕地球自转轴进行旋转的变换矩阵，先绕Z轴旋转倾角，再绕变换后的Y轴旋转角度
+            Matrix earthTilt = Matrix.CreateRotationZ(earthTiltAngle); // 倾角
+            Matrix earthTilt2 = Matrix.CreateRotationZ(earthRotationAngle); // 倾角
+            Matrix earthRotation = Matrix.CreateRotationY(earthRotationAngle); // 自转
+
+			// 将地球的倾角旋转和自转旋转组合起来
+			Matrix finalEarthRotation = earthTilt*earthRotation;
+
+            return finalEarthRotation;
         }
         public new void DrawClouds(Camera camera)
         {
+            WorldType worldType = m_subsystemWorldDemo.worldType;//获取当前所在世界
             if (SettingsManager.SkyRenderingMode == SkyRenderingMode.NoClouds || camera.ViewPosition.Y > 1000f)
             {
                 return;
@@ -10969,6 +8107,11 @@ namespace Game
                 else
                 {
                     m_cloudsTexture = ContentManager.Get<Texture2D>("Textures/Clouds", null);
+                    if (worldType == WorldType.Moon || worldType == WorldType.StationMoon)//如果是宇宙空间站或者无大气层星球，不渲染云
+					{
+						return;
+					}
+
                 }
             }
 			
@@ -11089,6 +8232,7 @@ namespace Game
         }
         public new void  DrawStars(Camera camera)
         {
+            WorldType worldType = m_subsystemWorldDemo.worldType;//获取当前所在世界
             float num = (camera.ViewPosition.Y > 1000f) ? 0f : this.m_subsystemWeather.GlobalPrecipitationIntensity;
             float timeOfDay = this.m_subsystemTimeOfDay.TimeOfDay;
             bool flag = this.m_starsVertexBuffer == null || this.m_starsIndexBuffer == null;
@@ -11102,27 +8246,55 @@ namespace Game
             }
             Display.DepthStencilState = DepthStencilState.DepthRead;
             Display.RasterizerState = RasterizerState.CullNoneScissor;
-            float num2 = MathUtils.Sqr((1f - this.FCCalculateLightIntensity(timeOfDay, camera)) * (1f - num));
-            bool flag2 = num2 > 0.01f;
-            if (flag2)
-            {
+            if (worldType == WorldType.Default)//如果是主世界（地球）
+			{
+                float num2 = MathUtils.Sqr((1f - this.FCCalculateLightIntensity(timeOfDay, camera)) * (1f - num));
+                bool flag2 = num2 > 0.01f;
+                if (flag2)
+                {
+                    Display.BlendState = BlendState.Additive;
+                    SubsystemSky.m_shaderTextured.Transforms.World[0] = Matrix.CreateRotationZ(-2f * timeOfDay * 3.1415927f) * Matrix.CreateTranslation(camera.ViewPosition) * camera.ViewProjectionMatrix;
+                    SubsystemSky.m_shaderTextured.Color = new Vector4(1f, 1f, 1f, num2);
+                    SubsystemSky.m_shaderTextured.Texture = ContentManager.Get<Texture2D>("Textures/Star");
+                    SubsystemSky.m_shaderTextured.SamplerState = SamplerState.LinearClamp;
+                    Display.DrawIndexed(PrimitiveType.TriangleList, SubsystemSky.m_shaderTextured, this.m_starsVertexBuffer, this.m_starsIndexBuffer, 0, this.m_starsIndexBuffer.IndicesCount);
+                }
+            }
+            else if (worldType == WorldType.Moon || worldType == WorldType.StationMoon)//如果是宇宙空间站或者无大气层星球，
+			{
                 Display.BlendState = BlendState.Additive;
                 SubsystemSky.m_shaderTextured.Transforms.World[0] = Matrix.CreateRotationZ(-2f * timeOfDay * 3.1415927f) * Matrix.CreateTranslation(camera.ViewPosition) * camera.ViewProjectionMatrix;
-                SubsystemSky.m_shaderTextured.Color = new Vector4(1f, 1f, 1f, num2);
+                SubsystemSky.m_shaderTextured.Color = new Vector4(1f, 1f, 1f, 255f);
                 SubsystemSky.m_shaderTextured.Texture = ContentManager.Get<Texture2D>("Textures/Star");
                 SubsystemSky.m_shaderTextured.SamplerState = SamplerState.LinearClamp;
                 Display.DrawIndexed(PrimitiveType.TriangleList, SubsystemSky.m_shaderTextured, this.m_starsVertexBuffer, this.m_starsIndexBuffer, 0, this.m_starsIndexBuffer.IndicesCount);
             }
+			else//默认
+			{
+                float num2 = MathUtils.Sqr((1f - this.FCCalculateLightIntensity(timeOfDay, camera)) * (1f - num));
+                bool flag2 = num2 > 0.01f;
+                if (flag2)
+                {
+                    Display.BlendState = BlendState.Additive;
+                    SubsystemSky.m_shaderTextured.Transforms.World[0] = Matrix.CreateRotationZ(-2f * timeOfDay * 3.1415927f) * Matrix.CreateTranslation(camera.ViewPosition) * camera.ViewProjectionMatrix;
+                    SubsystemSky.m_shaderTextured.Color = new Vector4(1f, 1f, 1f, num2);
+                    SubsystemSky.m_shaderTextured.Texture = ContentManager.Get<Texture2D>("Textures/Star");
+                    SubsystemSky.m_shaderTextured.SamplerState = SamplerState.LinearClamp;
+                    Display.DrawIndexed(PrimitiveType.TriangleList, SubsystemSky.m_shaderTextured, this.m_starsVertexBuffer, this.m_starsIndexBuffer, 0, this.m_starsIndexBuffer.IndicesCount);
+                }
+            }
+
+
         }
     }
     #endregion
 
 
     #region 樱花粒子效果
-    public class BlossomParticleSystem : ParticleSystem<BlossomParticleSystem.Particle>
+    public class BlossomParticleSystem : ParticleSystem<Particle>
 	{
 		
-		public class Particle : Game.Particle
+		public class Particle1 : Particle
 		{
 		
 			public float Time;
@@ -11162,7 +8334,7 @@ namespace Game
 			white.A = 255;
 			for (int i = 0; i < Particles.Length; i++)
 			{
-				Particle obj = Particles[i];
+                Particle1 obj =(Particle1)Particles[i];
 				obj.IsActive = true;
 				obj.Position = position + 0.4f * size * new Vector3(m_random.Float(-1f, 1f), m_random.Float(-1f, 1f), m_random.Float(-1f, 1f));
 				obj.Color = white;
@@ -11188,7 +8360,7 @@ namespace Game
 
 			for (int i = 0; i < Particles.Length; i++)
 			{
-				Particle particle = Particles[i];
+                Particle1 particle = (Particle1)Particles[i];
 				if (particle.IsActive)
 				{
 					flag = true;
@@ -11227,7 +8399,7 @@ namespace Game
 
 
 	#region 新粒子子系统，方块追踪
-	public class FCSubsystemPlantataBlockBehavior : SubsystemBlockBehavior, IUpdateable
+	/*public class FCSubsystemPlantataBlockBehavior : SubsystemBlockBehavior, IUpdateable
 	{
 		
 		Random randomfc = new Random();
@@ -11265,7 +8437,7 @@ namespace Game
 		}
 		public override void OnBlockAdded(int value, int oldValue, int x, int y, int z)
 		{
-			AddPlantData(value, x, y, z);
+			//AddPlantData(value, x, y, z);
 		}
 
 		public override void OnBlockRemoved(int value, int newValue, int x, int y, int z)
@@ -11280,7 +8452,7 @@ namespace Game
 
 		public override void OnBlockGenerated(int value, int x, int y, int z, bool isLoaded)
 		{
-			AddPlantData(value, x, y, z);
+			//AddPlantData(value, x, y, z);
 
 			
 
@@ -11342,7 +8514,7 @@ namespace Game
 			}
 		}
 		public Dictionary<Point3, BlossomParticleSystem> ParticleSystems = new Dictionary<Point3, BlossomParticleSystem>();
-	}
+	}*/
 	#endregion
 
 	#region 树叶地毯系统
@@ -11472,7 +8644,7 @@ namespace Game
 			Block block = BlocksManager.Blocks[num];
 			if (num == 948)
 			{
-				this.GrowYHCarpet(value, x, y, z, pollPass);
+				GrowYHCarpet(value, x, y, z, pollPass);
 				return;
 			}
 				
@@ -11491,23 +8663,26 @@ namespace Game
 				return; // 如果不为空，则不生成樱花地毯
 			}
 
-			else if ((Terrain.ExtractContents(cellValue1) != 0)&& (Terrain.ExtractContents(cellValue2) == 0)) // 检查樱花树叶下方块是否为空
+			else if ((Terrain.ExtractContents(cellValue1) == 8|| Terrain.ExtractContents(cellValue1) == 2 || Terrain.ExtractContents(cellValue1) == 3 || Terrain.ExtractContents(cellValue1) == 4 || Terrain.ExtractContents(cellValue1) == 5 || Terrain.ExtractContents(cellValue1) == 6 || Terrain.ExtractContents(cellValue1) == 7 || Terrain.ExtractContents(cellValue1) == 66 || Terrain.ExtractContents(cellValue1) == 67) && (Terrain.ExtractContents(cellValue2) == 0) && (Terrain.ExtractContents(cellValue2) != 963)&&m_random.Bool(0.8f)) // 检查樱花树叶下方块是否为空
 			{
 				// 生成樱花地毯
 				int carpetValue = Terrain.MakeBlockValue(963); // 方块ID为963
-				base.SubsystemTerrain.ChangeCell(x, y - 13, z, carpetValue, true);
+                this.m_toUpdate[new Point3(x, y -13 , z)] = Terrain.MakeBlockValue(carpetValue);
+               // base.SubsystemTerrain.ChangeCell(x, y - 13, z, carpetValue, true);
 			}
-			else if ((Terrain.ExtractContents(cellValue3) != 0) && (Terrain.ExtractContents(cellValue1) == 0)) // 检查樱花树叶下方块是否为空
+			else if ((Terrain.ExtractContents(cellValue3) == 8|| Terrain.ExtractContents(cellValue3) == 2 || Terrain.ExtractContents(cellValue3) == 3 || Terrain.ExtractContents(cellValue3) == 4 || Terrain.ExtractContents(cellValue3) == 5 || Terrain.ExtractContents(cellValue3) == 6 || Terrain.ExtractContents(cellValue3) == 7 || Terrain.ExtractContents(cellValue3) == 66 || Terrain.ExtractContents(cellValue3) == 67) && (Terrain.ExtractContents(cellValue1) == 0) && (Terrain.ExtractContents(cellValue1) != 963) && m_random.Bool(0.7f)) // 检查樱花树叶下方块是否为空
 			{
 				// 生成樱花地毯
 				int carpetValue = Terrain.MakeBlockValue(963); // 方块ID为963
-				base.SubsystemTerrain.ChangeCell(x, y - 14, z, carpetValue, true);
+                this.m_toUpdate[new Point3(x, y - 14, z)] = Terrain.MakeBlockValue(carpetValue);
+                //base.SubsystemTerrain.ChangeCell(x, y - 14, z, carpetValue, true);
 			}
-			else if ((Terrain.ExtractContents(cellValue2) != 0) && (Terrain.ExtractContents(cellValue4) == 0)) // 检查樱花树叶下方块是否为空
+			else if ((Terrain.ExtractContents(cellValue2) == 8 || Terrain.ExtractContents(cellValue2) == 2 || Terrain.ExtractContents(cellValue2) == 3 || Terrain.ExtractContents(cellValue2) == 4 || Terrain.ExtractContents(cellValue2) == 5 || Terrain.ExtractContents(cellValue2) == 6 || Terrain.ExtractContents(cellValue2) == 7 || Terrain.ExtractContents(cellValue2) == 66 || Terrain.ExtractContents(cellValue2) == 67) && (Terrain.ExtractContents(cellValue4) == 0) && (Terrain.ExtractContents(cellValue4) != 963) && m_random.Bool(0.9f)) // 检查樱花树叶下方块是否为空
 			{
 				// 生成樱花地毯
 				int carpetValue = Terrain.MakeBlockValue(963); // 方块ID为963
-				base.SubsystemTerrain.ChangeCell(x, y - 12, z, carpetValue, true);
+                this.m_toUpdate[new Point3(x, y - 12, z)] = Terrain.MakeBlockValue(carpetValue);
+                
 			}
 
 		}
@@ -11524,16 +8699,15 @@ namespace Game
 		{
 			if (this.m_subsystemTime.PeriodicGameTimeEvent(30.0, 0.0))
 			{
-				foreach (KeyValuePair<Point3, SubsystemPlantBlockBehavior.Replacement> keyValuePair in this.m_toReplace)
-				{
-					Point3 key = keyValuePair.Key;
-					if (Terrain.ReplaceLight(base.SubsystemTerrain.Terrain.GetCellValue(key.X, key.Y, key.Z), 0) == Terrain.ReplaceLight(keyValuePair.Value.RequiredValue, 0))
-					{
-						base.SubsystemTerrain.ChangeCell(key.X, key.Y, key.Z, keyValuePair.Value.Value, true);
-					}
-				}
-				this.m_toReplace.Clear();
-			}
+                foreach (KeyValuePair<Point3, int> keyValuePair in this.m_toUpdate)
+                {
+                    if (base.SubsystemTerrain.Terrain.GetCellContents(keyValuePair.Key.X, keyValuePair.Key.Y, keyValuePair.Key.Z) == 0)
+                    {
+                        base.SubsystemTerrain.ChangeCell(keyValuePair.Key.X, keyValuePair.Key.Y, keyValuePair.Key.Z, keyValuePair.Value, true);
+                    }
+                }
+                this.m_toUpdate.Clear();
+            }
 		}
 
 		
@@ -11553,9 +8727,9 @@ namespace Game
 
 		public Random m_random = new Random();
 
-		public Dictionary<Point3, SubsystemPlantBlockBehavior.Replacement> m_toReplace = new Dictionary<Point3, SubsystemPlantBlockBehavior.Replacement>();
-
-		public struct Replacement
+        //public Dictionary<Point3, SubsystemPlantBlockBehavior.Replacement> m_toReplace = new Dictionary<Point3, SubsystemPlantBlockBehavior.Replacement>();
+        public Dictionary<Point3, int> m_toUpdate = new Dictionary<Point3, int>();
+        public struct Replacement
 		{
 			public int RequiredValue;
 
@@ -11797,26 +8971,26 @@ namespace Game
 
 		private static string[] m_displayNames = new string[]
 		{
-			"铜板Copper plate",
-			"铁板iron plate",
-			"钢板steel plate",
-			"铜线圈copper coil",
-			"硅silicon",
-			"线路板circuit board",
-			"集成芯片integrated chip",
-			"酵素粉enzyme powder",
-			"硅板silicon plate",
-			"精制淀粉refined starch",
-			"偏导芯片bias chip",
-			"齿轮gear",
-			"钢棒steel rod",
-			"酵母菌yeast",
-			"活塞universal piston",
-			"钢锭steelIngot",
-			"碳粉",
-			"铁粉",
-			"磁化铁棒",
-			"基础马达",
+			"铜板Copper plate",//0
+			"铁板iron plate",//1
+			"钢板steel plate",//2
+			"铜线圈copper coil",//3
+			"硅silicon",//4
+			"线路板circuit board",//5
+			"集成芯片integrated chip",//6
+			"酵素粉enzyme powder",//7
+			"硅板silicon plate",//8
+			"精制淀粉refined starch",//9
+			"偏导芯片bias chip",//10
+			"齿轮gear",//11
+			"钢棒steel rod",//12
+			"酵母菌yeast",//13
+			"活塞universal piston",//14
+			"钢锭steelIngot",//15
+			"碳粉",//16
+			"铁粉",//17
+			"磁化铁棒",//18
+			"基础马达",//19
 
 
 		};
@@ -13161,6 +10335,7 @@ namespace Game
                         m_fireTimeRemaining = block.FuelFireDuration;
                         m_heatLevel = block.FuelHeatLevel;
                     }
+                    
                 }
             }
             if (m_fireTimeRemaining <= 0f)
@@ -14303,13 +11478,33 @@ namespace Game
 		public static string fName = "CraftingRecipesManager";
 	}
 
-	#endregion
+    #endregion
 
-	#region 配方界面显示
-	
-	#endregion
-	#region 樱花酒液体测试
-	public class YHWaterBlock : FluidBlock
+    #region 配方界面显示
+
+    #endregion
+    #region 樱花酒等液体测试
+    public class BloodBlock : FluidBlock
+    {
+        public BloodBlock() : base(BloodBlock.MaxLevel)
+        {
+        }
+
+        public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
+        {
+            Color sideColor;
+            Color color = sideColor = Color.DarkRed;
+            sideColor.A = byte.MaxValue;
+            Color topColor = color;
+            topColor.A = 0;
+            base.GenerateFluidTerrainVertices(generator, value, x, y, z, sideColor, topColor, geometry.TransparentSubsetsByFace);
+        }
+
+        public const int Index = 984;
+
+        public new static int MaxLevel = 7;
+    }
+    public class YHWaterBlock : FluidBlock
 	{
 		public YHWaterBlock() : base(YHWaterBlock.MaxLevel)
 		{
@@ -14357,11 +11552,11 @@ namespace Game
 
 		public void Update(float dt)
 		{
-			if (base.SubsystemTime.PeriodicGameTimeEvent(0.25, 0.0))
-			{
-				base.SpreadFluid();
-			}
-			if (base.SubsystemTime.PeriodicGameTimeEvent(1.0, 0.25))
+            if (base.SubsystemTime.PeriodicGameTimeEvent(0.20, 0.0))
+            {
+               // base.SpreadFluid();
+            }
+            if (base.SubsystemTime.PeriodicGameTimeEvent(1.0, 0.25))
 			{
 				float num = float.MaxValue;
 				foreach (Vector3 p in base.SubsystemAudio.ListenerPositions)
@@ -14403,9 +11598,252 @@ namespace Game
 
 		public float m_soundVolume;
 	}
+    public class FCSubsystemBloodBlockBehavior : SubsystemFluidBlockBehavior, IUpdateable
+    {
+        public override int[] HandledBlocks
+        {
+            get
+            {
+                return new int[]
+                {
+                    984
+                };
+            }
+        }
 
-	#endregion
-	#region 桶行为
+        public UpdateOrder UpdateOrder
+        {
+            get
+            {
+                return UpdateOrder.Default;
+            }
+        }
+
+        public FCSubsystemBloodBlockBehavior() : base(BlocksManager.FluidBlocks[984], true)
+        {
+        }
+
+        public void Update(float dt)
+        {
+            if (base.SubsystemTime.PeriodicGameTimeEvent(0.3, 0.0))
+            {
+                base.SpreadFluid();
+            }
+            if (base.SubsystemTime.PeriodicGameTimeEvent(1.0, 0.25))
+            {
+                float num = float.MaxValue;
+                foreach (Vector3 p in base.SubsystemAudio.ListenerPositions)
+                {
+                    float? num2 = base.CalculateDistanceToFluid(p, 8, true);
+                    if (num2 != null && num2.Value < num)
+                    {
+                        num = num2.Value;
+                    }
+                }
+                this.m_soundVolume = 0.5f * base.SubsystemAudio.CalculateVolume(num, 2f, 3.5f);
+            }
+            base.SubsystemAmbientSounds.WaterSoundVolume = MathUtils.Max(base.SubsystemAmbientSounds.WaterSoundVolume, this.m_soundVolume);
+        }
+
+        public override bool OnFluidInteract(int interactValue, int x, int y, int z, int fluidValue)
+        {
+            if (BlocksManager.Blocks[Terrain.ExtractContents(interactValue)] is MagmaBlock)
+            {
+                base.SubsystemAudio.PlayRandomSound("Audio/Sizzles", 1f, this.m_random.Float(-0.1f, 0.1f), new Vector3((float)x, (float)y, (float)z), 5f, true);
+                base.SubsystemTerrain.DestroyCell(0, x, y, z, 0, false, false);
+                base.Set(x, y, z, 0);
+                return true;
+            }
+            return base.OnFluidInteract(interactValue, x, y, z, fluidValue);
+        }
+
+       
+
+        public Random m_random = new Random();
+
+        public float m_soundVolume;
+    }
+	public class FCComponentBody : ComponentBody, IUpdateable
+	{
+       
+        public new void Update(float dt)
+        {
+            this.CollisionVelocityChange = Vector3.Zero;
+            this.Velocity += this.m_totalImpulse;
+            this.m_totalImpulse = Vector3.Zero;
+            if (this.m_parentBody != null || this.m_velocity.LengthSquared() > 9.9999994E-11f || this.m_directMove != Vector3.Zero || this.m_targetCrouchFactor != this.m_crouchFactor)
+            {
+                this.m_stoppedTime = 0f;
+            }
+            else
+            {
+                this.m_stoppedTime += dt;
+                if (this.m_stoppedTime > 0.5f && !Time.PeriodicEvent(0.25, 0.0))
+                {
+                    return;
+                }
+            }
+            if (this.m_targetCrouchFactor > this.m_crouchFactor)
+            {
+                this.m_crouchFactor = MathUtils.Min(this.m_crouchFactor + 2f * dt, this.m_targetCrouchFactor);
+            }
+            if (this.m_targetCrouchFactor < this.m_crouchFactor && base.Entity.FindComponent<ComponentRider>().Mount == null)
+            {
+                this.m_crouchFactor = MathUtils.Max(this.m_crouchFactor - 2f * dt, this.m_targetCrouchFactor);
+            }
+            Vector3 position = base.Position;
+            TerrainChunk chunkAtCell = this.m_subsystemTerrain.Terrain.GetChunkAtCell(Terrain.ToCell(position.X), Terrain.ToCell(position.Z));
+            if (chunkAtCell == null || chunkAtCell.State <= TerrainChunkState.InvalidContents4)
+            {
+                this.Velocity = Vector3.Zero;
+                return;
+            }
+            this.m_bodiesCollisionBoxes.Clear();
+            this.FindBodiesCollisionBoxes(position, this.m_bodiesCollisionBoxes);
+            this.m_movingBlocksCollisionBoxes.Clear();
+            this.FindMovingBlocksCollisionBoxes(position, this.m_movingBlocksCollisionBoxes);
+            if (!this.MoveToFreeSpace(0.56f))
+            {
+                this.m_crouchFactor = (this.CanCrouch ? 1f : 0f);
+                this.m_targetCrouchFactor = (this.CanCrouch ? 1f : 0f);
+                if (!this.MoveToFreeSpace(float.PositiveInfinity))
+                {
+                    ComponentHealth componentHealth = base.Entity.FindComponent<ComponentHealth>();
+                    if (componentHealth != null)
+                    {
+                        if (this.m_crushInjureTime >= 1f)
+                        {
+                            componentHealth.Injure(0.15f, null, true, "Crushed");
+                            this.m_crushInjureTime = 0f;
+                        }
+                        componentHealth.m_redScreenFactor = 1f;
+                        this.m_crushInjureTime += dt;
+                        return;
+                    }
+                    base.Project.RemoveEntity(base.Entity, true);
+                    return;
+                }
+                else
+                {
+                    this.m_crushInjureTime = 1f;
+                }
+            }
+            if (this.IsGravityEnabled)
+            {
+                this.m_velocity.Y = this.m_velocity.Y - 10f * dt;
+                if (this.ImmersionFactor > 0f)
+                {
+                    float num = this.ImmersionFactor * (1f + 0.03f * MathUtils.Sin((float)MathUtils.Remainder(2.0 * this.m_subsystemTime.GameTime, 6.2831854820251465)));
+                    this.m_velocity.Y = this.m_velocity.Y + 10f * (1f / this.Density * num) * dt;
+                }
+            }
+            float num2 = MathUtils.Saturate(this.AirDrag.X * dt);
+            float num3 = MathUtils.Saturate(this.AirDrag.Y * dt);
+            this.m_velocity.X = this.m_velocity.X * (1f - num2);
+            this.m_velocity.Y = this.m_velocity.Y * (1f - num3);
+            this.m_velocity.Z = this.m_velocity.Z * (1f - num2);
+            if (this.IsWaterDragEnabled && this.ImmersionFactor > 0f && this.ImmersionFluidBlock != null)
+            {
+                Vector2? vector = this.m_subsystemFluidBlockBehavior.CalculateFlowSpeed(Terrain.ToCell(position.X), Terrain.ToCell(position.Y), Terrain.ToCell(position.Z));
+                Vector3 vector2 = (vector != null) ? new Vector3(vector.Value.X, 0f, vector.Value.Y) : Vector3.Zero;
+                float num4 = 1f;
+                if (this.ImmersionFluidBlock.FrictionFactor != 1f)
+                {
+                    num4 = ((SimplexNoise.Noise((float)MathUtils.Remainder(6.0 * Time.FrameStartTime + (double)(this.GetHashCode() % 1000), 1000.0)) > 0.5f) ? this.ImmersionFluidBlock.FrictionFactor : 1f);
+                }
+                float f = MathUtils.Saturate(this.WaterDrag.X * num4 * this.ImmersionFactor * dt);
+                float f2 = MathUtils.Saturate(this.WaterDrag.Y * num4 * dt);
+                this.m_velocity.X = MathUtils.Lerp(this.m_velocity.X, vector2.X, f);
+                this.m_velocity.Y = MathUtils.Lerp(this.m_velocity.Y, vector2.Y, f2);
+                this.m_velocity.Z = MathUtils.Lerp(this.m_velocity.Z, vector2.Z, f);
+                if (this.m_parentBody == null && vector != null && this.StandingOnValue == null)
+                {
+                    if (this.WaterTurnSpeed > 0f)
+                    {
+                        float s = MathUtils.Saturate(MathUtils.Lerp(1f, 0f, this.m_velocity.Length()));
+                        Vector2 vector3 = Vector2.Normalize(vector.Value) * s;
+                        base.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, this.WaterTurnSpeed * (-1f * vector3.X + 0.71f * vector3.Y) * dt);
+                    }
+                    if (this.WaterSwayAngle > 0f)
+                    {
+                        base.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, this.WaterSwayAngle * (float)MathUtils.Sin((double)(200f / this.Mass) * this.m_subsystemTime.GameTime));
+                    }
+                }
+            }
+            if (this.m_parentBody != null)
+            {
+                Vector3 v = Vector3.Transform(this.ParentBodyPositionOffset, this.m_parentBody.Rotation) + this.m_parentBody.Position - position;
+                this.m_velocity = ((dt > 0f) ? (v / dt) : Vector3.Zero);
+                base.Rotation = this.ParentBodyRotationOffset * this.m_parentBody.Rotation;
+            }
+            this.StandingOnValue = null;
+            this.StandingOnBody = null;
+            this.StandingOnVelocity = Vector3.Zero;
+            Vector3 velocity = this.m_velocity;
+            float num5 = this.m_velocity.Length();
+            if (num5 > 0f)
+            {
+                Vector3 stanceBoxSize = this.StanceBoxSize;
+                float x = 0.45f * MathUtils.Min(stanceBoxSize.X, stanceBoxSize.Y, stanceBoxSize.Z) / num5;
+                float num7;
+                for (float num6 = dt; num6 > 0f; num6 -= num7)
+                {
+                    num7 = MathUtils.Min(num6, x);
+                    this.MoveWithCollision(num7, this.m_velocity * num7 + this.m_directMove);
+                    this.m_directMove = Vector3.Zero;
+                }
+            }
+            this.CollisionVelocityChange = this.m_velocity - velocity;
+            if (this.IsGroundDragEnabled && this.StandingOnValue != null)
+            {
+                this.m_velocity = Vector3.Lerp(this.m_velocity, this.StandingOnVelocity, 6f * dt);
+            }
+            if (this.StandingOnValue == null && dt != 0f)
+            {
+                this.TargetCrouchFactor = 0f;
+            }
+            this.UpdateImmersionData();
+            if (this.ImmersionFluidBlock is BloodBlock && this.ImmersionDepth > 0.3f && !this.m_fluidEffectsPlayed)
+            {
+                this.m_fluidEffectsPlayed = true;
+                this.m_subsystemAudio.PlayRandomSound("Audio/WaterFallIn", this.m_random.Float(0.75f, 1f), this.m_random.Float(-0.3f, 0f), position, 4f, true);
+                this.m_subsystemParticles.AddParticleSystem(new WaterSplashParticleSystem(this.m_subsystemTerrain, position, (this.BoundingBox.Max - this.BoundingBox.Min).Length() > 0.8f));
+                return;
+            }
+            if (this.ImmersionFluidBlock is WaterBlock && this.ImmersionDepth > 0.3f && !this.m_fluidEffectsPlayed)
+            {
+                this.m_fluidEffectsPlayed = true;
+                this.m_subsystemAudio.PlayRandomSound("Audio/WaterFallIn", this.m_random.Float(0.75f, 1f), this.m_random.Float(-0.3f, 0f), position, 4f, true);
+                this.m_subsystemParticles.AddParticleSystem(new WaterSplashParticleSystem(this.m_subsystemTerrain, position, (this.BoundingBox.Max - this.BoundingBox.Min).Length() > 0.8f));
+                return;
+            }
+            if (this.ImmersionFluidBlock is MagmaBlock && this.ImmersionDepth > 0f && !this.m_fluidEffectsPlayed)
+            {
+                this.m_fluidEffectsPlayed = true;
+                this.m_subsystemAudio.PlaySound("Audio/SizzleLong", 1f, 0f, position, 4f, true);
+                this.m_subsystemParticles.AddParticleSystem(new MagmaSplashParticleSystem(this.m_subsystemTerrain, position, (this.BoundingBox.Max - this.BoundingBox.Min).Length() > 0.8f));
+                return;
+            }
+            if (this.ImmersionFluidBlock == null)
+            {
+                this.m_fluidEffectsPlayed = false;
+            }
+        }
+
+
+        public new void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap)
+        {
+            base.Load(valuesDictionary, idToEntityMap);
+            
+        }
+		public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap)
+		{
+            base.Save(valuesDictionary, entityToIdMap);
+           
+        }
+    }
+    #endregion
+    #region 桶行为
 	public class FCSubsystemBucketBlockBehavior : SubsystemBlockBehavior
 	{
 		public override int[] HandledBlocks
@@ -14415,15 +11853,8 @@ namespace Game
 				return new int[]
 				{
 					90,
-					91,
-					93,
-					110,
-					245,
-					251,
-					252,
-					129,
-					128,
-					966//樱花酒桶 979液体
+					966,//樱花酒桶 979液体
+					962,//血桶  984液体
 				};
 			}
 		}
@@ -14444,29 +11875,7 @@ namespace Game
 					int data = Terrain.ExtractData(cellValue); //从方块值中提取出方块的数据部分，存储在data变量中。
 					Block block = BlocksManager.Blocks[num2]; //根据方块的内容索引获取对应的方块对象，存储在block变量中。意思就是看你点的方块到底是什么。
 
-					if (block is WaterBlock && FluidBlock.GetLevel(data) == 0) //如果方块是水方块且水的高度为0，则执行以下逻辑。
-					{
-						int value = Terrain.ReplaceContents(activeBlockValue, 91);  //将当前活动的方块值替换为水桶（方块索引为91），存储在value变量中。
-						inventory.RemoveSlotItems(inventory.ActiveSlotIndex, inventory.GetSlotCount(inventory.ActiveSlotIndex)); //移除玩家物品栏中当前激活槽位的物品，数量为槽位中的物品数量。
-						
-						if (inventory.GetSlotCount(inventory.ActiveSlotIndex) == 0)//如果物品栏中当前激活槽位的物品数量为0，则执行以下逻辑。
-						{
-							inventory.AddSlotItems(inventory.ActiveSlotIndex, value, 1);//向物品栏的当前激活槽位添加水桶物品，数量为1。
-						}
-						base.SubsystemTerrain.DestroyCell(0, cellFace.X, cellFace.Y, cellFace.Z, 0, false, false); //销毁交互的水方块。
-						return true;
-					}
-					if (block is MagmaBlock && FluidBlock.GetLevel(data) == 0)   //如果是岩浆
-					{
-						int value2 = Terrain.ReplaceContents(activeBlockValue, 93); 
-						inventory.RemoveSlotItems(inventory.ActiveSlotIndex, inventory.GetSlotCount(inventory.ActiveSlotIndex));
-						if (inventory.GetSlotCount(inventory.ActiveSlotIndex) == 0)
-						{
-							inventory.AddSlotItems(inventory.ActiveSlotIndex, value2, 1);
-						}
-						base.SubsystemTerrain.DestroyCell(0, cellFace.X, cellFace.Y, cellFace.Z, 0, false, false);
-						return true;
-					}
+                    
 
 					if (block is YHWaterBlock && FluidBlock.GetLevel(data) == 0) //樱花酒液体
 					{
@@ -14479,37 +11888,19 @@ namespace Game
 						base.SubsystemTerrain.DestroyCell(0, cellFace.X, cellFace.Y, cellFace.Z, 0, false, false);
 						return true;
 					}
-				}
-				else if (obj is BodyRaycastResult) ////如果射线检测结果是与实体交互（BodyRaycastResult类型）。 这里是指挤牛奶的行为
-				{
-					////获取射线检测结果的物体实体组件ComponentUdder，存储在componentUdder变量中。
-					ComponentUdder componentUdder = ((BodyRaycastResult)obj).ComponentBody.Entity.FindComponent<ComponentUdder>(); 
-					if (componentUdder != null && componentUdder.Milk(componentMiner)) //如果componentUdder不为null且调用Milk方法成功挤奶。
+					if (block is BloodBlock && FluidBlock.GetLevel(data) == 0) //血液
 					{
-						int value3 = Terrain.ReplaceContents(activeBlockValue, 110);
+						int value2 = Terrain.ReplaceContents(activeBlockValue, 962);
 						inventory.RemoveSlotItems(inventory.ActiveSlotIndex, inventory.GetSlotCount(inventory.ActiveSlotIndex));
 						if (inventory.GetSlotCount(inventory.ActiveSlotIndex) == 0)
 						{
-							inventory.AddSlotItems(inventory.ActiveSlotIndex, value3, 1);
+							inventory.AddSlotItems(inventory.ActiveSlotIndex, value2, 1);
 						}
-						this.m_subsystemAudio.PlaySound("Audio/Milked", 1f, 0f, ray.Position, 2f, true);
+						base.SubsystemTerrain.DestroyCell(0, cellFace.X, cellFace.Y, cellFace.Z, 0, false, false);
+						return true;
 					}
-					return true;
 				}
-			}
-			if (num == 91) //如果是水桶
-			{
-				TerrainRaycastResult? terrainRaycastResult = componentMiner.Raycast<TerrainRaycastResult>(ray, RaycastMode.Interaction, true, true, true);
-				if (terrainRaycastResult != null && componentMiner.Place(terrainRaycastResult.Value, Terrain.MakeBlockValue(18)))
-				{
-					inventory.RemoveSlotItems(inventory.ActiveSlotIndex, 1);
-					if (inventory.GetSlotCount(inventory.ActiveSlotIndex) == 0)
-					{
-						int value4 = Terrain.ReplaceContents(activeBlockValue, 90);
-						inventory.AddSlotItems(inventory.ActiveSlotIndex, value4, 1);
-					}
-					return true;
-				}
+                
 			}
 
 			if (num == 966) //如果是樱花酒桶
@@ -14526,63 +11917,21 @@ namespace Game
 					return true;
 				}
 			}
-			if (num == 93)
+			if (num == 962) //如果是樱花酒桶
 			{
-				TerrainRaycastResult? terrainRaycastResult2 = componentMiner.Raycast<TerrainRaycastResult>(ray, RaycastMode.Interaction, true, true, true);
-				if (terrainRaycastResult2 != null)
+				TerrainRaycastResult? terrainRaycastResult = componentMiner.Raycast<TerrainRaycastResult>(ray, RaycastMode.Interaction, true, true, true);
+				if (terrainRaycastResult != null && componentMiner.Place(terrainRaycastResult.Value, Terrain.MakeBlockValue(984)))
 				{
-					if (componentMiner.Place(terrainRaycastResult2.Value, Terrain.MakeBlockValue(92)))
+					inventory.RemoveSlotItems(inventory.ActiveSlotIndex, 1);
+					if (inventory.GetSlotCount(inventory.ActiveSlotIndex) == 0)
 					{
-						inventory.RemoveSlotItems(inventory.ActiveSlotIndex, 1);
-						if (inventory.GetSlotCount(inventory.ActiveSlotIndex) == 0)
-						{
-							int value5 = Terrain.ReplaceContents(activeBlockValue, 90);
-							inventory.AddSlotItems(inventory.ActiveSlotIndex, value5, 1);
-						}
+						int value4 = Terrain.ReplaceContents(activeBlockValue, 90); //换成空桶
+						inventory.AddSlotItems(inventory.ActiveSlotIndex, value4, 1);
 					}
 					return true;
 				}
 			}
-			if (num <= 129)
-			{
-				if (num != 110)
-				{
-					if (num - 128 > 1)
-					{
-						return false;
-					}
-					TerrainRaycastResult? terrainRaycastResult3 = componentMiner.Raycast<TerrainRaycastResult>(ray, RaycastMode.Digging, true, true, true);
-					if (terrainRaycastResult3 != null)
-					{
-						CellFace cellFace2 = terrainRaycastResult3.Value.CellFace;
-						int cellValue2 = base.SubsystemTerrain.Terrain.GetCellValue(cellFace2.X, cellFace2.Y, cellFace2.Z);
-						int num3 = Terrain.ExtractContents(cellValue2);
-						Block block2 = BlocksManager.Blocks[num3];
-						if (block2 is IPaintableBlock)
-						{
-							Vector3 normal = CellFace.FaceToVector3(terrainRaycastResult3.Value.CellFace.Face);
-							Vector3 position = terrainRaycastResult3.Value.HitPoint(0f);
-							int? num4 = (num == 128) ? null : new int?(PaintBucketBlock.GetColor(Terrain.ExtractData(activeBlockValue)));
-							Color color = (num4 != null) ? SubsystemPalette.GetColor(base.SubsystemTerrain, num4) : new Color(128, 128, 128, 128);
-							int value6 = ((IPaintableBlock)block2).Paint(base.SubsystemTerrain, cellValue2, num4);
-							base.SubsystemTerrain.ChangeCell(cellFace2.X, cellFace2.Y, cellFace2.Z, value6, true);
-							componentMiner.DamageActiveTool(1);
-							this.m_subsystemAudio.PlayRandomSound("Audio/Paint", 0.4f, this.m_random.Float(-0.1f, 0.1f), componentMiner.ComponentCreature.ComponentBody.Position, 2f, true);
-							this.m_subsystemParticles.AddParticleSystem(new PaintParticleSystem(base.SubsystemTerrain, position, normal, color));
-						}
-						return true;
-					}
-					return false;
-				}
-			}
-			else if (num != 245)
-			{
-				if (num - 251 > 1)
-				{
-					return false;
-				}
-				return true;
-			}
+
 			return true;
 		}
 
@@ -15130,7 +12479,9 @@ namespace Game
 	}
     #endregion
     #endregion
-}
+}//原始命名空间
+
+
 
 
 
@@ -15145,15 +12496,7 @@ namespace Game
 {
 	#region 附魔台炼药锅
 	#region ModLoader
-	public class ModModLoader : ModLoader
-	{
-		public override void OnLoadingFinished(List<System.Action> actions)
-		{
-			actions.Add(delegate {
-				XCraftingRecipesManager.Initialize();
-			});
-		}
-	}
+	
 	#endregion
 	public class XClothingWidget : CanvasWidget
 	{
@@ -16806,4 +14149,4 @@ namespace Game
 	
 	
 	#endregion
-}
+}//魔法工艺

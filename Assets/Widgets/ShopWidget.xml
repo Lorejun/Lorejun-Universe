@@ -1,0 +1,69 @@
+<ShopWidget xmlns="runtime-namespace:Game">
+  <BevelledRectangleWidget Size="814, 382" BevelSize="3" />
+  <LabelWidget Text="商店" HorizontalAlignment="Center" VerticalAlignment="Near" Color="255, 255, 255, 192" Margin="0, 14"/>
+  <CanvasWidget HorizontalAlignment="Center" VerticalAlignment="Near" Size="720, 312" Margin="0, 50">
+    <StackPanelWidget Direction="Horizontal">
+        <CanvasWidget Size="164, Infinity">
+            <BevelledRectangleWidget BevelSize="-2" />
+            <CanvasWidget Margin="3, 3">
+                <StackPanelWidget Name="DisplayMoneyData" Direction="Vertical">
+                    <CanvasWidget Size="Infinity, 54" >
+                        <BevelledRectangleWidget BevelSize="-1" />
+                        <StackPanelWidget Direction="Horizontal">
+                            <RectangleWidget Size="35, 35" HorizontalAlignment="Center" VerticalAlignment="Center" OutlineColor="0, 0, 0, 0" FillColor="255, 255, 255" Subtexture="{Textures/Ui/Money}" />
+                            <LabelWidget Name="MoneyLabel" WordWrap="true" FontScale="0.74" HorizontalAlignment="Center" VerticalAlignment="Center" Color="255, 255, 255, 192" Margin="8, 0"/>                        
+                        </StackPanelWidget>
+                    </CanvasWidget>
+                </StackPanelWidget>
+            </CanvasWidget>
+        </CanvasWidget>
+        <CanvasWidget Size="360, Infinity">
+            <BevelledRectangleWidget BevelSize="-2" />
+            <CanvasWidget>
+                <StackPanelWidget Name="DisplayItemData" Direction="Vertical">
+                    <CanvasWidget Size="Infinity, 34" >
+                        <BevelledRectangleWidget BevelSize="-1" />
+                        <LabelWidget Text="商品信息" WordWrap="true" FontScale="0.74" HorizontalAlignment="Center" VerticalAlignment="Near" Color="255, 255, 255, 192" Margin="8, 0"/>                        
+                    </CanvasWidget>
+                    <CanvasWidget Size="Infinity, 120" >
+                        <BevelledRectangleWidget BevelSize="-1" />
+                        <StackPanelWidget Direction="Horizontal">
+                            <BlockIconWidget Name="Icon" Size="80, 80" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <LabelWidget Name="ItemDataLabel" WordWrap="true" FontScale="0.74" HorizontalAlignment="Center" VerticalAlignment="Center" Color="255, 255, 255, 192" Margin="8, 0"/>                        
+                        </StackPanelWidget>
+                    </CanvasWidget>
+                    <CanvasWidget Size="Infinity, 80" >
+                        <BevelledRectangleWidget BevelSize="-1" />
+                        <StackPanelWidget Direction="Horizontal">
+                            <BevelledButtonWidget Style="{Styles/ButtonStyle_Minus}" Name="Last" VerticalAlignment="Center"/>	
+                            <SliderWidget Name="CountSlider" Size="Infinity, 80" Granularity="1" MinValue="0" MaxValue="40" LabelWidth="0" />
+                            <BevelledButtonWidget Style="{Styles/ButtonStyle_Plus}" Name="Next" VerticalAlignment="Center"/>    	        
+                        </StackPanelWidget>
+                    </CanvasWidget>
+                    <CanvasWidget Size="Infinity, 80" >
+                        <BevelledRectangleWidget BevelSize="-1" />
+                        <StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <BevelledButtonWidget Name="OkButton" Style="{Styles/ButtonStyle_160x60}" Text="确定购买" VerticalAlignment="Center"/>
+                            <CanvasWidget Size="0, 20" />
+                            <BevelledButtonWidget Name="OtherButton" Style="{Styles/ButtonStyle_160x60}" Text="出售商品" VerticalAlignment="Center"/>
+                        </StackPanelWidget>
+                    </CanvasWidget>
+                </StackPanelWidget>
+            </CanvasWidget>
+        </CanvasWidget>
+        <CanvasWidget>
+            <BevelledRectangleWidget BevelSize="-2" />
+            <StackPanelWidget Direction="Horizontal">
+                <CanvasWidget Size="130, Infinity">
+                    <BevelledRectangleWidget BevelSize="-1" />
+                    <ListPanelWidget Name="KindList" Direction="Vertical" Margin="10, 10" ItemSize="50" SelectionColor="255, 0, 0, 255"/>
+                </CanvasWidget>
+                <CanvasWidget>
+                    <BevelledRectangleWidget BevelSize="-1" />
+                    <ListPanelWidget Name="ItemList" Direction="Vertical" Margin="0, 10" ItemSize="50" SelectionColor="255, 0, 0, 255"/>                
+                </CanvasWidget>                
+            </StackPanelWidget>
+        </CanvasWidget>
+    </StackPanelWidget>
+  </CanvasWidget>
+</ShopWidget>

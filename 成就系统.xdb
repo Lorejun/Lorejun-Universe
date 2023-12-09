@@ -1,0 +1,20 @@
+<mod>
+	       <Parameter Name="Class" Guid="b4723611-8b4e-4763-a11d-b4ff19c6109f" new-Value="Game.ComponentXInventory" Type="string" />
+         <ProjectTemplate Name="Project" Guid="85023bf8-1c90-4dd1-9442-e6c13691d078">
+            <MemberSubsystemTemplate Name="Achievements" Guid="44796acc-d4bc-4f254584a58568858-b4dd-d4549935c314" InheritanceParent="a3914c13-7801-46a6-b23a-9e2b36e9defb">
+                 <Parameter Name="Class" Guid="44796acc-d4bc-4fa8-b4dd-d599671454f735c35268258414" Value="Game.SubsystemAchievements" Type="string" />
+            </MemberSubsystemTemplate>
+			 <MemberSubsystemTemplate Name="Task1" Guid="bd000001-bbdd-0000-0000-000000000001" InheritanceParent="a3914c13-7801-46a6-b23a-9e2b36e9defb">
+				 <Parameter Name="Class" Guid="bd000001-bbdd-0000-0000-000000000002" Value="Game.SubsystemTask1" Type="string" />
+			 </MemberSubsystemTemplate>
+		 </ProjectTemplate>
+
+           <EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">           
+            <MemberComponentTemplate Name="Achievements" Guid="44dd5622-a4c0-4ad5-85f8-813ef26dae6b67558" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			    <Parameter Name="Class" Guid="44dd5622-a4c0-4ad5-85f8-813ef26dae6b75762424" Value="Game.ComponentAchievements" Type="string" />
+		    </MemberComponentTemplate>
+			<MemberComponentTemplate Name="Task1" Guid="bd000002-bbdd-0000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+				<Parameter Name="Class" Guid="bd000002-bbdd-0000-0000-000000000002" Value="Game.ComponentTask1" Type="string" />
+			</MemberComponentTemplate>
+		   </EntityTemplate>
+</mod>

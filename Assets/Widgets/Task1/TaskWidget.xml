@@ -1,0 +1,71 @@
+<ShopWidget xmlns="runtime-namespace:Game">
+  <StackPanelWidget Direction="Horizontal">
+    <CanvasWidget Name="Tasks" Size="300, 382">
+        <BevelledRectangleWidget BevelSize="2" />
+        <StackPanelWidget Direction="Horizontal">
+        <CanvasWidget Size="20, 0"/>
+        <StackPanelWidget Direction="Vertical">
+            <LabelWidget Text="任务" HorizontalAlignment="Center" VerticalAlignment="Near" Color="255, 255, 255, 192" Margin="0, 14"/>
+            <CanvasWidget Size="0, 20"/>
+            <CanvasWidget Size="Infinity, 80">
+                <BevelledRectangleWidget BevelSize="-3" />            
+                <ListPanelWidget Name="KindList" Direction="Horizontal" Margin="10, 10" ItemSize="120" SelectionColor="255, 0, 0, 255"/>
+            </CanvasWidget>
+            <CanvasWidget Size="0, 20"/>
+            <CanvasWidget>
+                <BevelledRectangleWidget BevelSize="-1" />            
+                <ListPanelWidget Name="TaskList" Direction="Vertical" Margin="0, 10" ItemSize="50" SelectionColor="255, 0, 0, 255"/>
+            </CanvasWidget>
+            <CanvasWidget Size="0, 20"/>
+        </StackPanelWidget>
+        <CanvasWidget Size="20, 0"/>
+        </StackPanelWidget>
+    </CanvasWidget>
+    <BevelledRectangleWidget Name="DisplayTask.BevelledRectangleWidget" Size="0, 382" BevelSize="-2" />
+    <CanvasWidget Name="DisplayTask" Size="300, 382" IsVisible="false">
+        <BevelledRectangleWidget BevelSize="-2" />
+        <StackPanelWidget Direction="Horizontal">
+        <CanvasWidget Size="20, 0"/>
+        <StackPanelWidget Direction="Vertical">
+            <LabelWidget Text="任务介绍" HorizontalAlignment="Center" VerticalAlignment="Near" Color="255, 255, 255, 192" Margin="0, 14"/>
+            <CanvasWidget Size="0, 20"/>
+            <CanvasWidget>
+                <BevelledRectangleWidget BevelSize="-1" />
+                <ScrollPanelWidget Name="ScrollPanel" Direction="Vertical" Margin="3, 3">
+                    <StackPanelWidget Direction="Vertical">
+                        <LabelWidget Name="DisplayTaskNameLabel" Text="初来乍到的新人你好" WordWrap="true" FontScale="0.74" HorizontalAlignment="Center" VerticalAlignment="Near" Color="255, 255, 255, 192" Margin="8, 0"/>
+                        <CanvasWidget Size="0, 20"/>
+                        <LabelWidget Name="DisplayTaskLabel" Text="这个世界非常残酷，所以说你一定要活下去，作者的话" WordWrap="true" FontScale="0.74" HorizontalAlignment="Near" VerticalAlignment="Center" Color="255, 255, 255, 192" Margin="8, 0"/>
+                    </StackPanelWidget>
+                </ScrollPanelWidget>
+            </CanvasWidget>
+            <CanvasWidget Size="0, 20"/>
+        </StackPanelWidget>
+        <CanvasWidget Size="20, 0"/>
+        </StackPanelWidget>
+    </CanvasWidget>
+    <BevelledRectangleWidget Name="GetRewards.BevelledRectangleWidget" Size="0, 382" BevelSize="-2" />
+    <CanvasWidget Name="GetRewards" Size="300, 382" IsVisible="false">
+        <BevelledRectangleWidget BevelSize="-2" />
+        <StackPanelWidget Direction="Horizontal">
+        <CanvasWidget Size="20, 0"/>
+        <StackPanelWidget Direction="Vertical">
+            <LabelWidget Text="任务奖励" HorizontalAlignment="Center" VerticalAlignment="Near" Color="255, 255, 255, 192" Margin="0, 14"/>
+            <CanvasWidget Size="0, 60"/>
+            <CanvasWidget>
+                <BevelledRectangleWidget BevelSize="-1" />
+                <ScrollPanelWidget Name="ScrollPanel" Direction="Vertical" Margin="3, 3">
+                    <StackPanelWidget Direction="Vertical">
+                        <LabelWidget Name="DisplayTaskRewardsLabel" Text="这个世界非常残酷，所以说你一定要活下去，作者的话" WordWrap="true" FontScale="0.74" HorizontalAlignment="Near" VerticalAlignment="Center" Color="255, 255, 255, 192" Margin="8, 0"/>
+                    </StackPanelWidget>
+                </ScrollPanelWidget>
+            </CanvasWidget>
+            <CanvasWidget Size="0, 20"/>
+            <BevelledButtonWidget Name="RewardsButton" Text="领取奖励" HorizontalAlignment="Far" Style="{Styles/ButtonStyle_160x60}"/>            
+            <CanvasWidget Size="0, 20"/>
+        </StackPanelWidget>
+        <CanvasWidget Size="20, 0"/>
+        </StackPanelWidget>
+    </CanvasWidget>
+  </StackPanelWidget>
+</ShopWidget>

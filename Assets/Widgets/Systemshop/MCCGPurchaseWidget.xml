@@ -1,0 +1,41 @@
+<MCCGMerchantWidget xmlns="runtime-namespace:Game">
+	<BevelledRectangleWidget Size="614, 382" BevelSize="3" />
+	<LabelWidget CanvasWidget.Position="28, 14" Name="Title" Text="购买"  Color="255, 255, 255, 192"/>
+	<BevelledButtonWidget Margin="185, 8" Name="ChangeButton" Text="切换" Size="80,50" />
+	<BevelledButtonWidget Margin="60, 290" Name="MPButton" Text="提取灵能" Size="140,50" />
+	<CanvasWidget CanvasWidget.Position="28, 60" Size="240, 125" HorizontalAlignment="Center" >
+		<RectangleWidget FillColor="51, 51, 51, 120" OutlineColor="40, 40, 40, 255" OutlineThickness="2" />
+		<ListPanelWidget Name="List" Direction="Vertical" HorizontalAlignment="Center" Margin="3, 3" SelectionColor="100, 216, 100"/>
+	</CanvasWidget>
+  <CanvasWidget CanvasWidget.Position="36, 185"  Size="225,50">
+    <StackPanelWidget Direction="Horizontal">
+      <BevelledButtonWidget Name="Left" Style="{Styles/ButtonStyle_ArrowLeft}" Size="50, 50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      <CanvasWidget Size="100, 50" HorizontalAlignment="Center" VerticalAlignment="Center" >
+        <LabelWidget Name="Category" Text="全部" TextAnchor="HorizontalCenter,VerticalCenter" HorizontalAlignment="Center" VerticalAlignment="Center" DropShadow="true" />
+      </CanvasWidget>
+      <BevelledButtonWidget Name="Right" Style="{Styles/ButtonStyle_ArrowRight}" Size="50, 50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </StackPanelWidget>
+  </CanvasWidget>
+  <CanvasWidget CanvasWidget.Position="36, 245"  Size="225,50">
+    <StackPanelWidget Direction="Horizontal">
+      <SliderWidget Size="200,40" Name="Slider" Granularity="1" MinValue="1" MaxValue="10" HorizontalAlignment="Center" VerticalAlignment="Center" Text="" LabelWidth="25"/>
+    </StackPanelWidget>
+  </CanvasWidget>
+  <CanvasWidget CanvasWidget.Position="28, 290" >
+		<StackPanelWidget Direction="Horizontal">
+			<BlockIconWidget Name="Icon" Value="74" Size="40, 40" HorizontalAlignment="Center" VerticalAlignment="Center" />
+			<LabelWidget Name="SelectedText" Text="名字x14" FontScale="0.5" Color="255,255,255" DropShadow="true" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+		</StackPanelWidget>
+	</CanvasWidget>
+	<LabelWidget CanvasWidget.Position="28, 340" Name="PFlorin" Text="你的余额:F" FontScale="0.6" Color="255,255,255" DropShadow="true" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+	<CanvasWidget CanvasWidget.Position="200, 290" >
+		<StackPanelWidget Direction="Vertical">
+			<BevelledButtonWidget Name="PurchaseButton" Text="购买" Size="80,50" />
+			<LabelWidget Name="Price" Text="-77F" FontScale="0.6" Color="255,0,0" DropShadow="true" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+		</StackPanelWidget>
+	</CanvasWidget>
+	
+	
+	<LabelWidget CanvasWidget.Position="286, 14" Text="背包"  Color="255, 255, 255, 192"/>
+	<GridPanelWidget Name="InventoryGrid" CanvasWidget.Position="286, 52" ColumnsCount="4" RowsCount="4"/>
+</MCCGMerchantWidget>

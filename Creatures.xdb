@@ -16,13 +16,13 @@
 				<Parameter Name="Description" Guid="ffffffff-bbdd-0000-0000-000000000334" Value="洞穴蜘蛛（Cave Spider）是一种节肢中立生物，它像是拥有暗蓝色材质的蜘蛛。它有一身暗蓝色的外表和更高的危险性和能在黑暗中发出红光的眼睛。有更好的跳跃能力以及攀爬能力，所以能够有效率且快速的追击玩家。" Type="string"/>
 			</MemberComponentTemplate>
 			<MemberComponentTemplate Name="Miner" Guid="ffffffff-bbdd-0000-0000-000000000335" InheritanceParent="8acca888-ba39-464f-bcf5-6ae15e448c62">
-				<Parameter Name="AttackPower" Guid="ffffffff-bbdd-0000-0000-000000000336" Value="4" Type="float"/>
+				<Parameter Name="AttackPower" Guid="ffffffff-bbdd-0000-0000-000000000336" Value="5" Type="float"/>
 			</MemberComponentTemplate>
 			<MemberComponentTemplate Name="Health" Guid="ffffffff-bbdd-0000-0000-000000000337">
 				<Parameter Name="AttackResilience" Guid="ffffffff-bbdd-0000-0000-000000000338" Value="30" Type="float"/>
 			</MemberComponentTemplate>
 			<MemberComponentTemplate Name="Body" Guid="ffffffff-bbdd-0000-0000-000000000339">
-				<Parameter Name="BoxSize" Guid="ffffffff-bbdd-0000-0000-000000000340" Value="1.5,1.5,1.5" Type="Vector3"/>
+				<Parameter Name="BoxSize" Guid="ffffffff-bbdd-0000-0000-000000000340" Value="0.8,0.8,0.8" Type="Vector3"/>
 				<Parameter Name="Mass" Guid="ffffffff-bbdd-0000-0000-000000000341" Value="80" Type="float"/>
 			</MemberComponentTemplate>
 			<MemberComponentTemplate Name="ChaseBehavior" Guid="ffffffff-bbdd-0000-0000-000000000342" InheritanceParent="31894441-d90a-4549-9264-db9dbe20e234">
@@ -52,6 +52,13 @@
 
 			<MemberComponentTemplate Name="HerdBehavior" Guid="ffffffff-bbdd-0000-0000-000000000359" InheritanceParent="dfe7218e-ce14-4bde-8dac-f919c38e9efe">
 				<Parameter Name="AutoNearbyCreaturesHelp" Guid="ffffffff-bbdd-0000-0000-000000000360" Value="True" Type="bool"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Locomotion" Guid="ffffffff-bbdd-0000-6528-a00000000024">
+				<Parameter Name="InAirWalkFactor" Guid="ffffffff-bbdd-0000-6528-a00000000025" Value="1" Type="float"/>
+				<Parameter Name="WalkSpeed" Guid="ffffffff-bbdd-0000-6528-a00000000026" Value="7" Type="float"/>
+				<Parameter Name="FlySpeed" Guid="ffffffff-bbdd-0000-6528-a00000000027" Value="0" Type="float"/>
+				<Parameter Name="TurnSpeed" Guid="ffffffff-bbdd-0000-6528-a00000000028" Value="6" Type="float"/>
+				<Parameter Name="JumpSpeed" Guid="ffffffff-bbdd-0000-6528-a00000000029" Value="5" Type="float"/>
 			</MemberComponentTemplate>
 
 
@@ -108,7 +115,7 @@
 			<MemberComponentTemplate Name="HumanModel" Guid="ffffffff-bbdd-0000-6528-000000000030" InheritanceParent="0566662e-bb24-45f9-84d8-f3c1e5d083df">
 				<Parameter Name="WalkLegsAngle" Guid="ffffffff-bbdd-0000-6528-000000000031" Value="0.40" Type="float"/>
 				<Parameter Name="ModelName" Guid="ffffffff-bbdd-0000-6528-000000000032" Value="Models/BlockMan" Type="string"/>
-				<Parameter Name="TextureOverride" Guid="ffffffff-bbdd-0000-6528-000000000033" Value="Textures/Creatures/Village/custom_villager_begger_2" Type="string"/>
+				<Parameter Name="TextureOverride" Guid="ffffffff-bbdd-0000-6528-000000000033" Value="Textures/Creatures/Village/caixukun" Type="string"/>
 				<Parameter Name="WalkAnimationSpeed" Guid="ffffffff-bbdd-0000-6528-000000000034" Value="0.60" Type="float"/>
 			</MemberComponentTemplate>
 			<MemberComponentTemplate Name="Body" Guid="ffffffff-bbdd-0000-6528-000000000035">
@@ -117,7 +124,7 @@
 			</MemberComponentTemplate>
 			<MemberComponentTemplate Name="ChaseBehavior" Guid="ffffffff-opbbdd-0000-6528-000000000038" InheritanceParent="31894441-d90a-4549-9264-db9dbe20e234">
 				<Parameter Name="ChaseNonPlayerProbability" Guid="ffffffff-bbdd-0000-6528-000000000039" Value="0.1" Type="float"/>
-				<Parameter Name="AutoChaseMask" Guid="ffffffff-bbdd-0000-6528-000000000040" Value="0" Type="Game.CreatureCategory"/>
+				<Parameter Name="AutoChaseMask" Guid="ffffffff-bbdd-0000-6528-000000000040" Value="LandOther" Type="Game.CreatureCategory"/>
 				<Parameter Name="DayChaseRange" Guid="ffffffff-bbdd-0000-6528-000000000041" Value="0" Type="float"/>
 				<Parameter Name="NightChaseRange" Guid="ffffffff-bbdd-0000-6528-000000000042" Value="0" Type="float"/>
 				<Parameter Name="NightChaseTime" Guid="ffffffff-bbdd-0000-6528-000000000043" Value="0" Type="float"/>
@@ -148,8 +155,255 @@
 				<Parameter Name="EggTypeIndex" Guid="ffffffff-bbdd-0000-6528-000000000059" Value="51" Type="int"/>
 			</ParameterSet>
 		</EntityTemplate>
+		
+		<EntityTemplate Name="StrongZombie1_Strength" Guid="ffffffff-1837-0000-0000-000000000268" InheritanceParent="ffffffff-c558-0000-0000-000000000009">
+			<!--攻击力-->
+			<MemberComponentTemplate Name="Miner" Guid="ffffffff-1837-0000-0000-000000000269" InheritanceParent="8acca888-ba39-464f-bcf5-6ae15e448c62">
+				<Parameter Name="AttackPower" Guid="ffffffff-1837-0000-0000-000000000270" Value="3" Type="float"/>
+			</MemberComponentTemplate>
+			<!--生命-->
+			<MemberComponentTemplate Name="Health" Guid="ffffffff-1837-0000-0000-000000000271">
+				<Parameter Name="FallResilience" Guid="ffffffff-1837-0000-0000-000000000272" Value="20" Type="float"/>
+				<Parameter Name="AttackResilience" Guid="ffffffff-1837-0000-0000-000000000273" Value="120" Type="float"/>
+				<Parameter Name="FireResilience" Guid="ffffffff-1837-0000-0000-000000000274" Value="15" Type="float"/>
+			</MemberComponentTemplate>
+			<!--生物信息-->
+			<MemberComponentTemplate Name="Creature" Guid="ffffffff-1837-0000-0000-000000000275">
+				<Parameter Name="Description" Guid="ffffffff-1837-0000-0000-000000000276" Value="血泪之池匍匐的丧尸。他们对血肉有近乎疯狂的渴求，务必要小心。" Type="string"/>
+				<Parameter Name="Category" Guid="ffffffff-1837-0000-0000-000000000277" Value="LandPredator" Type="Game.CreatureCategory"/>
+				<Parameter Name="KillVerbs" Guid="ffffffff-1837-0000-0000-000000000278" Value="掏出内脏" Type="string"/>
+				<Parameter Name="DisplayName" Guid="ffffffff-1837-0000-0000-000000000279" Value="普通丧尸" Type="string"/>
+			</MemberComponentTemplate>
+			<!--运动-->
+			<MemberComponentTemplate Name="Locomotion" Guid="ffffffff-1837-0000-0000-000000000280">
+				<Parameter Name="InAirWalkFactor" Guid="ffffffff-1837-0000-6528-a00000000025" Value="1" Type="float"/>
+				<Parameter Name="TurnSpeed" Guid="ffffffff-1837-0000-0000-000000000281" Value="4" Type="float"/>
+				<Parameter Name="WalkSpeed" Guid="ffffffff-1837-0000-0000-000000000282" Value="5" Type="float"/>
+				<Parameter Name="FlySpeed" Guid="ffffffff-1837-0000-0000-000000000283" Value="0" Type="float"/>
+				<Parameter Name="LadderSpeed" Guid="ffffffff-1837-0000-0000-000000000284" Value="6" Type="float"/>
+				<Parameter Name="JumpSpeed" Guid="ffffffff-1837-0000-0000-000000000285" Value="6" Type="float"/>
+				<Parameter Name="AccelerationFactor" Guid="ffffffff-1837-0000-0000-000000000286" Value="1.4" Type="float"/>
+			</MemberComponentTemplate>
+			<!--模型与材质-->
+			<MemberComponentTemplate Name="HumanModel" Guid="ffffffff-1837-0000-0000-000000000287" InheritanceParent="0566662e-bb24-45f9-84d8-f3c1e5d083df">
+				<Parameter Name="MoveLegWhenFeeding" Guid="ffffffff-1837-0000-0000-000000000288" Value="True" Type="bool"/>
+				<Parameter Name="WalkLegsAngle" Guid="ffffffff-1837-0000-0000-000000000289" Value="0.35" Type="float"/>
+				<Parameter Name="TextureOverride" Guid="ffffffff-1837-0000-0000-000000000290" Value="Textures/Creatures/Zombies/Carnival3" Type="string"/>
+				<Parameter Name="WalkAnimationSpeed" Guid="ffffffff-1837-0000-0000-000000000291" Value="0.35" Type="float"/>
+				<Parameter Name="ModelName" Guid="ffffffff-1837-0000-0000-000000000292" Value="Models/ZombieModels/ZumbiForte" Type="string"/>
+			</MemberComponentTemplate>
+			<!--体重与碰撞-->
+			<MemberComponentTemplate Name="Body" Guid="ffffffff-1837-0000-0000-000000000293">
+				<Parameter Name="BoxSize" Guid="ffffffff-1837-0000-0000-000000000294" Value="1,1.8,1" Type="Vector3"/>
+				<Parameter Name="Mass" Guid="ffffffff-1837-0000-0000-000000000295" Value="10000" Type="float"/>
+			</MemberComponentTemplate>
+			<!--掉落-->
+			<MemberComponentTemplate Name="Loot" Guid="ffffffff-1837-0000-0000-000000000296">
+				<ParameterSet Name="LootOnFire" Guid="ffffffff-1837-0000-0000-000000000297">
+					<Parameter Name="1" Guid="ffffffff-1837-0000-0000-000000000298" Value="RottenMeatBlock;1;2" Type="string"/>
+					
+				</ParameterSet>
+				<ParameterSet Name="Loot" Guid="ffffffff-1837-0000-0000-000000000300">
+					<Parameter Name="1" Guid="ffffffff-1837-0000-0000-000000000301" Value="RottenMeatBlock;1;2" Type="string"/>
+					<Parameter Name="2" Guid="ffffffff-1837-0000-0000-000000000302" Value="PlantsBlocks:1;1;2" Type="string"/>
+					<Parameter Name="3" Guid="ffffffff-1837-0000-0000-000000000299" Value="PlantsBlocks:17;1;2" Type="string"/>
+				</ParameterSet>
+			</MemberComponentTemplate>
+			<!--追逐行为-->
+			<MemberComponentTemplate Name="ChaseBehavior" Guid="ffffffff-1837-0000-0000-000000000303" InheritanceParent="31894441-d90a-4549-9264-db9dbe20e234">
+				<Parameter Name="ChaseNonPlayerProbability" Guid="ffffffff-1837-0000-0000-000000000304" Value="0.5" Type="float"/>
+				<Parameter Name="AutoChaseMask" Guid="ffffffff-1837-0000-0000-000000000305" Value="LandOther" Type="Game.CreatureCategory"/>
+				<Parameter Name="ChaseOnTouchProbability" Guid="ffffffff-1837-0000-0000-000000000306" Value="1" Type="float"/>
+				<Parameter Name="ChaseWhenAttackedProbability" Guid="ffffffff-1837-0000-0000-000000000307" Value="1" Type="float"/>
+				<Parameter Name="NightChaseRange" Guid="ffffffff-1837-0000-0000-000000000308" Value="30" Type="float"/>
+				<Parameter Name="NightChaseTime" Guid="ffffffff-1837-0000-0000-000000000309" Value="30" Type="float"/>
+				<Parameter Name="DayChaseTime" Guid="ffffffff-1837-0000-0000-000000000310" Value="30" Type="float"/>
+				<Parameter Name="DayChaseRange" Guid="ffffffff-1837-0000-0000-000000000311" Value="30" Type="float"/>
+			</MemberComponentTemplate>
+			<!--眼睛-->
+			<MemberComponentTemplate Name="GlowingEyes" InheritanceParent="bb8701d3-3a4f-44f7-8a1f-3a455533f632">
+				<Parameter Name="GlowingEyesColor" Guid="ffffffff-1837-0000-0000-000000000312" Value="255,255,0" Type="Color"/>
+				<Parameter Name="GlowingEyesOffset" Guid="ffffffff-1837-0000-0000-000000000313" Value="0.06,0.2,0.1" Type="Vector3"/>
+			</MemberComponentTemplate>
+			<!--生物蛋-->
+			<ParameterSet Name="CreatureEggData" Guid="ffffffff-1837-0000-0000-000000000314">
+				<Parameter Name="EggTypeIndex" Guid="ffffffff-1837-0000-0000-000000000315" Value="66" Type="int"/>
+				<Parameter Name="TextureSlot" Guid="ffffffff-1837-0000-0000-000000000316" Value="163" Type="int"/>
+				<Parameter Name="SwapUV" Guid="ffffffff-1837-0000-0000-000000000317" Value="False" Type="bool"/>
+				<Parameter Name="Color" Guid="ffffffff-1837-0000-0000-000000000318" Value="80,250,100" Type="Color"/>
+				<Parameter Name="DisplayName" Guid="ffffffff-1837-0000-0000-000000000319" Value="丧尸" Type="string"/>
+			</ParameterSet>
+			
+			<MemberComponentTemplate Name="FindPlayerBehavior" Guid="ffffffff-1837-0000-0000-000000000322" InheritanceParent="44c9a961-258c-4eb3-81d1-d3ae249ae031">
+				<Parameter Name="DayRange" Guid="ffffffff-1837-0000-0000-000000000323" Value="30" Type="float"/>
+				<Parameter Name="MinRange" Guid="ffffffff-1837-0000-0000-000000000324" Value="8" Type="float"/>
+				<Parameter Name="NightRange" Guid="ffffffff-1837-0000-0000-000000000325" Value="30" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="OnFire" Guid="ffffffff-1837-0000-0000-000000000326"/>
+			<MemberComponentTemplate Name="HerdBehavior" Guid="ffffffff-1837-0000-0000-000000000327" InheritanceParent="dfe7218e-ce14-4bde-8dac-f919c38e9efe">
+				<Parameter Name="HerdName" Guid="ffffffff-1837-0000-0000-000000000328" Value="Zombies" Type="string"/>
+				<Parameter Name="HerdingRange" Value="25" Type="float"/>
+				<Parameter Name="AutoNearbyCreaturesHelp" Value="True" Type="bool"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="CreatureSounds" Guid="ffffffff-1837-0000-0000-000000000329">
+				<Parameter Name="AttackSound" Guid="ffffffff-1837-0000-0000-000000000330" Value="Audio/Creatures/Zombie/StrongZombieAttacl" Type="string"/>
+				<Parameter Name="IdleSound" Guid="ffffffff-1837-0000-0000-000000000331" Value="Audio/Creatures/Zombie/StrongZombiePain" Type="string"/>
+				<Parameter Name="PainSound" Guid="ffffffff-1837-0000-0000-000000000332" Value="Audio/Creatures/Zombie/StrongZombiePain" Type="string"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="WalkAroundBehavior" Guid="ffffffff-1837-0000-0000-000000000333" InheritanceParent="aebb86ce-4ee6-4ca0-850d-cd60051e1d71"/>
+			<MemberComponentTemplate Name="EatPickableBehavior" Guid="ffffffff-1837-0000-0000-000000000334">
+				<ParameterSet Name="FoodFactors" Guid="ffffffff-1837-0000-0000-000000000335">
+					<Parameter Name="Meat" Guid="ffffffff-1837-0000-0000-000000000336" Value="1" Type="float"/>
+					<Parameter Name="Bread" Guid="ffffffff-1837-0000-0000-000000000337" Value="1" Type="float"/>
+				</ParameterSet>
+			</MemberComponentTemplate>
+		</EntityTemplate>
+		<!--飞船<EntityTemplate Name="SpaceShip1" Guid="ffffffff-aaab-0000-0000-0000000000a1">
+			
+			<MemberComponentTemplate Name="SpaceShip1" Guid="ffffffff-aaab-0000-0000-000000000001" InheritanceParent="b05700ed-7e4e-4679-98f5-b597f421496b" />
+			<MemberComponentTemplate Name="SimpleModel" Guid="ffffffff-aaab-0000-0000-000000000002" InheritanceParent="cc5a4e72-0df9-4acf-a42e-ecb5a2a7baf4">
+				<Parameter Name="ModelName" Guid="ffffffff-aaab-0000-0000-000000000003" Value="Models/SpaceShip/starchaser" Type="string" />
+				<Parameter Name="CastsShadow" Guid="ffffffff-aaab-0000-0000-000000000004" Value="True" Type="bool" />
+				<Parameter Name="TextureOverride" Guid="ffffffff-aaab-0000-0000-000000000005" Value="Textures/SpaceShip/starchaser" Type="string" />
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Spawn" Guid="ffffffff-aaab-0000-0000-000000000006" InheritanceParent="65268743-4076-4ee3-aefe-f02a54d16b36" />
+			<MemberComponentTemplate Name="OnFire" Guid="ffffffff-aaab-0000-0000-000000000007" InheritanceParent="93590d78-63b9-4cd6-bc41-e66864cbb050" />
+			<MemberComponentTemplate Name="Mount" Guid="ffffffff-aaab-0000-0000-000000000008" InheritanceParent="d0b14127-39ce-4490-af00-fb4111e9c51e">
+				<Parameter Name="MountOffset" Guid="ffffffff-aaab-0000-0000-000000000009" Value="0,0.9,-0.2" Type="Vector3" />
+				<Parameter Name="DismountOffset" Guid="ffffffff-aaab-0000-0000-000000000010" Value="0,0.5,0.4" Type="Vector3" />
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Body" Guid="ffffffff-aaab-0000-0000-000000000011" InheritanceParent="8edd1986-0dcc-424f-893a-491c089b821e">
+				<Parameter Name="WaterSwayAngle" Guid="ffffffff-aaab-0000-0000-000000000012" Value="0.04" Type="float" />
+				<Parameter Name="MaxSmoothRiseHeight" Guid="ffffffff-aaab-0000-0000-000000000013" Value="0.3" Type="float" />
+				<Parameter Name="BoxSize" Guid="ffffffff-aaab-0000-0000-000000000014" Value="1.45,0.5,1.45" Type="Vector3" />
+				<Parameter Name="WaterDrag" Guid="ffffffff-aaab-0000-0000-000000000015" Value="6,4" Type="Vector2" />
+				<Parameter Name="Mass" Guid="ffffffff-aaab-0000-0000-000000000016" Value="250" Type="float" />
+				<Parameter Name="AirDrag" Guid="ffffffff-aaab-0000-0000-000000000017" Value="0.25,0.5" Type="Vector2" />
+				<Parameter Name="Density" Guid="ffffffff-aaab-0000-0000-000000000018" Value="0.8" Type="float" />
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Health" Guid="ffffffff-aaab-0000-0000-000000000019" InheritanceParent="d7a50718-e128-4d0e-bac1-16f789d50ddd">
+				<Parameter Name="AttackResilience" Guid="ffffffff-aaab-0000-0000-000000000020" Value="20000" Type="float" />
+			</MemberComponentTemplate>
+			
+			<MemberComponentTemplate Name="Vehicle" Guid="ffffffff-aaab-0000-0000-000000000039" >
+				<Parameter Name="VehicleType" Guid="ffffffff-aaab-0000-0000-000000000040" Value="Plane" Type="string" />
+			</MemberComponentTemplate>
+			
+
+			
+			
+		</EntityTemplate>-->
+		
+		<EntityTemplate Name="SpaceShip1" Guid="ffffffcc-0000-0000-0000-000000000088">
+			<MemberComponentTemplate Name="SpaceShip1" Guid="ffffffcc-0000-0000-0000-000000000089" InheritanceParent="b05700ed-7e4e-4679-98f5-b597f421496b">
+				<Parameter Name="JumpStrength" Guid="f2c6063a-2eae-4d66-bb18-969c7d089aa1" Value="0.95" Type="float" />
+				<Parameter Name="Class" Guid="ffffffcc-0000-0000-0000-000000000090" Value="Game.ComponentCar" Type="string"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="SimpleModel" Guid="ffffffcc-0000-0000-0000-000000000091" InheritanceParent="cc5a4e72-0df9-4acf-a42e-ecb5a2a7baf4">
+				<Parameter Name="ModelName" Guid="ffffffcc-0000-0000-0000-000000000092" Value="Models/SpaceShip/starchaser" Type="string"/>
+				<Parameter Name="CastsShadow" Guid="ffffffcc-0000-0000-0000-000000000093" Value="True" Type="bool"/>
+				<Parameter Name="TextureOverride" Guid="ffffffcc-0000-0000-0000-000000000094" Value="Textures/SpaceShip/starchaser" Type="string"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Spawn" Guid="ffffffcc-0000-0000-0000-000000000095" InheritanceParent="65268743-4076-4ee3-aefe-f02a54d16b36"/>
+			<MemberComponentTemplate Name="Mount" Guid="ffffffcc-0000-0000-0000-000000000096" InheritanceParent="d0b14127-39ce-4490-af00-fb4111e9c51e">
+				<Parameter Name="MountOffset" Guid="ffffffcc-0000-0000-0000-000000000097" Value="0,1.3,1" Type="Vector3"/>
+				<Parameter Name="DismountOffset" Guid="ffffffcc-0000-0000-0000-000000000098" Value="0,0.5,0.4" Type="Vector3"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Body" Guid="ffffffcc-0000-0000-0000-000000000099" InheritanceParent="8edd1986-0dcc-424f-893a-491c089b821e">
+				<Parameter Name="WaterSwayAngle" Guid="ffffffcc-0000-0000-0000-000000000100" Value="0" Type="float"/>
+				<Parameter Name="MaxSmoothRiseHeight" Guid="ffffffcc-0000-0000-0000-000000000101" Value="0.3" Type="float"/>
+				<Parameter Name="BoxSize" Guid="ffffffcc-0000-0000-0000-000000000102" Value="2.5,2,1.45" Type="Vector3"/>
+				<Parameter Name="WaterDrag" Guid="ffffffcc-0000-0000-0000-000000000103" Value="6,4" Type="Vector2"/>
+				<Parameter Name="Mass" Guid="ffffffcc-0000-0000-0000-000000000104" Value="250" Type="float"/>
+				<Parameter Name="AirDrag" Guid="ffffffcc-0000-0000-0000-000000000105" Value="0.25,0.5" Type="Vector2"/>
+				<Parameter Name="Density" Guid="ffffffcc-0000-0000-0000-000000000106" Value="15" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Damage" Guid="ffffffcc-0000-0000-0000-000000000107" InheritanceParent="ffffffcc-aabb-0000-0000-000000000001">
+				<Parameter Name="AttackResilience" Guid="ffffffcc-0000-0000-0000-000000000108" Value="200000" Type="float"/>
+				<Parameter Name="FallResilience" Guid="ffffffcc-0000-0000-0000-000000000109" Value="200000" Type="float"/>
+			</MemberComponentTemplate>
+		</EntityTemplate>
 	</Folder>
 
 	<Folder Name="Abstract" Guid="662d69f8-483c-4271-966b-da9cbb4f5042">
+		<!--陆地动物父类-->
+		<EntityTemplate Name="AnimalBase" Guid="ffffffff-c558-0000-0000-000000000000" InheritanceParent="3f077159-f492-419b-859a-bb051de6339f">
+			<MemberComponentTemplate Name="MoveAwayBehavior" Guid="ffffffff-c558-0000-0000-000000000001" InheritanceParent="ea5c25d3-2179-494b-b6e3-0534f08aee36"/>
+			<MemberComponentTemplate Name="Locomotion" Guid="ffffffff-c558-0000-0000-000000000002">
+				<Parameter Name="SwimSpeed" Guid="ffffffff-c558-0000-0000-000000000003" Value="0" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="AutoJump" Guid="ffffffff-c558-0000-0000-000000000004" InheritanceParent="ef94c9db-75b0-4e0f-9971-f575ac88661b"/>
+			<MemberComponentTemplate Name="LookAroundBehavior" Guid="ffffffff-c558-0000-0000-000000000005" InheritanceParent="faf5cd07-6752-4720-8761-a666831281e0"/>
+			<MemberComponentTemplate Name="Health" Guid="ffffffff-c558-0000-0000-000000000006" InheritanceParent="d7a50718-e128-4d0e-bac1-16f789d50ddd">
+				<Parameter Name="CorpseDuration" Guid="ffffffff-c558-0000-0000-000000000007" Value="1" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Inventory" Guid="ffffffff-c558-0000-0000-000000000008" InheritanceParent="de5c0cb9-42d1-4ee4-b58f-bb9bb668b890">
+				<Parameter Name="SlotsCount" Guid="c3b75594-58f9-439e-8068-680237ddf0be" Value="12" Type="int" />
+			</MemberComponentTemplate>
+			<!---->
+			<MemberComponentTemplate Name="Creature" Guid="0f35728d-b976-4f49-9b1c-b4cd92c3cd95">
+				<Parameter Name="ConstantSpawn" Guid="5742fe31-ee12-407b-a931-76a6a6803247" Value="True" Type="bool" />
+			</MemberComponentTemplate>
+		</EntityTemplate>
+		<!--人形动物父类-->
+		<EntityTemplate Name="HumanAnimal" Guid="ffffffff-c558-0000-0000-000000000009" InheritanceParent="ffffffff-c558-0000-0000-000000000000">
+
+			<!--人形动物父类-->
+			<MemberComponentTemplate Name="Rider" Guid="03daaca7-524b-4c4c-bc25-e16b4104f4c0" InheritanceParent="894cdf33-9691-4320-a342-3aba1fd1c746">
+				<Parameter Name="RiderOffset" Guid="03daaca7-524b-4c4c-bc25-e16b4104f4c1" Value="0,-0.71,0" Type="Vector3" />
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Loot" Guid="32572e80-8200-4cd4-ae2c-4992e360009b">
+				<Parameter Name="LootDropped" Guid="96f2e363-4a94-40a8-b688-1c55fd80805b" Value="False" Type="bool" />
+				<ParameterSet Name="LootOnFire" Guid="32572e80-8200-4cd4-ae2c-4992e3600092">
+					<Parameter Name="1" Guid="32572e80-8200-4cd4-ae2c-4992e3600093" Value="RottenMeatBlock;1;2" Type="string"/>
+					
+				</ParameterSet>
+				<ParameterSet Name="Loot" Guid="32572e80-8200-4cd4-ae2c-4992e3600094">
+					<Parameter Name="1" Guid="32572e80-8200-4cd4-ae2c-4992e3600095" Value="RottenMeatBlock;1;2" Type="string"/>
+					
+					
+				</ParameterSet>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="HerdBehavior" Guid="ffffffff-c558-0000-0000-000000000010" InheritanceParent="dfe7218e-ce14-4bde-8dac-f919c38e9efe">
+				<Parameter Name="AutoNearbyCreaturesHelp" Guid="ffffffff-c558-0000-0000-000000000011" Value="True" Type="bool"/>
+				<Parameter Name="HerdName" Guid="ffffffff-c558-0000-0000-000000000012" Value="Human" Type="string"/>
+				<Parameter Name="HerdingRange" Guid="1cab51a6-9f47-44b5-acb0-802ed7bbb1f9" Value="30" Type="float" />
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Body" Guid="ffffffff-c558-0000-0000-000000000013">
+				<Parameter Name="BoxSize" Guid="ffffffff-c558-0000-0000-000000000014" Value="0.5,1.77,0.5" Type="Vector3"/>
+				<Parameter Name="Mass" Guid="ffffffff-c558-0000-0000-000000000015" Value="70" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="WalkAroundBehavior" Guid="ffffffff-c558-0000-0000-000000000016" InheritanceParent="aebb86ce-4ee6-4ca0-850d-cd60051e1d71"/>
+			<MemberComponentTemplate Name="Health" Guid="ffffffff-c558-0000-0000-000000000017">
+				<Parameter Name="AttackResilience" Guid="ffffffff-c558-0000-0000-000000000018" Value="30" Type="float"/>
+				<Parameter Name="FallResilience" Guid="ffffffff-c558-0000-0000-000000000019" Value="30" Type="float"/>
+				<Parameter Name="CorpseDuration" Guid="29a144b5-7f6c-4269-a3b9-c7aa2630c3f1" Value="0.0001" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="HumanModel" Guid="ffffffff-c558-0000-0000-000000000020" InheritanceParent="0566662e-bb24-45f9-84d8-f3c1e5d083df">
+				<Parameter Name="WalkLegsAngle" Guid="ffffffff-c558-0000-0000-000000000021" Value="0.35" Type="float"/>
+				<Parameter Name="ModelName" Guid="ffffffff-c558-0000-0000-000000000022" Value="Models/HumanMale" Type="string"/>
+				<Parameter Name="WalkAnimationSpeed" Guid="ffffffff-c558-0000-0000-000000000023" Value="0.55" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Miner" Guid="ffffffff-c558-0000-0000-000000000024" InheritanceParent="8acca888-ba39-464f-bcf5-6ae15e448c62">
+				<Parameter Name="AttackPower" Guid="ffffffff-c558-0000-0000-000000000025" Value="1" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Locomotion" Guid="ffffffff-c558-0000-0000-000000000026">
+				<Parameter Name="WalkSpeedWhenTurning" Guid="ffffffff-c558-0000-0000-000000000027" Value="1.5" Type="float"/>
+				<Parameter Name="InAirWalkFactor" Guid="ffffffff-c558-0000-0000-000000000028" Value="0.5" Type="float"/>
+				<Parameter Name="WalkSpeed" Guid="ffffffff-c558-0000-0000-000000000029" Value="2.7" Type="float"/>
+				<Parameter Name="FlySpeed" Guid="ffffffff-c558-0000-0000-000000000030" Value="0" Type="float"/>
+				<Parameter Name="TurnSpeed" Guid="ffffffff-c558-0000-0000-000000000031" Value="8" Type="float"/>
+				<Parameter Name="JumpSpeed" Guid="ffffffff-c558-0000-0000-000000000032" Value="4.5" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="ChaseBehavior" Guid="ffffffff-c558-0000-0000-000000000033" InheritanceParent="31894441-d90a-4549-9264-db9dbe20e234">
+				<Parameter Name="AutoChaseMask" Guid="ffffffff-c558-0000-0000-000000000034" Value="LandPredator, Bird" Type="Game.CreatureCategory"/>
+				<Parameter Name="ChaseOnTouchProbability" Guid="ffffffff-c558-0000-0000-000000000035" Value="1" Type="float"/>
+				<Parameter Name="DayChaseTime" Guid="ffffffff-c558-0000-0000-000000000036" Value="8" Type="float"/>
+				<Parameter Name="DayChaseRange" Guid="ffffffff-c558-0000-0000-000000000037" Value="8" Type="float"/>
+				<Parameter Name="NightChaseTime" Guid="ffffffff-c558-0000-0000-000000000038" Value="8" Type="float"/>
+				<Parameter Name="NightChaseRange" Guid="ffffffff-c558-0000-0000-000000000039" Value="8" Type="float"/>
+				<Parameter Name="ChaseNonPlayerProbability" Guid="ffffffff-c558-0000-0000-000000000040" Value="0.5" Type="float"/>
+			</MemberComponentTemplate>
+		</EntityTemplate>
 	</Folder>
 </FantasyMod>

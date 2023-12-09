@@ -1,0 +1,64 @@
+<Mod>
+	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
+		<MemberComponentTemplate Name="FCHealBuff" Guid="12000000-abcd-100a-0000-000000000001" InheritanceParent="12000000-abcd-1000-0000-000000000001"/>
+		<MemberComponentTemplate Name="FCATKBuff" Guid="13000000-abcd-200a-0000-000000000001" InheritanceParent="13000000-abcd-2000-0000-000000000001"/>
+		<MemberComponentTemplate Name="FCSpeedBuff" Guid="14000000-abcd-200a-0000-000000000001" InheritanceParent="14000000-abcd-2000-0000-000000000001"/>
+		<MemberComponentTemplate Name="FCNightseeBuff" Guid="15000000-abcd-200a-0000-000000000001" InheritanceParent="15000000-abcd-2000-0000-000000000001"/>
+		<MemberComponentTemplate Name="FCComponentPC" Guid="16000000-abcd-200a-0000-000000000001" InheritanceParent="16000000-abcd-2000-0000-000000000001"/>
+		<MemberComponentTemplate Name="FCComponentBlind" Guid="17000000-abcd-200a-0000-000000000001" InheritanceParent="17000000-abcd-2000-0000-000000000001"/>
+		<MemberComponentTemplate Name="FCComponentSlow" Guid="18000000-abcd-200a-0000-000000000001" InheritanceParent="18000000-abcd-2000-b000-000000000001"/>
+		<MemberComponentTemplate Name="FCComponentJump" Guid="19000000-abcd-200a-0000-000000000001" InheritanceParent="19000000-abcd-2000-b000-000000000001"/>
+		<MemberComponentTemplate Name="FCComponentDizzy" Guid="20000000-abcd-200a-0000-000000000001" InheritanceParent="20000000-abcd-2000-b000-000000000001"/>
+		<MemberComponentTemplate Name="FCComponentDizzy" Guid="20000000-abcd-200a-0000-000000000001" InheritanceParent="20000000-abcd-2000-b000-000000000001"/>
+		
+	</EntityTemplate>
+	<EntityTemplate Name="Creatures" Guid="bc5be211-c1f8-4e50-9ffb-4fde625d2692">
+		<MemberComponentTemplate Name="FCHealBuff" Guid="12000000-abcd-100c-0000-000000000001" InheritanceParent="12000000-abcd-1000-0000-000000000001"/>
+		<MemberComponentTemplate Name="FCATKBuff" Guid="13000000-abcd-200c-0000-000000000001" InheritanceParent="13000000-abcd-2000-0000-000000000001"/>
+		<MemberComponentTemplate Name="FCSpeedBuff" Guid="14000000-abcd-200c-0000-000000000001" InheritanceParent="14000000-abcd-2000-0000-000000000001"/>
+		<MemberComponentTemplate Name="FCComponentPC" Guid="16000000-abcd-200c-0000-000000000001" InheritanceParent="16000000-abcd-2000-0000-000000000001"/>
+		<MemberComponentTemplate Name="FCComponentSlow" Guid="18000000-abcd-200c-0000-000000000001" InheritanceParent="18000000-abcd-2000-b000-000000000001"/>
+		<!--buff<MemberComponentTemplate Name="FCNightseeBuff" Guid="15000000-abcd-200c-0000-000000000001" InheritanceParent="15000000-abcd-2000-0000-000000000001"/>-->
+
+	</EntityTemplate>
+	<!--加攻击力buff-->
+
+	
+
+	<!--BUFF父类-->
+	<Folder Name="Gameplay" Guid="23dd4cdf-442b-4951-b4b1-1043fe4f444e">
+
+		<ComponentTemplate Name="FCHealBuff" Guid="12000000-abcd-1000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="12000000-abcd-1000-0000-000000000002" Value="Game.ComponentHealBuffA" Type="string" />
+		</ComponentTemplate>
+		<ComponentTemplate Name="FCATKBuff" Guid="13000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="13000000-abcd-2000-0000-000000000002" Value="Game.ComponentAttackUP" Type="string" />
+		</ComponentTemplate>
+		<ComponentTemplate Name="FCSpeedBuff" Guid="14000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="14000000-abcd-2000-0000-000000000002" Value="Game.ComponentSpeedUP" Type="string" />
+		</ComponentTemplate>
+		<ComponentTemplate Name="FCNightseeBuff" Guid="15000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="15000000-abcd-2000-0000-000000000002" Value="Game.ComponentNightsight" Type="string" />
+		</ComponentTemplate>
+		<ComponentTemplate Name="FCComponentPC" Guid="16000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="16000000-abcd-2000-0000-000000000002" Value="Test1.FCComponentPC" Type="string" />
+		</ComponentTemplate>
+		<ComponentTemplate Name="FCComponentBlind" Guid="17000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="17000000-abcd-2000-0000-000000000002" Value="Game.ComponentBlind" Type="string" />
+		</ComponentTemplate>
+		<!--18开始，后面都要带一个b-->
+		<ComponentTemplate Name="FCComponentSlow" Guid="18000000-abcd-2000-b000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="18000000-abcd-2000-b000-000000000002" Value="Game.ComponentSlowDown" Type="string" />
+		</ComponentTemplate>
+		<ComponentTemplate Name="FCComponentJump" Guid="19000000-abcd-2000-b000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="19000000-abcd-2000-b000-000000000002" Value="Game.ComponentJump" Type="string" />
+		</ComponentTemplate>
+		<ComponentTemplate Name="FCComponentDizzy" Guid="20000000-abcd-2000-b000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="20000000-abcd-2000-b000-000000000002" Value="Game.ComponentDizzy" Type="string" />
+		</ComponentTemplate>
+		
+
+
+
+	</Folder>
+</Mod>

@@ -1,0 +1,40 @@
+<CanvasWidget xmlns="runtime-namespace:Game">
+
+	<CanvasWidget Size="600, 400" ClampToBounds="true" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+		<RectangleWidget FillColor="0, 0, 0, 255" OutlineColor="128, 128, 128, 128" OutlineThickness="2" />
+
+		<StackPanelWidget Direction="Vertical" HorizontalAlignment="Center" Margin="10, 0" IsVisible="true">
+		
+			<LabelWidget Text="出售物品" HorizontalAlignment="Center" Margin="0, 15" />
+			
+            <CanvasWidget Size="0, 8" />
+            
+			<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center" Margin="0, 2">        
+                <CanvasWidget Size="240, Infinity">
+                    <StackPanelWidget Direction="Vertical" HorizontalAlignment="Center" IsVisible="true">
+                        <InventorySlotWidget Name="ToSellItemSlot" Size="80, 80" />
+                        <LabelWidget Name="DisplayItemDataLabel" WordWrap="true" HorizontalAlignment="Center" />
+                    </StackPanelWidget>
+                </CanvasWidget>
+                <CanvasWidget Size="Infinity, Infinity" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <GridPanelWidget Name="InventoryGrid" ColumnsCount="4" RowsCount="4"/>
+                </CanvasWidget>
+            </StackPanelWidget>
+
+			<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center" Margin="0, 2">        
+			    <UniformSpacingPanelWidget Direction="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 15">
+				    <BevelledButtonWidget Style="{Styles/ButtonStyle_160x60}" HorizontalAlignment="Center" Name="OkButton" Text="确定售出" />
+			    </UniformSpacingPanelWidget>
+			    <UniformSpacingPanelWidget Direction="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 15">
+				    <BevelledButtonWidget Style="{Styles/ButtonStyle_160x60}" HorizontalAlignment="Center" Name="CancelButton" Text="终止交易" />
+			    </UniformSpacingPanelWidget>
+            </StackPanelWidget>
+            
+		</StackPanelWidget>
+
+	</CanvasWidget>
+
+    <DragHostWidget Name="DragHost" />
+
+</CanvasWidget>

@@ -4,33 +4,128 @@
       " a"
       "aba"
     </Recipe>
-	 <Recipe Result="SandBlock" ResultCount="1" RequiredHeatLevel="2" a="cobblestone"  Description="测试">
-      "aaaa"
-      "aaaa"
-	  "aaaa"
-	  "aaaa"
+	
+	<!-- 魔药区域 fcfood:2水瓶  fcdvfood:0  fcplant:0-->
+	<Recipe Result="FCDVFoodBlock:1" ResultCount="1" RequiredHeatLevel="0" a="fcfood:24" b="fcdvfood:0" c="lightdust"  Description="闪烁西瓜由萤石粉和灵能合成，并且只能在精致台制作。">
+      "abc"
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:2" ResultCount="1" RequiredHeatLevel="0" a="pingguo" b="fcdvfood:0" c="lightdust"  Description="闪烁苹果由萤石粉和灵能合成，并且只能在精致台制作。">
+      "abc"
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:3" ResultCount="1" RequiredHeatLevel="0" a="juzi" b="fcdvfood:0" c="lightdust"  Description="闪烁橘子由萤石粉和灵能合成，并且只能在精致台制作。">
+      "abc"
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:4" ResultCount="1" RequiredHeatLevel="0" a="cocobean" b="fcdvfood:0" c="lightdust"  Description="闪烁可可豆由萤石粉和灵能合成，并且只能在精致台制作。">
+      "abc"
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:5" ResultCount="3" RequiredHeatLevel="0" a="fcdvfood:4"   Description="闪烁可可粉由闪烁可可豆分解，并且只能在精致台制作。">
+      "a"
+      
     </Recipe>
 	
+	<Recipe Result="FCDVFoodBlock:6" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:21" d="fcplant:20" e="lightdust" Description="夜视药水合成请看配方，其中蓝顶白褶菌、蓝环菌生长在极寒潮湿地带。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "ceed"
+	  
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:7" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:1" d="fcplant:17" e="lightdust" Description="治疗药水合成请看配方，其中血肉菌需要击杀血泪之池的丧尸获得。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "deed"
+	  "dddd"
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:8" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:1" d="fcplant:17" e="lightdust" Description="攻击力药水合成请看配方，其中血莲蓬、血肉菌需要击杀血泪之池的丧尸获得。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "deed"
+	  "cccc"
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:9" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:10"  e="lightdust" Description="速度药水合成请看配方，其中蜜环菌生长在温暖潮湿的地方，一般可在森林地带找到。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "ceec"
+	  "cccc"
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:10" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:9" d="fcplant:22" e="lightdust" Description="跳跃药水合成请看配方，其中需要大白口蘑。注意，大白口蘑较为稀有，生长在温暖潮湿的地方。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "ceec"
+	  
+    </Recipe>
+	<!-- 经验药水<Recipe Result="FCDVFoodBlock:11" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:21" d="fcplant:22" e="lightdust" Description="经验药水合成请看配方，其中血莲蓬、血肉菌需要击杀血泪之池的丧尸获得。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "ceed"
+	  
+    </Recipe>-->
+	
+	<Recipe Result="FCDVFoodBlock:12" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:21" d="fcplant:22" e="lightdust" Description="灵能药水合成请看配方，灵能药水就是高度浓缩富含灵力的药水。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "beeb"
+	  "bbbb"
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:13" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:16" d="fcplant:33" e="lightdust" Description="剧毒药水合成请看配方，其中这些毒蘑菇一般长在温暖潮湿的地方，之所以用这两种蘑菇，是因为这两种毒性最强。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "ceed"
+	  
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:14" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:11"  e="lightdust" Description="致盲药水合成请看配方，其中墨汁鬼伞生长在温暖潮湿的地方。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "ceec"
+	  
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:15" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:11" d="fcplant:16" f="fcplant:27" g="fcplant:31" h="fcplant:33" e="lightdust" Description="瘟疫药水合成请看配方，瘟疫药水需要几乎所有的毒蘑菇。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "ceed"
+	  "fgh "
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:16" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:0" d="fcplant:22" e="lightdust" Description="迟缓药水合成请看配方，其中极寒蘑菇属于极寒植物，生长在极寒潮湿的环境。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "ceec"
+	  "cccc"
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:17" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:6" d="fcplant:35" e="lightdust" Description="眩晕药水合成请看配方，其中硫黄菌生长在岩浆附近，迷幻菇目前只能商城购买。如果懒得收集，材料可以在游戏商店购买。">
+      "aaaa"
+      "bbbb"
+	  "ceed"
+	  
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:18" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:1" d="fcplant:16" f="fcplant:29" e="lightdust" Description="降Sen药水合成请看配方，其中血鎴戠埍浣�鎴戠埍浣�需要击杀鎴戠埍浣�鎴戠埍浣�血泪之池的鎴戠埍浣�鎴戠埍浣�丧尸获得。如果懒得收集，材料可以在游戏商店购买。哦……鎴戠埍浣�这个药水的制作鎴戠埍浣�很明显和其他药水都鎴戠埍浣�一样鎴戠埍浣�这个药水只会让你立刻进入0sen鎴戠埍浣�状态，毫无作鎴戠埍浣�用的药水！我建议你不要鎴戠埍浣�去合成它，浪费资源。">
+      "aaaa"
+      "cccc"
+	  "dffd"
+	  "dddd"
+    </Recipe>
+	<Recipe Result="FCDVFoodBlock:19" ResultCount="4" RequiredHeatLevel="2" a="fcfood:26" b="fcdvfood:0" c="fcplant:1" d="fcplant:17" e="lightdust" Description="治疗药水合成请看配方，其中血莲蓬、血肉菌需要击杀血泪之池的丧尸获得。如果懒得收集，材料可以在游戏商店购买。啊……永远的幸福鎴戠埍浣�，喝了它就鎴戠埍浣�可以瞬间摆脱恐怖的低sen环境鎴戠埍浣�，瞬间回满sen值，我觉得你需要备上100瓶！！！！！！！！！！！！！！！！！？？……鎴戠埍浣�鎴戠埍浣�%#">
+      "aaaa"
+      "cccc"
+	  "dddd"
+	  "dddd"
+    </Recipe>
 	<!-- 需要加热    -->
-	<Recipe Result="Qingzhengyu" ResultCount="1" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="1" a="rawfish" b="waterbucket" Description="[0]">
+	<Recipe Result="FCORFoodBlock:10" ResultCount="1" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="1" a="rawfish" b="waterbucket" Description="制作清蒸鱼">
 	  "ab"
 	</Recipe>
-	<Recipe Result="Chocolate" ResultCount="1" RequiredHeatLevel="1" a="rawchocolate"  Description="[0]">
+	<Recipe Result="Chocolate" ResultCount="1" RequiredHeatLevel="1" a="fcfood:25"  Description="生巧克力做巧克力">
 	  "a"
 	</Recipe>
-	<Recipe Result="Shuxiandan" ResultCount="1" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="1" a="rawxiandan" b="waterbucket" Description="[0]">
+
+	<Recipe Result="FCORFoodBlock:15" ResultCount="2"  RequiredHeatLevel="1" a="fcfood:25" Description="水瓶蒸馏制作盐">
+	  "a"
+	</Recipe>
+	<Recipe Result="FCORFoodBlock:4" ResultCount="1" RequiredHeatLevel="1" a="fcfood:11" Description="生瓜子烤制瓜子">
+	  "a"
+	</Recipe>
+	<Recipe Result="FCORFoodBlock:23" ResultCount="5"  RequiredHeatLevel="1" a="fcfood:12" b="fcfood:22" Description="生鸡块和油瓶炸成炸鸡">
 	  "ab"
 	</Recipe>
-	<Recipe Result="Salt" ResultCount="2"  RequiredHeatLevel="1" a="shuiping" Description="[0]">
-	  "a"
-	</Recipe>
-	<Recipe Result="Guazi" ResultCount="1" RequiredHeatLevel="1" a="rawguazi" Description="[0]">
-	  "a"
-	</Recipe>
-	<Recipe Result="Zhaji" ResultCount="5" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="1" a="rawjikuai" b="youping" Description="[0]">
-	  "ab"
-	</Recipe>
-	<Recipe Result="Xiaosurou" ResultCount="5" RequiredHeatLevel="1" a="readymeat" b="youping" Description="[0]">
+	<Recipe Result="FCORFoodBlock:18" ResultCount="5" RequiredHeatLevel="1" a="fcfood:14" b="fcfood:22" Description="小酥肉，由油和肉片炸制">
 	  "ab"
 	</Recipe>
 
@@ -164,25 +259,25 @@
     
 
 
-	<Recipe Result="Mianbaopian" ResultCount="2" RequiredHeatLevel="0" a="bread" Description="[0]">
+	<Recipe Result="FCORFoodBlock:8" ResultCount="2" RequiredHeatLevel="0" a="bread" Description="面包片">
 	  "a" 
 	</Recipe>
-	<Recipe Result="Shousi" ResultCount="1" RequiredHeatLevel="0" a="kelp" b="dough" Description="[0]">
+	<Recipe Result="FCORFoodBlock:16" ResultCount="1" RequiredHeatLevel="0" a="kelp" b="dough" Description="寿司">
 	  "aaa"
 	  "aba"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="Qingtuan" ResultCount="1" RequiredHeatLevel="0" a="tallgrass" b="dough" Description="[0]">
+	<Recipe Result="FCORFoodBlock:9" ResultCount="1" RequiredHeatLevel="0" a="tallgrass" b="dough" Description="青团">
 	  "aaa"
 	  "aba"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="Dangao" ResultCount="1" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="seeds:5" b="dough" c="milkbucket" d="youping" Description="[0]">
+	<Recipe Result="FCORFoodBlock:0" ResultCount="1" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="seeds:5" b="dough" c="milkbucket" d="fcfood:22" Description="[0]">
 	  "aaa"
 	  "cbd"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="Rawguazi" ResultCount="2" RequiredHeatLevel="0" a="sunflower" Description="生瓜子">
+	<Recipe Result="FCORFoodBlock:11" ResultCount="2" RequiredHeatLevel="0" a="sunflower" Description="生瓜子">
 	  "a" 
 	</Recipe>
 	<Recipe Result="FCSeedBlock:1" ResultCount="18" RequiredHeatLevel="0" a="sunflower" Description="向日葵种子">
@@ -190,31 +285,31 @@
 	  "aaa" 
 	  "aaa" 
 	</Recipe>
-	<Recipe Result="Xiguapian" ResultCount="2" RequiredHeatLevel="0" a="xigua:8" Description="[0]">
+	<Recipe Result="FCORFoodBlock:24" ResultCount="2" RequiredHeatLevel="0" a="xigua:8" Description="西瓜片">
 	  "a" 
 	</Recipe>
 
-	<Recipe Result="Xianbing" ResultCount="1" RequiredHeatLevel="0" a="tallgrass" b="dough" c="salt" d="cookedmeat" Description="[0]">
+	<Recipe Result="FCORFoodBlock:17" ResultCount="1" RequiredHeatLevel="0" a="tallgrass" b="dough" c="fcfood:15" d="cookedmeat" Description="馅饼">
 	  "ac"
 	  "db"
 	</Recipe>
-	<Recipe Result="Huangmengji" ResultCount="1" RequiredHeatLevel="0" a="jiangyou" b="cookedbird" c="salt" Description="[0]">
+	<Recipe Result="FCORFoodBlock:6" ResultCount="1" RequiredHeatLevel="0" a="fcfood:7" b="cookedbird" c="fcfood:15" Description="黄焖鸡=酱油+熟鸡+盐">
 	  "abc"
 	</Recipe>
-	<Recipe Result="Cong" ResultCount="1" RequiredHeatLevel="0" a="tallgrass" Description="[0]">
+	<Recipe Result="FCORFoodBlock:3" ResultCount="1" RequiredHeatLevel="0" a="tallgrass" Description="葱">
 	  "aaa"
 	  "aaa"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="Hamburger" ResultCount="1" RequiredHeatLevel="0" a="mianbaopian" b="cookedmeat" c="cong" d="youping" Description="[0]">
+	<Recipe Result="FCORFoodBlock:5" ResultCount="1" RequiredHeatLevel="0" a="fcfood:8" b="cookedmeat" c="fcfood:3" d="fcfood:22" Description="汉堡=面包片+熟肉+葱+油瓶">
 	  " a "
 	  "cbd"
 	  " a "
 	</Recipe>
-	<Recipe Result="Rawjikuai" ResultCount="2" RequiredHeatLevel="0" a="rawbird"  Description="[0]">
+	<Recipe Result="FCORFoodBlock:12" ResultCount="2" RequiredHeatLevel="0" a="rawbird"  Description="鸟肉可以分解成生鸡块">
 	  "aa" 
 	</Recipe>
-	<Recipe Result="Readymeat" ResultCount="1" RequiredHeatLevel="0" a="flour" b="cookedmeat" c="salt" Description="[0]">
+	<Recipe Result="FCORFoodBlock:14" ResultCount="1" RequiredHeatLevel="0" a="flour" b="cookedmeat" c="fcfood:15" Description="待处理的肉片=面粉+熟肉+盐">
 	  "abc"
 	</Recipe>
 
@@ -249,7 +344,7 @@
 	  "a a"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="Boliping" ResultCount="9" RequiredHeatLevel="0" a="glass" b="planks"   Description="制作一次性玻璃瓶">
+	<Recipe Result="FCORFoodBlock:2" ResultCount="9" RequiredHeatLevel="0" a="glass" b="planks"   Description="制作一次性玻璃瓶">
 	  " b "
 	  "a a"
 	  " a "
@@ -266,9 +361,7 @@
 	<Recipe Result="Xiguazhi" ResultCount="1"  RequiredHeatLevel="0" a="xigua:8" b="boliping2" Description="西瓜汁">
 	  "ab"
 	</Recipe>
-	<Recipe Result="Xiguazhi" ResultCount="1"  RequiredHeatLevel="0" a="xigua:24" b="boliping2" Description="西瓜汁2">
-	  "ab"
-	</Recipe>
+	
 	<Recipe Result="Pingguozhi" ResultCount="1"  RequiredHeatLevel="0" a="pingguo" b="boliping2" Description="[0]">
 	  "aa"
 	  " b "
@@ -284,7 +377,7 @@
 	<Recipe Result="Cocofeng" ResultCount="3"  RequiredHeatLevel="0" a="cocobean" Description="磨成可可粉">
 	  "a"
 	</Recipe>
-	<Recipe Result="RawChocolate" ResultCount="1" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="cocofeng"  b="milkbucket" Description="[0]">
+	<Recipe Result="FCORFoodBlock:25" ResultCount="1" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="cocofeng"  b="milkbucket" Description="[0]">
 	  "aaa"
 	  "aba"
 	  "aaa"
@@ -301,6 +394,11 @@
 	<Recipe Result="PlanksBlock" ResultCount="10" RequiredHeatLevel="0" a="ljwood" Description="老君木可以提供更多木板">
 	  "a"
 	</Recipe>
+	<Recipe Result="WoodenDoorBlock" ResultCount="1" RequiredHeatLevel="0" a="yhplanks" Description="[0]">
+	"aa"
+	"aa"
+	"aa"
+    </Recipe>
 	<Recipe Result="StickBlock" ResultCount="4" RequiredHeatLevel="0" a="yhplanks" Description="[0]">
 	  "a"
 	  "a"
@@ -338,27 +436,27 @@
 
 
 	<!-- 各种液体桶的衍生物区    -->
-	<Recipe Result="Jiangyou" ResultCount="8" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="boliping" b="jiangyoutong" Description="酱油">
+	<Recipe Result="FCORFoodBlock:7" ResultCount="8" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="fcfood:2" b="jiangyoutong" Description="酱油">
 	  "aaa"
 	  "aba"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="Beer" ResultCount="8" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="boliping" b="jiutong"  Description="啤酒">
+	<Recipe Result="FCORFoodBlock:1" ResultCount="8" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="fcfood:2" b="jiutong"  Description="啤酒">
 	  "aaa"
 	  "aba"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="YHBeer" ResultCount="8" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="boliping" b="yhjiutong"  Description="啤酒">
+	<Recipe Result="YHBeer" ResultCount="9" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="fcfood:2" b="yhjiutong"  Description="啤酒">
 	  "aaa"
 	  "aba"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="ShuipingBlock" ResultCount="8" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="boliping" b="waterbucket" Description="[0]">
+	<Recipe Result="FCORFoodBlock:26" ResultCount="8" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="fcfood:2" b="waterbucket" Description="[0]">
 	  "aaa"
 	  "aba"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="Youping" ResultCount="8" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="boliping" b="youtong" Description="[0]">
+	<Recipe Result="FCORFoodBlock:22" ResultCount="8" Remains="EmptyBucketBlock" RemainsCount="1" RequiredHeatLevel="0" a="fcfood:2" b="youtong" Description="[0]">
 	  "aaa"
 	  "aba"
 	  "aaa"
@@ -374,12 +472,12 @@
 	  "aba"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="Youtong" ResultCount="1" RequiredHeatLevel="0" a="rawguazi" b="emptybucket" Description="油桶">
+	<Recipe Result="Youtong" ResultCount="1" RequiredHeatLevel="0" a="fcfood:11" b="emptybucket" Description="油桶">
 	  "aaa"
 	  "aba"
 	  "aaa"
 	</Recipe>
-	<Recipe Result="Youtong" ResultCount="1" RequiredHeatLevel="0" a="cong" b="emptybucket" Description="油桶（葱）">
+	<Recipe Result="Youtong" ResultCount="1" RequiredHeatLevel="0" a="fcfood:3" b="emptybucket" Description="油桶（葱）">
 	  "aaa"
 	  "aba"
 	  "aaa"
@@ -395,37 +493,32 @@
 
 
 	<!-- 腌肉区    -->
-	<Recipe Result="Yanrou" ResultCount="1" RequiredHeatLevel="0" a="rawmeat" b="salt" Description="腌肉">
+	<Recipe Result="FCORFoodBlock:21" ResultCount="1" RequiredHeatLevel="0" a="rawmeat" b="fcfood:15" Description="腌肉">
 	  "ab" 
 	</Recipe>
-	<Recipe Result="Yanchicken" ResultCount="1" RequiredHeatLevel="0" a="rawbird" b="salt" Description="腌鸡">
+	<Recipe Result="FCORFoodBlock:19" ResultCount="1" RequiredHeatLevel="0" a="rawbird" b="fcfood:15" Description="腌鸡">
 	  "ab" 
 	</Recipe>
-	<Recipe Result="Yanfish" ResultCount="1" RequiredHeatLevel="0" a="rawfish" b="salt" Description="腌鱼">
+	<Recipe Result="FCORFoodBlock:20" ResultCount="1" RequiredHeatLevel="0" a="rawfish" b="fcfood:15" Description="腌鱼">
 	  "ab" 
 	</Recipe>
 
 
 	<!-- 咸蛋区    -->
-	<Recipe Result="Rawxiandan" ResultCount="1" RequiredHeatLevel="0" a="egg:0" b="salt" Description="生咸蛋">
+	<Recipe Result="FCORFoodBlock:13" ResultCount="1" RequiredHeatLevel="0" a="egg:0" b="fcfood:15" Description="生咸蛋">
 	  "ab" 
 	</Recipe>
-	<Recipe Result="Rawxiandan" ResultCount="1" RequiredHeatLevel="0" a="egg:1" b="salt" Description="[0]">
+	<Recipe Result="FCORFoodBlock:13" ResultCount="1" RequiredHeatLevel="0" a="egg:16" b="fcfood:15" Description="[0]">
 	  "ab" 
 	</Recipe>
-	<Recipe Result="Rawxiandan" ResultCount="1" RequiredHeatLevel="0" a="egg:2" b="salt" Description="[0]">
+	<Recipe Result="FCORFoodBlock:13" ResultCount="1" RequiredHeatLevel="0" a="egg:32" b="fcfood:15" Description="[0]">
 	  "ab" 
 	</Recipe>
-	<Recipe Result="Rawxiandan" ResultCount="1" RequiredHeatLevel="0" a="egg:33" b="salt" Description="[0]">
+	<Recipe Result="FCORFoodBlock:13" ResultCount="1" RequiredHeatLevel="0" a="egg:768" b="fcfood:15" Description="[0]">
 	  "ab" 
 	</Recipe>
-	<Recipe Result="Rawxiandan" ResultCount="1" RequiredHeatLevel="0" a="egg:32" b="salt" Description="[0]">
-	  "ab" 
-	</Recipe>
-	<Recipe Result="Rawxiandan" ResultCount="1" RequiredHeatLevel="0" a="egg:48" b="salt" Description="[0]">
-	  "ab" 
-	</Recipe>
-	<Recipe Result="Rawxiandan" ResultCount="1" RequiredHeatLevel="0" a="egg:49" b="salt" Description="[0]">
+
+	<Recipe Result="FCORFoodBlock:13" ResultCount="1" RequiredHeatLevel="0" a="egg:784" b="fcfood:15" Description="[0]">
 	  "ab" 
 	</Recipe>
 
@@ -439,12 +532,12 @@
 	  "aa"
 	  "aa"
 	</Recipe>
-	<Recipe Result="LightDustBlock" ResultCount="1" RequiredHeatLevel="0" a="lightstone" Description="萤石块分解">
-	  "aa"
-	  "aa"
+	<Recipe Result="LightDustBlock" ResultCount="4" RequiredHeatLevel="0" a="lightstone" Description="萤石块分解">
+	  "a"
+	 
 	</Recipe>
 
-	<Recipe Result="FCSeedBlock:0" ResultCount="4" RequiredHeatLevel="0" a="xiguapian" Description="西瓜片提取西瓜种子">
+	<Recipe Result="FCSeedBlock:0" ResultCount="4" RequiredHeatLevel="0" a="fcfood:24" Description="西瓜片提取西瓜种子">
 	  "a"
 	</Recipe>
 	

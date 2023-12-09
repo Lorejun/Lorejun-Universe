@@ -6,15 +6,17 @@
 		<MemberSubsystemTemplate Name="ShumiaoBehavior" Guid="20000000-bbdd-0000-0000-000000000001" InheritanceParent="3830d91c-64fd-4048-ac76-efe4b0e26315" >
 			<Parameter Name="Class" Guid="20000000-bbdd-0000-0000-000000000001-0000-0000-000000000003" Value="Game.NewSubsystemSaplingBlockBehavior" Type="string" />
         </MemberSubsystemTemplate>
-		<MemberSubsystemTemplate Name="FCsubsystemPlantataBlockBehavior" Guid="30000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+		<!--樱花系统<MemberSubsystemTemplate Name="FCsubsystemPlantataBlockBehavior" Guid="30000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
 			<Parameter Name="Class" Guid="30000000-bbdd-0000-0000-000000000002" Value="Game.FCSubsystemPlantataBlockBehavior" Type="string"/>
-		</MemberSubsystemTemplate>
+		</MemberSubsystemTemplate>-->
+		
 		<MemberSubsystemTemplate Name="YHleaveBlockBehavior" Guid="40000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
 			<Parameter Name="Class" Guid="40000000-bbdd-0000-0000-000000000002" Value="Game.SubsystemYHleaveBlockBehavior" Type="string"/>
 		</MemberSubsystemTemplate>
-		<MemberSubsystemTemplate Name="FCCPBlockBehavior" Guid="50000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+		<!--草皮系统<MemberSubsystemTemplate Name="FCCPBlockBehavior" Guid="50000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
 			<Parameter Name="Class" Guid="50000000-bbdd-0000-0000-000000000002" Value="Game.FCSubsystemGrassBlockBehavior" Type="string"/>
-		</MemberSubsystemTemplate>
+		</MemberSubsystemTemplate>-->
+		
 		<MemberSubsystemTemplate Name="Town" Guid="60000000-bbdd-0000-0000-000000000001" InheritanceParent="a3914c13-7801-46a6-b23a-9e2b36e9defb">
 			<ParameterSet Name="Towns" Guid="60000000-bbdd-0000-0000-000000000002" />
 			<Parameter Name="Class" Guid="60000000-bbdd-0000-0000-000000000003" Value="Game.FCSubsystemTown" Type="string" />
@@ -26,11 +28,32 @@
 		<MemberSubsystemTemplate Name="chocolate" Guid="80000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
 			<Parameter Name="Class" Guid="80000000-bbdd-0000-0000-000000000002" Value="Game.ChocolateSystem" Type="string"/>
 		</MemberSubsystemTemplate>
+		
 		<!--附魔台系统-->
 		<MemberSubsystemTemplate Name="MusicPlayer" Guid="90000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
 			<Parameter Name="Class" Guid="90000000-bbdd-0000-0000-000000000002" Value="Game.FCMusicManager" Type="string"/>
 		</MemberSubsystemTemplate>
-		
+		<MemberSubsystemTemplate Name="FCFoodSystem" Guid="11000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="11000000-bbdd-0000-0000-000000000002" Value="Game.FoodSystem" Type="string"/>
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="FCBuildSystem" Guid="12000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="12000000-bbdd-0000-0000-000000000002" Value="Game.SubsystemNaturallyBuildings" Type="string"/>
+		</MemberSubsystemTemplate>
+		<!--血系统<MemberSubsystemTemplate Name="SpaceShip1Behavior" Guid="14000000-bbdd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="14000000-bbdd-1000-0000-000000000002" Value="Game.SubsystemSpaceShipBehavior" Type="string"/>
+		</MemberSubsystemTemplate>-->
+		<MemberSubsystemTemplate Name="BloodBehavior" Guid="13000000-bbdd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="13000000-bbdd-1000-0000-000000000002" Value="Game.FCSubsystemBloodBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="CarBlockBehavior" Guid="ffffffff-9988-0000-0660-000066000088" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="ffffffff-8668-0990-0000-000009900011" Value="Game.SubsystemCarBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="NewPlant" Guid="14000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="14000000-bbdd-0000-0000-000000000002" Value="Game.NewPlantSystem" Type="string"/>
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="NewPlant2" Guid="15000000-bbdd-0000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+			<Parameter Name="Class" Guid="15000000-bbdd-0000-0000-000000000002" Value="Game.FCSubsystemPlantBlockBehavior" Type="string"/>
+		</MemberSubsystemTemplate>
 		
     </ProjectTemplate>
 	<Parameter Name="Class" Guid="3c28d383-dc6e-4d55-8084-5d914abd4d79" new-Value="Game.FCSubsystemSky" Type="string" />

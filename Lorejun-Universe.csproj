@@ -9,15 +9,16 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>发酵桶工程2</RootNamespace>
     <AssemblyName>发酵桶工程2</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\1生存战争2.3工程\1.50版本（游戏）\API1.50Gitee\Mods\</OutputPath>
+    <OutputPath>..\1生存战争2.3工程\1.50版本（游戏）\API1.53Gitte\Mods\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,30 +26,26 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\1生存战争2.3工程\1.50版本（游戏）\survivalcraft2.3插件电脑版API1.50\Mods\</OutputPath>
+    <OutputPath>..\1生存战争2.3工程\1.50版本（游戏）\API1.53Gitte\Mods\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Engine, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.5引用\生存战争2.3API1.50\Engine.dll</HintPath>
+    <Reference Include="Engine">
+      <HintPath>..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.53引用\Engine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="EntitySystem, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.5引用\生存战争2.3API1.50\EntitySystem.dll</HintPath>
+    <Reference Include="EntitySystem">
+      <HintPath>..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.53引用\EntitySystem.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.5引用\生存战争2.3API1.50\OpenTK.dll</HintPath>
+    <Reference Include="OpenTK">
+      <HintPath>..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.53引用\OpenTK.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Survivalcraft, Version=2.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.5引用\生存战争2.3API1.50\Survivalcraft.exe</HintPath>
+    <Reference Include="Survivalcraft">
+      <HintPath>..\1生存战争2.3工程\1#【基础应用文件以及模板】\API1.53引用\Survivalcraft.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -62,6 +59,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="CS源码分类\NPC.cs" />
+    <Compile Include="CS源码分类\npc实体获取.cs" />
+    <Compile Include="CS源码分类\任务系统.cs" />
+    <Compile Include="CS源码分类\工具武器.cs" />
+    <Compile Include="CS源码分类\成就系统.cs" />
+    <Compile Include="CS源码分类\MoreWorld.cs" />
+    <Compile Include="CS源码分类\药水粒子特效.cs" />
+    <Compile Include="CS源码分类\新植物+系统.cs" />
+    <Compile Include="CS源码分类\Modloader.cs" />
+    <Compile Include="CS源码分类\音乐管理器.cs" />
+    <Compile Include="CS源码分类\飞船系统.cs" />
+    <Compile Include="CS源码分类\地图.cs" />
+    <Compile Include="CS源码分类\新损坏组件.cs" />
+    <Compile Include="CS源码分类\食物系统.cs" />
     <Compile Include="obj\Debug\.NETFramework,Version=v4.8.AssemblyAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -103,6 +114,7 @@
     <None Include="Assets\Lang1\en-US.json" />
     <None Include="Assets\Lang1\zh-CN.json" />
     <None Include="Assets\Models\BlockMan.dae" />
+    <None Include="Assets\Models\BlockMan1.dae" />
     <None Include="Assets\Models\CraftingTable1.dae" />
     <None Include="Assets\Models\EmptyFCBucket.dae" />
     <None Include="Assets\Models\FullBucket.dae" />
@@ -110,8 +122,13 @@
     <None Include="Assets\Models\Furnace1.dae" />
     <None Include="Assets\Models\Plate.dae" />
     <None Include="Assets\Models\Pumpkins1.dae" />
+    <None Include="Assets\Models\SpaceShip\speeder_a.dae" />
+    <None Include="Assets\Models\SpaceShip\starchaser.dae" />
+    <None Include="Assets\Models\SpaceShip\starchaser1.dae" />
+    <None Include="Assets\Models\SpaceShip\starchaser3.dae" />
     <None Include="Assets\Models\Spider.dae" />
     <None Include="Assets\Models\XCraftingTable.dae" />
+    <None Include="Assets\Models\ZombieModels\ZumbiForte.dae" />
     <None Include="Creatures.xdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -125,20 +142,39 @@
     <None Include="modinfo.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="NPC.xdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
     <None Include="obj\Debug\Lorejun-Universe.csproj.AssemblyReference.cache" />
     <None Include="README.md" />
     <None Include="Test1.xdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="BUFF.xdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="发酵站注册.xdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="多维世界系统.xdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="子世界.xdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="成就系统.xdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="生成注册.xdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Gameplay.xdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Audio\achieve.wav" />
     <Content Include="Assets\Audio\Creatures\Drink\drink1.wav" />
     <Content Include="Assets\Audio\Creatures\Village\ATK\ATK1.wav" />
     <Content Include="Assets\Audio\Creatures\Village\ATK\ATK2.wav" />
@@ -155,10 +191,31 @@
     <Content Include="Assets\Audio\Creatures\zhizhu\Pain\Pain1.wav" />
     <Content Include="Assets\Audio\Creatures\zhizhu\Pain\Pain2.wav" />
     <Content Include="Assets\Audio\Creatures\zhizhu\Pain\PainBone.wav" />
+    <Content Include="Assets\Audio\Creatures\Zombie\StrongZombieAttacl\mumbling01-0-0.wav" />
+    <Content Include="Assets\Audio\Creatures\Zombie\StrongZombieAttacl\zombiedie-0.wav" />
+    <Content Include="Assets\Audio\Creatures\Zombie\StrongZombiePain\been_shot_01-0.wav" />
+    <Content Include="Assets\Audio\Creatures\Zombie\StrongZombiePain\been_shot_02-0.wav" />
+    <Content Include="Assets\Audio\Creatures\Zombie\StrongZombiePain\been_shot_04-0.wav" />
+    <Content Include="Assets\Audio\Creatures\Zombie\StrongZombiePain\been_shot_06-0.wav" />
+    <Content Include="Assets\Audio\Creatures\Zombie\StrongZombiePain\been_shot_08-0.wav" />
+    <Content Include="Assets\Audio\Down.wav" />
+    <Content Include="Assets\Audio\Flying.wav" />
+    <Content Include="Assets\Audio\Flyup.wav" />
+    <Content Include="Assets\Audio\LevelUp.wav" />
+    <Content Include="Assets\Audio\MagicPowerGet.wav" />
     <Content Include="Assets\Audio\UI\ItemMoved.wav" />
     <Content Include="Assets\Audio\UI\jichuang.wav" />
     <Content Include="Assets\Audio\UI\Message.wav" />
     <Content Include="Assets\Audio\UI\start.wav" />
+    <Content Include="Assets\BackgroundMusic\Blood.ogg" />
+    <Content Include="Assets\BackgroundMusic\CaveMusic.ogg" />
+    <Content Include="Assets\BackgroundMusic\LowSen.ogg" />
+    <Content Include="Assets\BackgroundMusic\SpaceMusic.ogg" />
+    <Content Include="Assets\BackgroundMusic\SurfaceMusic.ogg" />
+    <Content Include="Assets\BlocksSen.png" />
+    <Content Include="Assets\Dialogs\CreaterModeEditDialog.xml" />
+    <Content Include="Assets\Dialogs\MoneyEditDialog.xml" />
+    <Content Include="Assets\Dialogs\SellItemDialog.xml" />
     <Content Include="Assets\DT\images\apple0.png" />
     <Content Include="Assets\DT\images\apple1.png" />
     <Content Include="Assets\DT\images\apple2.png" />
@@ -176,11 +233,16 @@
     <Content Include="Assets\House\LivingHouse1.txt" />
     <Content Include="Assets\House\PetHouse.txt" />
     <Content Include="Assets\House\shuijing.txt" />
+    <Content Include="Assets\House\Supercity.txt" />
+    <Content Include="Assets\House\血泪.txt" />
+    <Content Include="Assets\ItemDatas.xml" />
+    <Content Include="Assets\Money.xml" />
     <Content Include="Assets\Music\AloneForever.ogg" />
     <Content Include="Assets\Music\NativeAmerican.ogg" />
     <Content Include="Assets\Music\NativeAmericanFluteSpirit.ogg" />
     <Content Include="Assets\Music\NativeAmericanHeart.ogg" />
     <Content Include="Assets\Music\NativeAmericanPeaceFlute.ogg" />
+    <Content Include="Assets\Screens\SettingsModScreen.xml" />
     <Content Include="Assets\Shaders\AlphaTested.psh" />
     <Content Include="Assets\Shaders\AlphaTested.vsh" />
     <Content Include="Assets\Shaders\Highlight.psh" />
@@ -200,10 +262,13 @@
     <Content Include="Assets\Styles\ButtonStyle_60x40.xml" />
     <Content Include="Assets\Styles\ButtonStyle_70x60.xml" />
     <Content Include="Assets\Styles\ButtonStyle_80x40.xml" />
+    <Content Include="Assets\Talk\Widgets\LordButtonsPanelWidget.xml" />
     <Content Include="Assets\Test1\Dialogs\Test1TextDialog.xml" />
     <Content Include="Assets\Test1\Textures\Setting.png" />
     <Content Include="Assets\Test1\Textures\Setting_Click.png" />
     <Content Include="Assets\Test1\Widgets\Test1ButtonsPanelWidget.xml" />
+    <Content Include="Assets\Textures\Achievements\Cross.png" />
+    <Content Include="Assets\Textures\Achievements\ice.png" />
     <Content Include="Assets\Textures\amod\apple.png" />
     <Content Include="Assets\Textures\amod\beer.png" />
     <Content Include="Assets\Textures\amod\boliping.png" />
@@ -246,11 +311,22 @@
     <Content Include="Assets\Textures\amod\zhaji.png" />
     <Content Include="Assets\Textures\Blocks\TFurnace.png" />
     <Content Include="Assets\Textures\Blocks\XFurnace.png" />
+    <Content Include="Assets\Textures\BuffFog.png" />
+    <Content Include="Assets\Textures\Bufffs\Healing.png" />
+    <Content Include="Assets\Textures\CloudsSen.png" />
+    <Content Include="Assets\Textures\Creatures\BSLord.png" />
     <Content Include="Assets\Textures\Creatures\cave_spider.png" />
+    <Content Include="Assets\Textures\Creatures\DoDo.png" />
+    <Content Include="Assets\Textures\Creatures\HumanFemale1.png" />
+    <Content Include="Assets\Textures\Creatures\HumanMale3.png" />
+    <Content Include="Assets\Textures\Creatures\Village\caixukun.png" />
     <Content Include="Assets\Textures\Creatures\Village\custom_villager_begger_2.png" />
+    <Content Include="Assets\Textures\Creatures\Zombies\Carnival3.png" />
     <Content Include="Assets\Textures\Earth.png" />
     <Content Include="Assets\Textures\Earth2.png" />
     <Content Include="Assets\Textures\Earth3.png" />
+    <Content Include="Assets\Textures\earth9.png" />
+    <Content Include="Assets\Textures\FCBlock.png" />
     <Content Include="Assets\Textures\FCBlocks\appleleave.png" />
     <Content Include="Assets\Textures\FCBlocks\cocowood.png" />
     <Content Include="Assets\Textures\FCBlocks\fajiaotong.png" />
@@ -268,25 +344,25 @@
     <Content Include="Assets\Textures\FCBlocks\yhwood.png" />
     <Content Include="Assets\Textures\FCBlocks\yingshi.png" />
     <Content Include="Assets\Textures\FCBlocks\ZLS.png" />
-    <Content Include="Assets\Textures\FCDVFood\chilun.png" />
-    <Content Include="Assets\Textures\FCDVFood\cihuatiebang.png" />
-    <Content Include="Assets\Textures\FCDVFood\DVfeng.png" />
-    <Content Include="Assets\Textures\FCDVFood\gangban.png" />
-    <Content Include="Assets\Textures\FCDVFood\gangbang.png" />
-    <Content Include="Assets\Textures\FCDVFood\gangding.png" />
-    <Content Include="Assets\Textures\FCDVFood\gui.png" />
-    <Content Include="Assets\Textures\FCDVFood\guiban.png" />
-    <Content Include="Assets\Textures\FCDVFood\huosai.png" />
-    <Content Include="Assets\Textures\FCDVFood\jiaomujun.png" />
-    <Content Include="Assets\Textures\FCDVFood\jiaosufeng.png" />
-    <Content Include="Assets\Textures\FCDVFood\mada.png" />
-    <Content Include="Assets\Textures\FCDVFood\PDU.png" />
-    <Content Include="Assets\Textures\FCDVFood\tanfeng.png" />
-    <Content Include="Assets\Textures\FCDVFood\tieban.png" />
-    <Content Include="Assets\Textures\FCDVFood\tiefeng.png" />
-    <Content Include="Assets\Textures\FCDVFood\tongban.png" />
-    <Content Include="Assets\Textures\FCDVFood\tongxianquan.png" />
-    <Content Include="Assets\Textures\FCDVFood\xianluban.png" />
+    <Content Include="Assets\Textures\FCDVFood\ATKUP.png" />
+    <Content Include="Assets\Textures\FCDVFood\Blind.png" />
+    <Content Include="Assets\Textures\FCDVFood\BSaplle.png" />
+    <Content Include="Assets\Textures\FCDVFood\BSCoco.png" />
+    <Content Include="Assets\Textures\FCDVFood\BSCocobean.png" />
+    <Content Include="Assets\Textures\FCDVFood\BSmelon.png" />
+    <Content Include="Assets\Textures\FCDVFood\BSorange.png" />
+    <Content Include="Assets\Textures\FCDVFood\Disease.png" />
+    <Content Include="Assets\Textures\FCDVFood\Dizzy.png" />
+    <Content Include="Assets\Textures\FCDVFood\EnMP.png" />
+    <Content Include="Assets\Textures\FCDVFood\EXP.png" />
+    <Content Include="Assets\Textures\FCDVFood\Heal.png" />
+    <Content Include="Assets\Textures\FCDVFood\Jump.png" />
+    <Content Include="Assets\Textures\FCDVFood\MP.png" />
+    <Content Include="Assets\Textures\FCDVFood\Poison.png" />
+    <Content Include="Assets\Textures\FCDVFood\SenDown.png" />
+    <Content Include="Assets\Textures\FCDVFood\Senup.png" />
+    <Content Include="Assets\Textures\FCDVFood\Slowdown.png" />
+    <Content Include="Assets\Textures\FCDVFood\Speed.png" />
     <Content Include="Assets\Textures\FCDVFood\yeshi.png" />
     <Content Include="Assets\Textures\FCgongye\chilun.png" />
     <Content Include="Assets\Textures\FCgongye\cihuatiebang.png" />
@@ -323,21 +399,45 @@
     <Content Include="Assets\Textures\Moon6.png" />
     <Content Include="Assets\Textures\Moon7.png" />
     <Content Include="Assets\Textures\Moon8.png" />
+    <Content Include="Assets\Textures\MoonShadow.png" />
+    <Content Include="Assets\Textures\Plants.png" />
     <Content Include="Assets\Textures\Recipes.png" />
-    <Content Include="Assets\Textures\XBlocks.png" />
+    <Content Include="Assets\Textures\SpaceShip\starchaser.png" />
+    <Content Include="Assets\Textures\Stone.png" />
+    <Content Include="Assets\Textures\Task1\Cross.png" />
+    <Content Include="Assets\Textures\Task1\ice.png" />
+    <Content Include="Assets\Textures\Ui\.png" />
+    <Content Include="Assets\Textures\Ui\Achievements.png" />
+    <Content Include="Assets\Textures\Ui\Money.png" />
     <Content Include="Assets\Textures\YHParticle.png" />
+    <Content Include="Assets\Widgets\AchievementsItem.xml" />
+    <Content Include="Assets\Widgets\AchievementsWidget.xml" />
     <Content Include="Assets\Widgets\FajiaotongWidget.xml" />
     <Content Include="Assets\Widgets\FCfajiaotong\FermentationWidget.xml" />
     <Content Include="Assets\Widgets\FCRecipeWidget.xml" />
     <Content Include="Assets\Widgets\FlameFurnaceWidget.xml" />
+    <Content Include="Assets\Widgets\GameWidget.xml" />
     <Content Include="Assets\Widgets\GaoluWidget.xml" />
     <Content Include="Assets\Widgets\JichuangWidget.xml" />
     <Content Include="Assets\Widgets\MicroWidget.xml" />
+    <Content Include="Assets\Widgets\MoneyItem.xml" />
+    <Content Include="Assets\Widgets\ShopWidget.xml" />
+    <Content Include="Assets\Widgets\Systemshop\MCCGPurchaseWidget.xml" />
+    <Content Include="Assets\Widgets\Systemshop\MCCGSellWidget.xml" />
+    <Content Include="Assets\Widgets\Task1\Task1Item.xml" />
+    <Content Include="Assets\Widgets\Task1\Task1Widget.xml" />
+    <Content Include="Assets\Widgets\Task1\TextItem.xml" />
+    <Content Include="Assets\Widgets\TextItem.xml" />
+    <Content Include="Assets\Widgets\TextLabelWidget.xml" />
+    <Content Include="Assets\Widgets\TradingWidget.xml" />
     <Content Include="Assets\Widgets\XClothingWidget.xml" />
     <Content Include="Assets\Widgets\XCraftingRecipe.xml" />
     <Content Include="Assets\Widgets\XCraftingTableWidget.xml" />
     <Content Include="Assets\Widgets\XRecipeWidget.xml" />
     <Content Include="Assets\Widgets\XSmeltingRecipe.xml" />
+    <Content Include="Assets\传送门贴图.png" />
+    <Content Include="Assets\寂静岭材质包.png" />
+    <Content Include="Assets\沙漠房子.txt" />
     <Content Include="icon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -351,7 +451,6 @@
     <Folder Include=".git\objects\info\" />
     <Folder Include=".git\refs\tags\" />
     <Folder Include="Assets\Textures\DT\" />
-    <Folder Include="CS源码分类\" />
     <Folder Include="obj\Debug\TempPE\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -41,6 +41,7 @@
 		<MemberSubsystemTemplate Name="FlameFurnaceBlockBehavior" Guid="90000000-abcd-1000-0000-000000000001" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
 		  <Parameter Name="Class" Guid="90000000-abcd-1000-0000-000000000002" Value="Game.SubsystemFlameFurnaceBlockBehavior" Type="string"/>                
 		</MemberSubsystemTemplate>
+		
 		  
 	</ProjectTemplate>
 	
@@ -112,34 +113,17 @@
 		
 	</Folder>
 	<!--按钮合成表组件<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
+	
 	   <MemberComponentTemplate Name="GameSystem1" Guid="11000000-abcd-1000-0000-000000000002" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
 			<Parameter Name="Class" Guid="11000000-abcd-1000-0000-000000000003" Value="Game.ComponentGameSystem1" Type="string" />
 		</MemberComponentTemplate>		    
 	</EntityTemplate>    -->
 	
-    <!--治疗buff-->   
-    <Parameter Name="Class" Guid="4e14ce27-fdef-46ca-8ea0-26af43c215e5" new-Value="Game.FCComponentHealth" Type="string" />	
-	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
-	   <MemberComponentTemplate Name="FCHealBuff" Guid="12000000-abcd-1000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
-			<Parameter Name="Class" Guid="12000000-abcd-1000-0000-000000000002" Value="Game.ComponentHealBuffA" Type="string" />
-	   </MemberComponentTemplate>		
-	</EntityTemplate>
-	<!--加攻击力buff--> 
-	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
-	   <MemberComponentTemplate Name="FCATKBuff" Guid="13000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
-			<Parameter Name="Class" Guid="13000000-abcd-2000-0000-000000000002" Value="Game.ComponentAttackUP" Type="string" />
-	   </MemberComponentTemplate>		
-	</EntityTemplate>
-	<!--加速buff--> 
-	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
-	   <MemberComponentTemplate Name="FCSpeedBuff" Guid="14000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
-			<Parameter Name="Class" Guid="14000000-abcd-2000-0000-000000000002" Value="Game.ComponentSpeedUP" Type="string" />
-	   </MemberComponentTemplate>		
-	</EntityTemplate>
-	<!--夜视BUFF--> 
-	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
-	   <MemberComponentTemplate Name="FCNightseeBuff" Guid="15000000-abcd-2000-0000-000000000001" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
-			<Parameter Name="Class" Guid="15000000-abcd-2000-0000-000000000002" Value="Game.ComponentNightsight" Type="string" />
-	   </MemberComponentTemplate>		
-	</EntityTemplate>
+	
+    <!--治疗buff-->
+	<Parameter Name="Class" Guid="4e14ce27-fdef-46ca-8ea0-26af43c215e5" new-Value="Game.FCComponentHealth" Type="string" />
+	<Parameter Name="Class" Guid="7347a83f-2d46-4fdf-bce2-52677de0b568" new-Value="Game.FCComponentBody" Type="string" />
+	
+	<!--18开始，后面都要带一个b-->
+	
 </Mod>

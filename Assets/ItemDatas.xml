@@ -1,0 +1,11 @@
+<ItemDatas>
+
+    <ItemData DisplayName="Null" BuyMoney="0" SellMoney="0" Quality="0" Type="" HitTime="0.33000001311302185" AimTime="1.4" HitDistance="2" MoveScreenWhenAim="false" />
+    <ItemData DisplayName="DirtBlock" BuyMoney="4" SellMoney="1" Quality="0.2" Type="杂物" HitTime="0" AimTime="1.4" HitDistance="20" MoveScreenWhenAim="false" />
+    <ItemData DisplayName="ClothingBlock:32" BuyMoney="4" SellMoney="35" Quality="0.2" Type="杂物" HitTime="0.33000001311302185" AimTime="1.4" HitDistance="2" MoveScreenWhenAim="false" />
+    <ItemData DisplayName="CopperSpearBlock" BuyMoney="4" SellMoney="60" Quality="0.2" Type="杂物" HitTime="0" AimTime="0" HitDistance="50" MoveScreenWhenAim="true" >
+        <ItemData DisplayName="IronSpearBlock" BuyMoney="4" SellMoney="60" Quality="0.2" Type="杂物" HitTime="0" AimTime="0" HitDistance="50" MoveScreenWhenAim="true" />
+    </ItemData>
+    <ItemData DisplayName="EggBlock:24" BuyMoney="4" SellMoney="35" Quality="0.2" Type="杂物" HitTime="0" AimTime="0" HitDistance="2" MoveScreenWhenAim="true" />
+
+</ItemDatas>

@@ -1,0 +1,26 @@
+<Mod>
+	
+
+	
+
+	<!--载具-->
+	<Folder Name="Gameplay" Guid="23dd4cdf-442b-4951-b4b1-1043fe4f444e">
+		<ComponentTemplate Name="FCDamage" Description="Handles body damage" Guid="ffffffcc-aabb-0000-0000-000000000001" InheritanceParent="17bb7b53-159c-4eb3-b4bc-137b10bba88a">
+			
+			<Parameter Name="Class" Guid="ffffffcc-aabb-0000-0000-000000000002" Value="Game.FCComponentDamage" Type="string" />
+			
+		</ComponentTemplate>
+		<ComponentTemplate Name="Lordentity" Description="find entity" Guid="ffffffcc-a00b-0001-0000-000000000001" InheritanceParent="b05700ed-7e4e-4679-98f5-b597f421496b">
+
+			<Parameter Name="Class" Guid="ffffffcc-a00b-0001-0000-000000000002" Value="Game.ComponententityLord" Type="string" />
+
+		</ComponentTemplate>
+		<ComponentTemplate Name="Dodoentity" Description="find entity" Guid="ffffffcc-a00b-0002-0000-000000000001" InheritanceParent="b05700ed-7e4e-4679-98f5-b597f421496b">
+
+			<Parameter Name="Class" Guid="ffffffcc-a00b-0002-0000-000000000002" Value="Game.ComponententityDodo" Type="string" />
+
+		</ComponentTemplate>
+
+
+	</Folder>
+</Mod>

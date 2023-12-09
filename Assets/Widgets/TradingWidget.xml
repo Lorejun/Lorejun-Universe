@@ -1,0 +1,25 @@
+<ChestWidget xmlns="runtime-namespace:Game">
+	<BevelledRectangleWidget Size="700, 382" BevelSize="3" />
+	<LabelWidget CanvasWidget.Position="12, 14" Name="ChestLabel" Text="交易"  Color="255, 255, 255, 192"/>
+	<LabelWidget CanvasWidget.Position="396, 14" Name="InventoryLabel" Text="[ChestWidget:2]"  Color="255, 255, 255, 192"/>
+	<GridPanelWidget CanvasWidget.Position="32, 82" Name="ChestGrid" ColumnsCount="1" RowsCount="1"/>
+	<InventorySlotWidget Name="CraftingRemainsSlot" CanvasWidget.Position="200, 86" >
+	<LabelWidget Text="物品"  Color="0, 0, 0, 96" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+	</InventorySlotWidget>
+	<ArrowLineWidget Color="0, 0, 0, 96" Width="8" ArrowWidth="24" PointsString="120, 122; 176, 122" AbsoluteCoordinates="true"/>
+	<GridPanelWidget CanvasWidget.Position="396, 52" Name="InventoryGrid" ColumnsCount="4" RowsCount="4"/>
+	
+	<CanvasWidget Size="160, 120" ClampToBounds="false" HorizontalAlignment="Center" VerticalAlignment="Center">
+		<BevelledButtonWidget Name="ItemsButton" CanvasWidget.Position="-240, 120" Size="80, 80" Style="{Styles/ButtonStyle_310x60}"  Text="选择物品" Margin="20, 0" />
+		<BevelledButtonWidget Name="ShopButton" CanvasWidget.Position="-240, 180" Style="{Styles/ButtonStyle_160x60}" Text="购买" Margin="20, 0" />
+	    <BevelledButtonWidget Name="MoneyButton" CanvasWidget.Position="-80, 180" Style="{Styles/ButtonStyle_160x60}" Margin="20, 0" Text="出售"/>
+	</CanvasWidget>
+		
+	<CanvasWidget Size="300, 30"  VerticalAlignment="Center">	
+        <BevelledButtonWidget CanvasWidget.Position="14, 0" Style="{Styles/ButtonStyle_Minus}" Name="PreviousRecipe" Margin="20, 0" VerticalAlignment="Center"/>	
+		<SliderWidget Name="CountSlider" CanvasWidget.Position="100, 0" Size="160, 30" HorizontalAlignment="Center" Margin="30, 0" />
+        <BevelledButtonWidget CanvasWidget.Position="260, 0" Style="{Styles/ButtonStyle_Plus}" Name="NextRecipe" Margin="20, 0" VerticalAlignment="Center"/>    	        
+	    <BlockIconWidget Name="Icon" CanvasWidget.Position="330, 0" Size="64, 64" Value ="2" VerticalAlignment="Center" HorizontalAlignment="Center"/>	    			
+	</CanvasWidget>	        
+	
+</ChestWidget>

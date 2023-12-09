@@ -1,0 +1,147 @@
+<mod>
+	<EntityTemplate Name="Player" Guid="4be6c1c5-d65d-4537-8a8b-a391969e6dc2">
+		
+		<MemberComponentTemplate Name="PlayerSystem" Guid="99dd5622-a4c0-4ad5-85f8-813ef26dae6b67558" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="99dd5622-a4c0-4ad5-85f8-813ef26dae6b75762424" Value="Game.ComponentPlayerSystem" Type="string" />
+		</MemberComponentTemplate>
+		<MemberComponentTemplate Name="Task" Guid="fffffffc-0000-0000-0000-000000000000" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9" >
+			<Parameter Name="Class" Guid="fffffffc-0000-0000-0000-000000000001" Value="Game.ComponentTask" Type="string" />
+		</MemberComponentTemplate>
+	</EntityTemplate>
+    <ProjectTemplate Name="Project" Guid="85023bf8-1c90-4dd1-9442-e6c13691d078">
+		<MemberSubsystemTemplate Name="WorldSyatem" Guid="77796acc-88bc-4f254584a58568858-b4dd-d4549935c314" InheritanceParent="a3914c13-7801-46a6-b23a-9e2b36e9defb">
+			<Parameter Name="Class" Guid="77796acc-99bc-4fa8-b4dd-d599671454f735c35268258414" Value="Game.SubsystemWorldSystem" Type="string" />
+		</MemberSubsystemTemplate>
+        <MemberSubsystemTemplate Name="NPCBehavior" Guid="ffffffff-8888-0000-0660-000066000088" InheritanceParent="fefb9590-4972-4893-b02a-76063611b745">
+            <Parameter Name="Class" Guid="ffffffff-8888-0990-0000-000009900011" Value="Game.SubsystemNPCBehavior" Type="string"/>
+        </MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="Task" Guid="fffffffc-0001-0000-0000-000000000000" InheritanceParent="a3914c13-7801-46a6-b23a-9e2b36e9defb">
+			<Parameter Name="Class" Guid="fffffffc-0001-0000-0000-000000000001" Value="Game.SubsystemTask" Type="string" />
+		</MemberSubsystemTemplate>
+    </ProjectTemplate>
+
+    <Folder Name="Animals" Guid="66a49cbb-cb12-4479-9b40-fbadd9db3425"> 
+          <EntityTemplate Name="BSLord" Guid="fffffffb-0000-0000-0000-000000000000" InheritanceParent="e4275171-a39f-413f-8888-4c472868364d">
+            
+            <MemberComponentTemplate Name="HumanModel" Guid="fffffffb-0000-0000-0000-000000000002" InheritanceParent="0566662e-bb24-45f9-84d8-f3c1e5d083df">
+              <Parameter Name="WalkLegsAngle" Guid="fffffffb-0000-0000-0000-000000000003" Value="0.35" Type="float"/>
+              <Parameter Name="ModelName" Guid="fffffffb-0000-0000-0000-000000000004" Value="Models/HumanMale" Type="string"/>
+              <Parameter Name="TextureOverride" Guid="fffffffb-0000-0000-0000-000000000005" Value="Textures/Creatures/BSLord" Type="string"/>
+              <Parameter Name="WalkAnimationSpeed" Guid="fffffffb-0000-0000-0000-000000000006" Value="0.65" Type="float"/>
+            </MemberComponentTemplate>
+            <MemberComponentTemplate Name="Health" Guid="fffffffb-0000-0000-0000-000000000007">
+              <Parameter Name="AttackResilience" Guid="fffffffb-0000-0000-0000-000000000008" Value="10000000" Type="float"/>
+            </MemberComponentTemplate>
+            <MemberComponentTemplate Name="Loot" Guid="fffffffb-0000-0000-0000-000000000009">
+              <ParameterSet Name="LootOnFire" Guid="fffffffb-0000-0000-0000-000000000010">
+                <Parameter Name="1" Guid="fffffffb-0000-0000-0000-000000000011" Value="RottenMeatBlock;1;2;1" Type="string"/>
+              </ParameterSet>            
+              <ParameterSet Name="Loot" Guid="fffffffb-0000-0000-0000-000000000012">
+                <Parameter Name="1" Guid="fffffffb-0000-0000-0000-000000000013" Value="RottenMeatBlock;1;2;1" Type="string"/>
+              </ParameterSet>
+            </MemberComponentTemplate>
+            <MemberComponentTemplate Name="Locomotion" Guid="fffffffb-0000-0000-0000-000000000014">
+              <Parameter Name="WalkSpeed" Guid="fffffffb-0000-0000-0000-000000000015" Value="0" Type="float"/>
+              
+              <Parameter Name="FlySpeed" Guid="fffffffb-0000-0000-0000-000000000017" Value="0" Type="float"/>
+              <Parameter Name="LadderSpeed" Guid="fffffffb-0000-0000-0000-000000000018" Value="0" Type="float"/>
+              <Parameter Name="LookSpeed" Guid="fffffffb-0000-0000-0000-000000000019" Value="8" Type="float"/>
+            </MemberComponentTemplate>
+           
+            <MemberComponentTemplate Name="Creature" Guid="fffffffb-0000-0000-0000-000000000024">
+              <Parameter Name="Description" Guid="fffffffb-0000-0000-0000-000000000025" Value="他是值得相信的商人，一个有趣的人！" Type="string"/>
+              <Parameter Name="KillVerbs" Guid="fffffffb-0000-0000-0000-000000000026" Value="trampled,mauled" Type="string"/>
+              <Parameter Name="Category" Guid="fffffffb-0000-0000-0000-000000000027" Value="LandPredator" Type="Game.CreatureCategory"/>
+              <Parameter Name="DisplayName" Guid="fffffffb-0000-0000-0000-000000000028" Value="安德烈·德·洛德" Type="string"/>
+            </MemberComponentTemplate>
+            
+            <MemberComponentTemplate Name="Body" Guid="fffffffb-0000-0000-0000-000000000030">
+              <Parameter Name="BoxSize" Guid="fffffffb-0000-0000-0000-000000000031" Value="0.7,1.8,0.7" Type="Vector3"/>
+              <Parameter Name="Mass" Guid="fffffffb-0000-0000-0000-000000000032" Value="120000000" Type="float"/>
+            </MemberComponentTemplate>
+           
+            <MemberComponentTemplate Name="OnFire" Guid="fffffffb-0000-0000-0000-000000000034"/>
+            <MemberComponentTemplate Name="Miner" Guid="fffffffb-0000-0000-0000-000000000035" InheritanceParent="8acca888-ba39-464f-bcf5-6ae15e448c62">
+              <Parameter Name="AttackPower" Guid="fffffffb-0000-0000-0000-000000000036" Value="9000" Type="float"/>
+            </MemberComponentTemplate>
+           
+            <ParameterSet Name="CreatureEggData" Guid="fffffffb-0000-0000-0000-000000000044">
+              <Parameter Name="TextureSlot" Guid="fffffffb-0000-0000-0000-000000000045" Value="163" Type="int"/>
+              <Parameter Name="Color" Guid="fffffffb-0000-0000-0000-000000000046" Value="255,0,0" Type="Color"/>
+              <Parameter Name="SwapUV" Guid="fffffffb-0000-0000-0000-000000000047" Value="False" Type="bool"/>
+              <Parameter Name="DisplayName" Guid="fffffffb-0000-0000-0000-000000000048" Value="生成洛德" Type="string"/>
+              <Parameter Name="EggTypeIndex" Guid="fffffffb-0000-0000-0000-000000000049" Value="69" Type="int"/>
+            </ParameterSet>
+			<MemberComponentTemplate Name="Money" Guid="ffffffff-6666-0000-0000-000000001026" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9">
+				<Parameter Name="SlotsCount" Guid="ffffffff-6666-0000-0000-000000001027" Value="2" Type="int"/>
+				<Parameter Name="Class" Guid="ffffffff-6666-0000-0000-000000001028" Value="Game.ComponentMoney" Type="string"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="findEntitylord" Guid="ffffffff-666a-0000-0000-000000001000" InheritanceParent="ffffffcc-a00b-0001-0000-000000000001">
+				
+				<Parameter Name="Class" Guid="ffffffff-666a-0000-0000-000000001001" Value="Game.ComponententityLord" Type="string"/>
+			</MemberComponentTemplate>
+          </EntityTemplate>
+		
+		<EntityTemplate Name="DoDo" Guid="fffffffb-0001-0000-0000-000000000000" InheritanceParent="e4275171-a39f-413f-8888-4c472868364d">
+
+			<MemberComponentTemplate Name="HumanModel" Guid="fffffffb-0001-0000-0000-000000000002" InheritanceParent="0566662e-bb24-45f9-84d8-f3c1e5d083df">
+				<Parameter Name="WalkLegsAngle" Guid="fffffffb-0001-0000-0000-000000000003" Value="0.35" Type="float"/>
+				<Parameter Name="ModelName" Guid="fffffffb-0001-0000-0000-000000000004" Value="Models/HumanFemale" Type="string"/>
+				<Parameter Name="TextureOverride" Guid="fffffffb-0001-0000-0000-000000000005" Value="Textures/Creatures/DoDo" Type="string"/>
+				<Parameter Name="WalkAnimationSpeed" Guid="fffffffb-0001-0000-0000-000000000006" Value="0.65" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Health" Guid="fffffffb-0001-0000-0000-000000000007">
+				<Parameter Name="AttackResilience" Guid="fffffffb-0001-0000-0000-000000000008" Value="10000000" Type="float"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Loot" Guid="fffffffb-0001-0000-0000-000000000009">
+				<ParameterSet Name="LootOnFire" Guid="fffffffb-0001-0000-0000-000000000010">
+					<Parameter Name="1" Guid="fffffffb-0001-0000-0000-000000000011" Value="RottenMeatBlock;1;2;1" Type="string"/>
+				</ParameterSet>
+				<ParameterSet Name="Loot" Guid="fffffffb-0001-0000-0000-000000000012">
+					<Parameter Name="1" Guid="fffffffb-0001-0000-0000-000000000013" Value="RottenMeatBlock;1;2;1" Type="string"/>
+				</ParameterSet>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="Locomotion" Guid="fffffffb-0001-0000-0000-000000000014">
+				<Parameter Name="WalkSpeed" Guid="fffffffb-0001-0000-0000-000000000015" Value="0" Type="float"/>
+
+				<Parameter Name="FlySpeed" Guid="fffffffb-0001-0000-0000-000000000017" Value="0" Type="float"/>
+				<Parameter Name="LadderSpeed" Guid="fffffffb-0001-0000-0000-000000000018" Value="0" Type="float"/>
+				<Parameter Name="LookSpeed" Guid="fffffffb-0001-0000-0000-000000000019" Value="8" Type="float"/>
+			</MemberComponentTemplate>
+
+			<MemberComponentTemplate Name="Creature" Guid="fffffffb-0001-0000-0000-000000000024">
+				<Parameter Name="Description" Guid="fffffffb-0001-0000-0000-000000000025" Value="生活在血泪之池的渡渡鸟，她貌似不属于这个世界。她的种族太蠢了，所以灭绝到只剩下她了，她能安稳的继续活下去吗？" Type="string"/>
+				<Parameter Name="KillVerbs" Guid="fffffffb-0001-0000-0000-000000000026" Value="trampled,mauled" Type="string"/>
+				<Parameter Name="Category" Guid="fffffffb-0001-0000-0000-000000000027" Value="LandPredator" Type="Game.CreatureCategory"/>
+				<Parameter Name="DisplayName" Guid="fffffffb-0001-0000-0000-000000000028" Value="愚鸟渡渡" Type="string"/>
+			</MemberComponentTemplate>
+
+			<MemberComponentTemplate Name="Body" Guid="fffffffb-0001-0000-0000-000000000030">
+				<Parameter Name="BoxSize" Guid="fffffffb-0001-0000-0000-000000000031" Value="0.7,1.8,0.7" Type="Vector3"/>
+				<Parameter Name="Mass" Guid="fffffffb-0001-0000-0000-000000000032" Value="120000000" Type="float"/>
+			</MemberComponentTemplate>
+
+			<MemberComponentTemplate Name="OnFire" Guid="fffffffb-0001-0000-0000-000000000034"/>
+			<MemberComponentTemplate Name="Miner" Guid="fffffffb-0001-0000-0000-000000000035" InheritanceParent="8acca888-ba39-464f-bcf5-6ae15e448c62">
+				<Parameter Name="AttackPower" Guid="fffffffb-0001-0000-0000-000000000036" Value="9000" Type="float"/>
+			</MemberComponentTemplate>
+
+			<ParameterSet Name="CreatureEggData" Guid="fffffffb-0001-0000-0000-000000000044">
+				<Parameter Name="TextureSlot" Guid="fffffffb-0001-0000-0000-000000000045" Value="163" Type="int"/>
+				<Parameter Name="Color" Guid="fffffffb-0001-0000-0000-000000000046" Value="255,0,211" Type="Color"/>
+				<Parameter Name="SwapUV" Guid="fffffffb-0001-0000-0000-000000000047" Value="False" Type="bool"/>
+				<Parameter Name="DisplayName" Guid="fffffffb-0001-0000-0000-000000000048" Value="愚鸟渡渡" Type="string"/>
+				<Parameter Name="EggTypeIndex" Guid="fffffffb-0001-0000-0000-000000000049" Value="70" Type="int"/>
+			</ParameterSet>
+			<MemberComponentTemplate Name="Money" Guid="ffffffff-6666-0001-0000-000000001026" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9">
+				<Parameter Name="SlotsCount" Guid="ffffffff-6666-0001-0000-000000001027" Value="2" Type="int"/>
+				<Parameter Name="Class" Guid="ffffffff-6666-0001-0000-000000001028" Value="Game.ComponentMoney" Type="string"/>
+			</MemberComponentTemplate>
+			<MemberComponentTemplate Name="findEntitydodo" Guid="ffffffff-666a-0000-0000-000000002000" InheritanceParent="ffffffcc-a00b-0002-0000-000000000001">
+
+				<Parameter Name="Class" Guid="ffffffff-666a-0000-0000-000000002001" Value="Game.ComponententityDodo" Type="string"/>
+			</MemberComponentTemplate>
+		</EntityTemplate>
+
+	</Folder>
+</mod>

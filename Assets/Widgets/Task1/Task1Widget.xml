@@ -1,0 +1,21 @@
+<CanvasWidget xmlns="runtime-namespace:Game" Size="614, 382" >
+        <RectangleWidget FillColor="0, 0, 0, 255" OutlineColor="255, 0, 0, 255" />
+
+        <StackPanelWidget Direction="Horizontal">
+            <CanvasWidget Size="20, 0"/>
+            <StackPanelWidget Direction="Vertical">
+                <CanvasWidget Size="0, 20"/>
+                <CanvasWidget>
+                    <RectangleWidget FillColor="0, 0, 0, 255" OutlineColor="255, 0, 0, 255" />
+                    <ListPanelWidget Name="Task1List" Direction="Vertical" Margin="5, 3" ItemSize="50" SelectionColor="255, 0, 0, 255"/>                                        
+                </CanvasWidget>
+                <StackPanelWidget Direction="Horizontal" HorizontalAlignment="Far">
+                    <BevelledButtonWidget Name="SeeButton" CenterColor="0, 0, 0, 255" BevelColor="255, 0, 0, 255" HorizontalAlignment="Far" Text="查看" Style="{Styles/ButtonStyle_70x60}" />
+                    <BevelledButtonWidget Name="ClearButton" CenterColor="0, 0, 0, 255" BevelColor="255, 0, 0, 255" HorizontalAlignment="Far" Text="清空" Style="{Styles/ButtonStyle_70x60}" />
+                </StackPanelWidget>
+                <CanvasWidget Size="0, 20"/>
+            </StackPanelWidget>
+            <CanvasWidget Size="20, 0"/>
+         </StackPanelWidget>
+
+</CanvasWidget>

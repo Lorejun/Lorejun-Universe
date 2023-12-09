@@ -2,7 +2,7 @@
 	<CanvasWidget Size="614, 382" ClampToBounds="true" HorizontalAlignment="Center" VerticalAlignment="Center">
     <BevelledRectangleWidget BevelSize="3" />
     <!--文字界面，标题-->
-    <LabelWidget CanvasWidget.Position="265, 14" Text="食品工艺" HorizontalAlignment="Center" Color="255, 255, 255, 192"/>
+    <LabelWidget CanvasWidget.Position="265, 14" Text="万象宇宙" HorizontalAlignment="Center" Color="255, 255, 255, 192"/>
     <!--这个栈界面是为了用一个空CanvasWidget将按钮列表位置顶到下面，防止阻挡上方文字-->
     <StackPanelWidget Direction="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
       <CanvasWidget Size="0, 40"/>
@@ -16,14 +16,14 @@
             <BevelledButtonWidget Name="Button2" Text="2.基础教程" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <BevelledButtonWidget Name="Button3" Text="3.樱花粒子开关" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <BevelledButtonWidget Name="Button4" Text="4.万象合成表" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <BevelledButtonWidget Name="Button5" Text="5.功能5" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <BevelledButtonWidget Name="Button5" Text="5.召唤商人洛德" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </StackPanelWidget>
           <!--右边栈界面，方向为竖直-->
           <StackPanelWidget Name="RightStack" Direction="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <BevelledButtonWidget Name="Button6" Text="6.功能6" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <BevelledButtonWidget Name="Button7" Text="7.功能7" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <BevelledButtonWidget Name="Button8" Text="8.功能8" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <BevelledButtonWidget Name="Button9" Text="9.功能9" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <BevelledButtonWidget Name="Button6" Text="6.游戏商店" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <BevelledButtonWidget Name="Button7" Text="7.物品出售" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <BevelledButtonWidget Name="Button8" Text="8.地图开关" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <BevelledButtonWidget Name="Button9" Text="9.任务剧情" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <BevelledButtonWidget Name="Button10" Text="10.开发者模式" Size="180,60" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </StackPanelWidget>
         </StackPanelWidget>

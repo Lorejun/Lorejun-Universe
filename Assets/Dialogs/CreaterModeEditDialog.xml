@@ -1,0 +1,36 @@
+<CanvasWidget xmlns="runtime-namespace:Game">
+
+	<CanvasWidget Size="420, 240" ClampToBounds="true" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+    <RectangleWidget FillColor="0, 0, 0, 255" OutlineColor="128, 128, 128, 128" OutlineThickness="2" />
+
+		<StackPanelWidget Direction="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 0" IsVisible="true">
+		
+			<LabelWidget Text="请输入密钥" HorizontalAlignment="Center" Margin="0, 15" />
+			
+            <CanvasWidget Size="0, 8" />
+            
+                <CanvasWidget Size="380, 50" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <RectangleWidget FillColor="0, 0, 0, 64" OutlineColor="128, 128, 158, 128" />            
+                    <TextBoxWidget Name="TextBox" Title="输入密钥" Size="380, 50" VerticalAlignment="Center"  MaximumLength="14" Margin="10, 0" />
+			    </CanvasWidget>
+			    
+			<CanvasWidget Size="0, 8" />
+
+		<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 0" IsVisible="true">
+					
+			<UniformSpacingPanelWidget Direction="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 15">
+				<BevelledButtonWidget Style="{Styles/ButtonStyle_160x60}" HorizontalAlignment="Center" Name="OkButton" Text="确定" />
+			</UniformSpacingPanelWidget>
+
+			<UniformSpacingPanelWidget Direction="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 15">
+				<BevelledButtonWidget Style="{Styles/ButtonStyle_160x60}" HorizontalAlignment="Center" Name="CancelButton" Text="取消" />
+			</UniformSpacingPanelWidget>
+			
+	    </StackPanelWidget>
+	    
+    </StackPanelWidget>
+		
+	</CanvasWidget>
+
+</CanvasWidget>
